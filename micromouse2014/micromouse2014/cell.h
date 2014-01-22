@@ -32,6 +32,9 @@ class cell
 	bool	wall_south;
 	bool	wall_east;
 	bool	wall_west;
+
+	bool start_node; // for cells that have multiple options for different paths
+	bool state; // used to determine if the path is open or closed (already tried or not)
 	
 public:
 	cell();
