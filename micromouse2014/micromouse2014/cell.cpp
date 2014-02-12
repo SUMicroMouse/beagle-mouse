@@ -7,3 +7,10 @@
 //
 
 #include "cell.h"
+
+using namespace std;
+
+cell::cell()
+{
+    adj_east = adj_north = adj_south = adj_west = nullptr;
+}

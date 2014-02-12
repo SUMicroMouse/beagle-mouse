@@ -2,14 +2,15 @@
 //  cell.h
 //  micromouse2014
 //
-//  Created by Lyle Moffitt on 1/21/14.
-//  Copyright (c) 2014 Lyle Moffitt. All rights reserved.
+// Created by Carlton Semple, Lyle Moffitt, & Nick Beni
+// Created at Syracuse University for the 2014 micromouse competition
 //
 
-#ifndef __micromouse2014__node__
-#define __micromouse2014__node__
+#ifndef __micromouse2014__cell__
+#define __micromouse2014__cell__
 
 #include <iostream>
+
 
 #include "config.h"
 
@@ -20,7 +21,33 @@ enum direction
 	EAST,
 	WEST
 };
+/* A cell is just an arbitrary set of 4 "walls" that enclose a space. Not all of
+ the walls are physically there. The walls should not be assumed to be parallel
+ or of a fixed size.
 
+ The graph below is exerpted from <lidar.h>. It contains many cells. The number,
+ size, and shape of each depends on your view. From a top-down, cartesian 
+ perspective, it could be said that there are 9 othogonal, equilateral, cells.
+ From the @'s co-planar perspective there are between 4 and 6  cells (approx).
+ They are radial or wedge shaped, with varying size and shape. 
+ 
+ +       + ----- + ----- +
+ |               |
+ |               |
+ |               |
+ + ----- +       + ----- +
+ |       |
+ |       |
+ |       |
+ +       +       + ----- +
+ |               |       |
+ |           @   |       |
+ |               |       |
+ +               +       +
+ 
+ A cell has adjacentcies. Not all of them are filled. They exist if any two
+ cells share a "wall". 
+ */
 class cell
 {
 	cell *	adj_north;
@@ -45,4 +72,4 @@ public:
 };
 
 
-#endif /* defined(__micromouse2014__node__) */
+#endif /* defined(__micromouse2014__cell__) */

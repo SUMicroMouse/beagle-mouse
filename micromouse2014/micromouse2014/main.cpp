@@ -6,7 +6,13 @@
 // Created at Syracuse University for the 2014 micromouse competition
 //
 
-#include <iostream>
+#include "config.h"
+#include "cell.h"
+#include "grid.h"
+#include "lidar.h"
+#include "star.h"
+#include "sonar.h"
+#include "robot.h"
 
 
 int main(int argc, const char * argv[])

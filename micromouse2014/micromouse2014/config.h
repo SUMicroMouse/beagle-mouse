@@ -2,8 +2,8 @@
 //  config.h
 //  micromouse2014
 //
-//  Created by Lyle Moffitt on 1/21/14.
-//  Copyright (c) 2014 Lyle Moffitt. All rights reserved.
+// Created by Carlton Semple, Lyle Moffitt, & Nick Beni
+// Created at Syracuse University for the 2014 micromouse competition
 //
 
 /** This is a header file for centralizing all configuration options.
@@ -11,6 +11,8 @@
 
 #ifndef micromouse2014_config_h
 #define micromouse2014_config_h
+
+
 
 /*****************************************************************************/
 /** Maze presets.

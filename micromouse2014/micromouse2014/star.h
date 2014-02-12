@@ -3,20 +3,24 @@
 //  micromouse2014
 //
 //
+// Created by Carlton Semple, Lyle Moffitt, & Nick Beni
+// Created at Syracuse University for the 2014 micromouse competition
 
 #ifndef __micromouse2014__star__
 #define __micromouse2014__star__
+
 
 #include <iostream>
 #include <vector>
 #include <stack>
 
 
-#include "grid.h"
 #include "config.h"
+#include "grid.h"
+
 
 typedef
-std::stack<grid &> path;
+std::stack<grid > path;
 
 // contains 
 class item{

@@ -6,4 +6,13 @@
 //  Copyright (c) 2014 Lyle Moffitt. All rights reserved.
 //
 
-#include "cell_map.h"
+#include "grid.h"
+
+using namespace std;
+
+grid::grid():
+axis_x(*new vector<vector<cell*>>(1,vector<cell*>(1, nullptr))),
+axis_y(*new vector<vector<cell*>>(1,vector<cell*>(1, nullptr)))
+{
+    origin = goal = center = nullptr;
+}
