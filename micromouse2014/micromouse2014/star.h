@@ -13,6 +13,7 @@
 #include <iostream>
 #include <vector>
 #include <stack>
+#include <string>
 
 
 #include "config.h"
@@ -20,7 +21,10 @@
 
 
 typedef
-std::stack<grid > path;
+std::vector<cell*> path;
+
+typedef
+std::string string;
 
 // contains 
 class item{
@@ -46,12 +50,19 @@ class star
 {
 	// size of cells
 	double lengthwidth;
-	double threshold; // distance at which it's determined the side walls aren't there
+	double threshold;	// distance at which it's determined the side walls aren't there
+	double front_threshold; // about the length of a cell. 
+							// when it's determined that an open side is on the left/right, this says if there is a wall in front or not
 
 	grid maze;
 	
-	path to_orig;
-	path guess;
+	/*path to_orig;
+	path guess;*/
+	string direction; // direction that mouse is facing
+	int rightTurns;
+	int leftTurns;
+	
+	std::vector<cell *> traversed;
 
 	/*********** Local Grid ************/
 	int leftFromViewfinder; // will get the region that the open space (to the left) is currently at in relation to the lidar
@@ -60,9 +71,16 @@ class star
 public:
 	star();
 
-	grid *get_scan(); // retrieves scan from lidar 
-	void motion(grid &fetched_scan); // overall motion. calls the turn functions
 	
+
+	grid *get_scan(); // retrieves scan from lidar 
+	cell * motion(grid &fetched_scan, cell &currentcell, path &junctions, string &direction); // local motion. calls the turn functions
+	void changeDirection(int turn); // left turn = 1. right turn = 2
+
+	void choose(cell &junction);
+
+	int search(path &traversed, grid &fetched_scan);
+
 	local_grid viewFinder;
 };
 
