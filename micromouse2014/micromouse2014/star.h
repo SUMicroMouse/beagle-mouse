@@ -12,6 +12,7 @@
 
 #include <iostream>
 #include <vector>
+#include <deque>
 #include <stack>
 #include <string>
 
@@ -22,6 +23,15 @@
 
 typedef
 std::vector<cell*> path;
+
+typedef
+std::vector<packet*> packets;
+
+typedef
+std::deque<wall*> walls;
+
+typedef
+std::vector<double> vect;
 
 typedef
 std::string string;
@@ -39,11 +49,12 @@ class local_grid{
 	std::vector<double> viewfinder;
 	std::vector<double> previous;
 public:
-	local_grid();
+	local_grid() { viewfinder.resize(90); previous.resize(90); }
 
 	// takes the grid from the lidar scan and simplifies the data
 	void updateView(grid &fetched_scan, int &returnedLeft, int &returnedRight, double &returnedFront); 
 };
+
 
 
 class star
@@ -59,10 +70,17 @@ class star
 	/*path to_orig;
 	path guess;*/
 	string direction; // direction that mouse is facing
+	double compass;
 	int rightTurns;
 	int leftTurns;
 	
+	
 	std::vector<cell *> traversed;
+
+	// new
+	packets vision;
+	walls wallDeq;
+	int num_packets; // 90
 
 	/*********** Local Grid ************/
 	int leftFromViewfinder; // will get the region that the open space (to the left) is currently at in relation to the lidar
@@ -74,7 +92,7 @@ public:
 	
 
 	grid *get_scan(); // retrieves scan from lidar 
-	cell * motion(grid &fetched_scan, cell &currentcell, path &junctions, string &direction); // local motion. calls the turn functions
+	cell * motion(grid &fetched_scan, cell &currentcell, path &junctions, string &direction, string &order); // local motion. calls the turn functions
 	void changeDirection(int turn); // left turn = 1. right turn = 2
 
 	void choose(cell &junction);
@@ -82,6 +100,12 @@ public:
 	int search(path &traversed, grid &fetched_scan);
 
 	local_grid viewFinder;
+
+
+	// starting fresh
+	void scan(); // modifies local grid
+	void turn(double angle);
+	void updateMaze(double x, double y);
 };
 
 #endif /* defined(__micromouse2014__star__) */

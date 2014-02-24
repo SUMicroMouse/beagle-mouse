@@ -83,10 +83,14 @@ public:
 	bool gSouth() { return b_south; }
 	bool gEast() { return b_east; }
 	bool gWest() { return b_west; }
+
+	void markSourceDirection(string direction);
+	void checkVirtualSides(bool &left, bool &right, bool &front, string direction);
 	
 	int checked; // 1 = checked. 2 = has multiple paths...
 	bool deadend;
 	bool finish;
+
 };
 
 

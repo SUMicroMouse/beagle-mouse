@@ -68,3 +68,46 @@ cell::cell(int left, int right, int front, string direction)
 			b_west = true;
 	}
 }
+
+// upon revisiting a cell, "close" the direction that you're coming from
+void cell::markSourceDirection(string direction)
+{
+	if (direction == "north")
+		b_south = true; // set to true so that when returning to the cell, it doesn't go down a path previously traveled
+	else if (direction == "south")
+		b_north = true;
+	else if (direction == "east")
+		b_west = true;
+	else if (direction == "west")
+		b_east = true;
+}
+
+// returns the values of left, front, right depending on the direction
+void cell::checkVirtualSides(bool &left, bool &right, bool &front, string direction)
+{
+	if (direction == "north")
+	{
+		left = b_west;
+		right = b_east;
+		front = b_north;
+	}
+	else if (direction == "south")
+	{
+		left = b_east;
+		right = b_west;
+		front = b_south;
+	}
+	else if (direction == "east")
+	{
+		left = b_north;
+		right = b_south;
+		front = b_east;
+	}
+	else if (direction == "west")
+	{
+		left = b_south;
+		right = b_north;
+		front = b_west;
+	}
+}
+

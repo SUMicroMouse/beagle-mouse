@@ -6,12 +6,12 @@
 
 #include "star.h"
 #include "cell.h"
+#include "packet.h"
+#include "wall.h"
+#include <math.h>
 
-local_grid::local_grid()
-{
-	viewfinder = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-	previous = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-}
+bool deadend = false;
+
 
 void local_grid::updateView(grid &fetched_scan, int &returnedLeft, int &returnedRight, double &returnedFront)
 {
@@ -36,7 +36,11 @@ void local_grid::updateView(grid &fetched_scan, int &returnedLeft, int &returned
 /********** Star ********/
 star::star()
 {
+	
 	direction = "north";
+	compass = 0;
+	num_packets = 90;
+
 	// size of cells
 	lengthwidth = 16; // free to change
 	threshold = 2;
@@ -230,99 +234,214 @@ void star::choose(cell &junction)
 }
 
 // updates local view and calls motion functions
-cell * star::motion(grid &fetched_scan, cell &currentcell, path &junctions, string &d)
+cell * star::motion(grid &fetched_scan, cell &currentcell, path &junctions, string &d, string &order)
 {
+	//path::iterator pathIt;
+	cell *pathIterator;
+
 	// start with motion forward so as not to get confused after being called once again to leave a cell
 	//
 	//
+	if (order == "foward"){
+		// constantly update the view as long as the mouse is moving
+		while (true)
+		{
+			viewFinder.updateView(fetched_scan, leftFromViewfinder, rightFromViewfinder, frontFromViewfinder);
 
-	// constantly update the view as long as the mouse is moving
-	while (true)
+
+			/************** Check for dead end or finish position ***************/
+
+			// dead end
+			// might call a function instead...
+			if (deadend)
+			{
+				cell *dead = new cell(1, 1, 1, direction);
+				dead->deadend = true;
+				return dead;
+			}
+
+
+
+			if ((leftFromViewfinder > threshold) && (rightFromViewfinder > threshold))
+			{ // both sides are open. check front
+
+				// if there is a wall in front
+				if (frontFromViewfinder <= front_threshold)
+				{
+					cell *temp = new cell(0, 0, 1, direction);
+					junctions.push_back(temp);
+
+					return temp;
+				}
+				else // if there's no wall in front, still add the cell. the source direction is automatically blocked off by the constructor
+				{
+					cell *temp = new cell(0, 0, 0, direction);
+					junctions.push_back(temp);
+
+					return temp;
+				}
+
+				// motion forward , just to get to center
+
+
+				//do{
+				//	viewFinder.updateView(fetched_scan, leftFromViewfinder, rightFromViewfinder, frontFromViewfinder);
+				//} while (frontFromViewfinder > threshold); // threshold for front should probably be the same value. if front does not exist and the sides start to reappear, it's a 4-way cell
+
+			}
+			else if ((leftFromViewfinder > threshold) && (rightFromViewfinder <= threshold))
+			{	// left wall is open, right is not
+
+				// if the front wall is open
+				if (frontFromViewfinder > front_threshold)
+				{
+					cell *temp = new cell(0, 1, 0, direction);
+					junctions.push_back(temp);
+
+					return temp;
+				}
+				else if (frontFromViewfinder <= front_threshold)
+				{	// there is a front wall. so simply turn left
+
+					// move forward, 
+					// turn left
+					leftTurns++;
+					rightTurns = 0;
+
+					do{
+						viewFinder.updateView(fetched_scan, leftFromViewfinder, rightFromViewfinder, frontFromViewfinder);
+					} while (frontFromViewfinder > threshold); // threshold for front should probably be the same value. if front does not exist and the sides start to reappear, it's a 4-way cell
+
+					// change direction
+					changeDirection(1);
+				}
+			}
+			else if ((leftFromViewfinder <= threshold) && (rightFromViewfinder > threshold))
+			{	// right wall is open, left is not
+
+				// if the front wall is open
+				if (frontFromViewfinder > front_threshold)
+				{
+					cell *temp = new cell(1, 0, 0, direction);
+					junctions.push_back(temp);
+
+					return temp;
+				}
+				else if (frontFromViewfinder <= front_threshold)
+				{	// simply turn right
+
+					// move forward,
+					// turn right
+					rightTurns++;
+					leftTurns = 0;
+
+					do{
+						viewFinder.updateView(fetched_scan, leftFromViewfinder, rightFromViewfinder, frontFromViewfinder);
+					} while (frontFromViewfinder > threshold); // threshold for front should probably be the same value. if front does not exist and the sides start to reappear, it's a 4-way cell
+
+					// change direction
+					changeDirection(2);
+
+					// only return when there's more than one choice at a cell... aka a "junction"
+				}
+			}
+		}
+	}
+	else if (order == "backward") // going back. duhhhhh
 	{
-		viewFinder.updateView(fetched_scan, leftFromViewfinder, rightFromViewfinder, frontFromViewfinder);
+		// point to the last element in the junctions vector
+		pathIterator = junctions.back();
+		bool left, right, front; // these will change depending on the current direction. a function will return their values based on the last junction
+
+		while (true)
+		{
+			viewFinder.updateView(fetched_scan, leftFromViewfinder, rightFromViewfinder, frontFromViewfinder);
 
 
-		if ((leftFromViewfinder > threshold) && (rightFromViewfinder > threshold))
-		{ // both sides are open. check front
+			if ((leftFromViewfinder > threshold) && (rightFromViewfinder <= threshold))
+			{	// left wall is open, right is not
 
-			// if there is a wall in front
-			if (frontFromViewfinder <= front_threshold)
-			{
-				cell *temp = new cell(0, 0, 1, direction);
-				junctions.push_back(temp);
+				// if the front wall is open
+				/** junction **/
+				if (frontFromViewfinder > front_threshold)
+				{
+					// add a virtual wall to the cell
+					pathIterator->markSourceDirection(direction);
 
-				return temp;
+					// check virtual walls
+				}
+				/** not a junction **/
+				else if (frontFromViewfinder <= front_threshold)
+				{	// there is a front wall. so simply turn left
+
+					// move forward, 
+					// turn left
+					leftTurns++;
+					rightTurns = 0;
+
+					do{
+						viewFinder.updateView(fetched_scan, leftFromViewfinder, rightFromViewfinder, frontFromViewfinder);
+					} while (frontFromViewfinder > threshold); // threshold for front should probably be the same value. if front does not exist and the sides start to reappear, it's a 4-way cell
+
+					// change direction
+					changeDirection(1);
+				}
 			}
-			else // if there's no wall in front, still add the cell. the source direction is automatically blocked off by the constructor
-			{
-				cell *temp = new cell(0, 0, 0, direction);
-				junctions.push_back(temp);
+			else if ((leftFromViewfinder <= threshold) && (rightFromViewfinder > threshold))
+			{	// right wall is open, left is not
 
-				return temp;
+				// if the front wall is open
+				if (frontFromViewfinder > front_threshold)
+				{
+					cell *temp = new cell(1, 0, 0, direction);
+					junctions.push_back(temp);
+
+					return temp;
+				}
+				else if (frontFromViewfinder <= front_threshold)
+				{	// simply turn right
+
+					// move forward,
+					// turn right
+					rightTurns++;
+					leftTurns = 0;
+
+					do{
+						viewFinder.updateView(fetched_scan, leftFromViewfinder, rightFromViewfinder, frontFromViewfinder);
+					} while (frontFromViewfinder > threshold); // threshold for front should probably be the same value. if front does not exist and the sides start to reappear, it's a 4-way cell
+
+					// change direction
+					changeDirection(2);
+
+					// only return when there's more than one choice at a cell... aka a "junction"
+				}
 			}
+			else if ((leftFromViewfinder > threshold) && (rightFromViewfinder > threshold))
+			{ // both sides are open. check front
 
-			// motion forward , just to get to center
+				// if there is a wall in front
+				if (frontFromViewfinder <= front_threshold)
+				{
+					cell *temp = new cell(0, 0, 1, direction);
+					junctions.push_back(temp);
+
+					return temp;
+				}
+				else // if there's no wall in front, still add the cell. the source direction is automatically blocked off by the constructor
+				{
+					cell *temp = new cell(0, 0, 0, direction);
+					junctions.push_back(temp);
+
+					return temp;
+				}
+
+				// motion forward , just to get to center
 
 
-			//do{
-			//	viewFinder.updateView(fetched_scan, leftFromViewfinder, rightFromViewfinder, frontFromViewfinder);
-			//} while (frontFromViewfinder > threshold); // threshold for front should probably be the same value. if front does not exist and the sides start to reappear, it's a 4-way cell
+				//do{
+				//	viewFinder.updateView(fetched_scan, leftFromViewfinder, rightFromViewfinder, frontFromViewfinder);
+				//} while (frontFromViewfinder > threshold); // threshold for front should probably be the same value. if front does not exist and the sides start to reappear, it's a 4-way cell
 
-		}
-		else if ((leftFromViewfinder > threshold) && (rightFromViewfinder <= threshold))
-		{	// left wall is open, right is not
-
-			// if the front wall is open
-			if (frontFromViewfinder > front_threshold)
-			{
-				cell *temp = new cell(0, 1, 0, direction);
-				junctions.push_back(temp);
-
-				return temp;
-			}
-			else if (frontFromViewfinder <= front_threshold)
-			{	// there is a front wall. so simply turn left
-				
-				// move forward, 
-				// turn left
-				leftTurns++;
-				rightTurns = 0;
-
-				do{
-					viewFinder.updateView(fetched_scan, leftFromViewfinder, rightFromViewfinder, frontFromViewfinder);
-				} while (frontFromViewfinder > threshold); // threshold for front should probably be the same value. if front does not exist and the sides start to reappear, it's a 4-way cell
-
-				// change direction
-				changeDirection(1);
-			}
-		}
-		else if ((leftFromViewfinder <= threshold) && (rightFromViewfinder > threshold))
-		{	// right wall is open, left is not
-
-			// if the front wall is open
-			if (frontFromViewfinder > front_threshold)
-			{
-				cell *temp = new cell(1, 0, 0, direction);
-				junctions.push_back(temp);
-
-				return temp;
-			}
-			else if (frontFromViewfinder <= front_threshold)
-			{	// simply turn right
-
-				// move forward,
-				// turn right
-				rightTurns++;
-				leftTurns = 0;
-				
-				do{
-					viewFinder.updateView(fetched_scan, leftFromViewfinder, rightFromViewfinder, frontFromViewfinder);
-				} while (frontFromViewfinder > threshold); // threshold for front should probably be the same value. if front does not exist and the sides start to reappear, it's a 4-way cell
-
-				// change direction
-				changeDirection(2);
-
-				// only return when there's more than one choice at a cell... aka a "junction"
 			}
 		}
 	}
@@ -359,6 +478,7 @@ int star::search(path &traversed, grid &fetched_scan)
 		// turn around
 
 		// call function to get back to previous junction
+
 	}
 	else if (result == 1)
 	{
@@ -368,3 +488,91 @@ int star::search(path &traversed, grid &fetched_scan)
 	}
 
 }
+
+
+/********************************** starting fresh **********************************/
+
+// turn by so many degrees, determined by time
+// assuming the front middle is 0 degrees
+void star::turn(double angle)
+{
+	double middle; // just here temporarily
+	double degrees = middle - angle;
+	
+	if (degrees > 0) // turn left
+	{
+		if (ceil(degrees) == 0) //  go straight
+		{
+
+		}
+		else
+		{
+			// turn left, degrees per second
+
+			compass += degrees;
+		}			
+	}
+	else if (degrees < 0) // turn right
+	{
+		if (floor(degrees) == 0) // go straight
+		{
+
+		}
+		else
+		{
+			// turn right, degrees per second
+
+			compass += degrees;
+		}
+	}
+}
+
+void polarToCartesian(double radius, double angle, double &x, double &y)
+{
+	x = radius * cos(angle);
+	y = radius * sin(angle);
+}
+
+void star::scan()
+{
+	vision.empty(); // empty the previous vision. new scan
+	vect nums; // used to separate the measurements into degrees, 4 numbers per degree
+	for (int i = 0; i < 1440; i++) // 1440 measurements total
+	{
+		// read in 
+		double fake;
+		double radius;
+
+		if ((i > 180) && (i < 540)) // between angle 45 and 135. might need to expand in order to scan more at once & create the maze faster
+		{
+			nums.push_back(fake);
+			if (nums.size() == 4)
+			{
+				packet *pack = new packet(nums[0], nums[1], nums[2], nums[3]); 
+				nums.empty();
+				vision.push_back(pack);
+			}
+		}
+	}
+}
+
+void star::updateMaze(double x, double y)
+{
+	// add walls to wall deque. probably should turn in the direction of the longer wall to record the pathway in full
+
+	packets::iterator pI; // iterate through vector of packets
+	pI = vision.begin();
+	packets::iterator follower;
+	follower = vision.begin();
+
+	int i = 0;
+
+	pI++;
+	// create walls
+	while (pI != vision.end())
+	{
+
+
+	}
+}
+
