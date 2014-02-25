@@ -78,8 +78,8 @@ class star
 	std::vector<cell *> traversed;
 
 	// new
-	packets vision;
-	walls wallDeq;
+	std::vector<packet*> vision;
+	std::deque<wall*> wallDeq;
 	int num_packets; // 90
 
 	/*********** Local Grid ************/

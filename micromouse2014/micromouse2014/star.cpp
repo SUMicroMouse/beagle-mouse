@@ -548,7 +548,7 @@ void star::scan()
 			nums.push_back(fake);
 			if (nums.size() == 4)
 			{
-				packet *pack = new packet(nums[0], nums[1], nums[2], nums[3]); 
+				packet *pack = new packet(nums[0], nums[1], nums[2], nums[3], i); 
 				nums.empty();
 				vision.push_back(pack);
 			}
@@ -560,17 +560,36 @@ void star::updateMaze(double x, double y)
 {
 	// add walls to wall deque. probably should turn in the direction of the longer wall to record the pathway in full
 
-	packets::iterator pI; // iterate through vector of packets
+	// value that says the packets' radii are too far apart, indicating a space
+	double closeEnough = 1;
+
+	std::vector<packet*>::iterator pI; // iterate through vector of packets
 	pI = vision.begin();
-	packets::iterator follower;
+	std::vector<packet*>::iterator beginner; // is the beginning of the wall
+	beginner = vision.begin();
+	std::vector<packet*>::iterator follower;
 	follower = vision.begin();
 
 	int i = 0;
 
+	double previous_value;
 	pI++;
 	// create walls
 	while (pI != vision.end())
 	{
+		if (((*pI)->aveRadius - (*follower)->aveRadius) > closeEnough)
+		{
+			// length from beginning spot to the last spot that was recorded as part of the same wall
+			int angle = (*follower)->angle - (*beginner)->angle;
+			if (angle < 0)
+				angle = -1 * angle;
+			double length = sqrt(pow((*beginner)->aveRadius, 2.0) + pow((*follower)->aveRadius, 2.0) - 2 * (*beginner)->aveRadius * (*follower)->aveRadius * cos(angle)); // length of wall. a^2 = b^2 + c^2 - 2bc * cos(A)
+			wall *nWall = new wall(length);
+		}
+		else
+		{
+
+		}
 
 
 	}
