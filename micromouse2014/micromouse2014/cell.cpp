@@ -18,6 +18,16 @@ cell::cell()
 	finish = false;
 }
 
+cell::cell(int r, int c)
+{
+	row = r;
+	column = c;
+
+	checked = 0;
+	deadend = false;
+	finish = false;
+}
+
 // uses the current direction to determine which walls are false or true
 cell::cell(int left, int right, int front, string direction)
 {

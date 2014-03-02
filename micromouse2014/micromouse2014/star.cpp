@@ -38,8 +38,10 @@ star::star()
 {
 	
 	direction = "north";
-	compass = 0;
+	compass = 90; // starting position is 90 degrees, which will be "north". 0 degrees is to the left to match up with the lidar
+	shift = 0.0; // default position, so shift is 0 degrees
 	num_packets = 90;
+	mazeSize = 16;
 
 	// size of cells
 	lengthwidth = 16; // free to change
@@ -556,6 +558,64 @@ void star::scan()
 	}
 }
 
+void star::createMaze()
+{
+	lat_headers.resize(mazeSize);
+	long_headers.resize(mazeSize);
+
+	int r, c;
+	for (r = 0; r < mazeSize; r++)
+	{
+		for (c = 0; c < mazeSize; c++)
+		{
+			cell *temp = new cell(r, c);
+			addCell(*temp);
+		}
+	}
+}
+
+void star::addCell(cell &newcell)
+{
+	cell *adder;
+	adder = lat_headers[newcell.row];
+	if (adder != NULL)
+	{
+		while (adder->east != NULL)
+		{
+			adder = adder->east;
+			if (adder->east == NULL)
+				break;
+		}
+		if (adder->east == NULL)
+		{
+			newcell.west = adder;
+			adder->east = &newcell;
+		}
+	}
+	else
+		lat_headers[newcell.row] = &newcell;
+
+	// link it to the column
+	cell *linker;
+	linker = long_headers[newcell.column];
+	if (linker != NULL)
+	{
+		while (linker->south != NULL)
+		{
+			linker = linker->south;
+			if (linker->south == NULL)
+				break;
+		}
+		if (linker->south == NULL)
+		{
+			newcell.north = linker;
+			linker->south = &newcell;
+		}
+	}
+	else
+		long_headers[newcell.column] = &newcell;
+}
+
 void star::updateMaze(double x, double y)
 {
 	// add walls to wall deque. probably should turn in the direction of the longer wall to record the pathway in full
@@ -579,12 +639,14 @@ void star::updateMaze(double x, double y)
 	{
 		if (((*pI)->aveRadius - (*follower)->aveRadius) > closeEnough)
 		{
-			// length from beginning spot to the last spot that was recorded as part of the same wall
-			int angle = (*follower)->angle - (*beginner)->angle;
+			
+			int angle = (*follower)->angle - (*beginner)->angle; //angle that encompasses the wall from the viewpoint
 			if (angle < 0)
 				angle = -1 * angle;
-			double length = sqrt(pow((*beginner)->aveRadius, 2.0) + pow((*follower)->aveRadius, 2.0) - 2 * (*beginner)->aveRadius * (*follower)->aveRadius * cos(angle)); // length of wall. a^2 = b^2 + c^2 - 2bc * cos(A)
+			// length from beginning spot to the last spot that was recorded as part of the same wall
+			double length;
 			wall *nWall = new wall(length);
+
 		}
 		else
 		{
@@ -595,3 +657,152 @@ void star::updateMaze(double x, double y)
 	}
 }
 
+void star::wallOrienter(wall &wallInQuestion, string &orientation, double &x_displacement, double &y_displacement, double distanceToWall)
+{
+	// only five possibilities
+	double angle;
+
+	if (closeEnough(wallInQuestion.leftAngle, wallInQuestion.rightAngle))
+	{	// wall is directly ahead
+
+		// get triangle height to see how far away it is
+
+		//triangle perimeter
+		double perimeter = wallInQuestion.radiusLeft + wallInQuestion.length + wallInQuestion.radiusRight;
+
+		// Heron's formula for area
+		double area = sqrt(perimeter * (perimeter - wallInQuestion.radiusLeft) * (perimeter - wallInQuestion.length) * (perimeter - wallInQuestion.radiusRight));
+
+		// area = (1/2) * base * height
+		// height = (2*area)/base . base will be wallinquestion.length. distanceToWall will be height
+		distanceToWall = (2 * area) / wallInQuestion.length;
+		x_displacement = 0;
+		y_displacement = 0;
+	}
+	else if (wallInQuestion.leftAngle < wallInQuestion.rightAngle)
+	{
+		// assuming 90 degrees is directly in the middle
+		if (wallInQuestion.a1 > 90.0)
+		{
+			// the wall is perpendicular to the robot's plane of vision (parallel with the 90 degree line)
+			orientation = "perpendicularRight";
+			
+			angle = 180 - wallInQuestion.a2;
+			x_displacement = cos(angle) * wallInQuestion.radiusRight; // tricky here
+			y_displacement = sin(angle) * wallInQuestion.radiusRight;
+		}
+		else
+		{
+			// the wall is parallel to the robot's plane of vision (parallel with the 0 degree line)
+			orientation = "parallelLeft";
+
+			angle = wallInQuestion.a2; // rightVectorAngle.
+			x_displacement = -cos(angle) * wallInQuestion.radiusRight; // x_displacement left is negative. right is positive
+			y_displacement = sin(angle) * wallInQuestion.radiusRight;
+		}
+	}
+	else if (wallInQuestion.rightAngle < wallInQuestion.leftAngle)
+	{
+		// assuming 90 degrees is directly in the middle
+		if (wallInQuestion.a2 < 90.0)
+		{
+			// the wall is perpendicular to the robot's plane of vision
+			orientation = "perpendicularLeft";
+
+			angle = wallInQuestion.a1;
+			x_displacement = -cos(angle) * wallInQuestion.radiusLeft; // x_displacement left is negative. right is positive
+			y_displacement = sin(angle) * wallInQuestion.radiusLeft;
+		}
+		else
+		{
+			// the wall is parallel to the robot's plane of vision
+			orientation = "parallelRight";
+
+			angle = 180 - wallInQuestion.a1;
+			x_displacement = cos(angle) * wallInQuestion.radiusLeft;
+			y_displacement = sin(angle) * wallInQuestion.radiusLeft;
+		}
+	}
+
+}
+
+void star::addBasedOnCompass(wall &wallInQuestion, string wallOrientation, double &x_displacement, double &y_displacement, double distanceToWall)
+{
+	double x_wall, y_wall;
+
+	// assuming 90 is the starting direction. 0 is to the left at the beginning
+	if ((compass > 315) && (compass < 45))
+	{ // facing left
+		x_wall = xDistance - y_displacement; // positive y displacement will be negative x
+		y_wall = yDistance + x_displacement; // positive x is to the right, which will end up being positive y
+
+		if ((wallOrientation == "perpendicularRight") || (wallOrientation == "perpendicularLeft")){
+			x_wall -= wallInQuestion.length / 2;
+		}
+		else if (wallOrientation == "parallelLeft"){
+			y_wall -= wallInQuestion.length / 2; // left is negative y
+		}
+		else if (wallOrientation == "parallelRight"){
+			y_wall += wallInQuestion.length / 2;
+		}
+	}
+	else if ((compass > 45) && (compass < 135)) 
+	{ // default direction
+		x_wall = xDistance + x_displacement;
+		y_wall = yDistance + y_displacement;
+
+		if ((wallOrientation == "perpendicularRight") || (wallOrientation == "perpendicularLeft")){
+			y_wall += wallInQuestion.length / 2;
+		}
+		else if (wallOrientation == "parallelLeft"){
+			x_wall -= wallInQuestion.length / 2;
+		}
+		else if (wallOrientation == "parallelRight"){
+			x_wall += wallInQuestion.length / 2;
+		}
+	}
+	else if ((compass > 135) && (compass < 225))
+	{ // facing right
+		x_wall = xDistance + y_displacement; // positive y will equal positve x
+		y_wall = yDistance - x_displacement; // positive x is to the right, which will equal negative y
+
+		if ((wallOrientation == "perpendicularRight") || (wallOrientation == "perpendicularLeft")){
+			x_wall += wallInQuestion.length / 2;
+		}
+		else if (wallOrientation == "parallelLeft"){
+			y_wall += wallInQuestion.length / 2;
+		}
+		else if (wallOrientation == "parallelRight"){
+			y_wall -= wallInQuestion.length / 2; // right is negative y
+		}
+	}
+	else if ((compass > 225) && (compass < 315))
+	{ // facing south
+		x_wall = xDistance - x_displacement; // reversed
+		y_wall = yDistance - y_displacement; // reversed
+
+		if ((wallOrientation == "perpendicularRight") || (wallOrientation == "perpendicularLeft")){
+			y_wall -= wallInQuestion.length / 2;
+		}
+		else if (wallOrientation == "parallelLeft"){
+			x_wall += wallInQuestion.length / 2; // left is positive x
+		}
+		else if (wallOrientation == "parallelRight"){
+			x_wall -= wallInQuestion.length / 2; // right is negative x
+		}
+	}
+	else if ((compass == 45) || (compass == 135) || (compass == 225) || (compass == 315))
+	{
+
+	}
+
+
+}
+
+bool closeEnough(double angle1, double angle2)
+{
+	if (abs(angle2 - angle1) <= 1.0)
+		return true;
+	else
+		return false;
+}

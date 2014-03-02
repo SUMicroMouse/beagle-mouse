@@ -54,11 +54,16 @@ std::string string;
  */
 class cell
 {
+public:
+	int row; // lat
+	int column; // long
+
 	cell *	north;
 	cell *	south;
 	cell *	east;
 	cell *	west;
-	
+
+private:
 	bool	b_north; // b for boundary
 	bool	b_south;
 	bool	b_east;
@@ -69,6 +74,7 @@ class cell
 	
 public:
 	cell();
+	cell(int r, int c);
 	cell(int left, int right, int front, string direction);
 	//cell(cell & _adj, direction _dir);
 	

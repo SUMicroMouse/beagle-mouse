@@ -78,9 +78,14 @@ class star
 	std::vector<cell *> traversed;
 
 	// new
+	double xDistance, yDistance; // the current position of the robot
+	double shift; // represents the difference between the current compass heading and the default, which is 90 degrees
 	std::vector<packet*> vision;
 	std::deque<wall*> wallDeq;
 	int num_packets; // 90
+	std::vector<cell*> lat_headers; // rows
+	std::vector<cell*> long_headers; // columns
+	int mazeSize;
 
 	/*********** Local Grid ************/
 	int leftFromViewfinder; // will get the region that the open space (to the left) is currently at in relation to the lidar
@@ -105,7 +110,11 @@ public:
 	// starting fresh
 	void scan(); // modifies local grid
 	void turn(double angle);
+	void createMaze(); // create the linked lists of cells, 16 by 16
+	void addCell(cell &newcell);
 	void updateMaze(double x, double y);
+	void wallOrienter(wall &wallInQuestion, string &orientation, double &x_displacement, double &y_displacement, double distanceToWall);
+	void addBasedOnCompass(wall &wallinQuestion, string wallOrientation, double &x_displacement, double &y_displacement, double distanceToWall);
 };
 
 #endif /* defined(__micromouse2014__star__) */
