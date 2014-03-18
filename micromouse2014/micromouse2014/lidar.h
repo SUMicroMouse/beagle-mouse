@@ -15,81 +15,53 @@
 #include <vector>
 #include <string>
 #include <cmath>
+#include <deque>
 
+#include <map>
+
+#include "packet.h"
+#include "device.h"
 
 //#include "config.h"
 //#include "grid.h"
 
-struct grid{};
+struct _360_scan;
+struct lidar;
 
+typedef std::chrono::time_point<std::chrono::system_clock> timestamp;
 
-#define timestamp long unsigned
-
-#define coeff_bit_len 6
-#define expnt_bit_len 16 - coeff_bit_len
-
-#define LIDAR_DEPTH 5
-
-template<size_t _num, size_t _wid >
-struct bitstr
+namespace lidar_config
 {
-//    typedef bitstr<_num, 1> binstr;
-//    typedef bitstr<_num, 3> octalstr;
-//    typedef bitstr<_num, 4> hexstr;
-    //Data
-    std::vector<std::bitset<_wid>> v_0b;
-    //Constructors
-    bitstr();
-    bitstr(std::string str, int base);
-    //Methods
-    template<size_t _bits>
-    std::bitset<_bits> get_segment(size_t bit_offset);
-};
-
-
-class data
-{
-    //4 bytes, 32 downto 0
-    std::bitset<32> _0b;
-public:
+    constexpr size_t pkt_index_max  = 22;
     
-    data(int _d);
-    data(uint _d);
+    constexpr char tty_path[]       = "/dev/tty01";
+}
 
-    uint16_t    distance();//13 : 0 (LSB first)
-    bool        strength_warn();//b14
-    bool        invalid();//b15
-    uint16_t    strength();//31 : 16 (LSB first)
 
-};
-
-class packet
+// A list of data points organized radially (by degree index)
+// Data points are all distances
+struct _360_scan
 {
-    std::vector<uint8_t> _raw;
-public:
-    //Order of receipt
-    uint8_t     start();//0xFA
-    uint16_t    index();//Packet #0 - #89, 4 readings each
-    float       speed();//16b total, 10.6b fixed, 64th of RPM
-    data        data0();
-    data        data1();
-    data        data2();
-    data        data3();
-    uint16_t    chksum();
+    //Stores reference to each data sub-packet composing the 360 degrees
+    std::map<uint,const data*> deg_index;
+    //The times degree 0 and 359 were entered (respectively)
+    timestamp   begin,end;
     
+    //deconstructs the packet and stores it in the map.
+    size_t add_pkt(packet& _p);
+    
+    //Print out the list. Template defines whether packet or data(default)
+    template <class _t>
+    void print();
 };
 
 
 
 
-float fix_to_float(std::bitset<coeff_bit_len> coeff,
-                   std::bitset<expnt_bit_len> expnt);
 
-class lidar
+
+class lidar//: protected device_tty
 {
-	static const
-	unsigned depth = LIDAR_DEPTH;
-	
 	/** Hold the most recent scan.
 	 *	A scan is a radial grid.
 	 *	Sample coordinates for cells.
@@ -111,45 +83,34 @@ class lidar
      
 	 */
     
-	// Holds the most recent scan
-	grid & scan;
-	// holds a temporary grid while the scan is being updated
-	grid & temp_scan;
-    // The file stream device that will be read from to generate the grid.
-    std::ifstream f_data;
+    // The underlying hardware connection
+    device_tty  _dev;
+
+protected:
+    std::map<timestamp, _360_scan*> scan_hist;
     
-    // The name of the file. Probably "/dev/tty01"
-    std::string f_name;
-	
-    //Returns a 44 character hex string, starting with (0x) "FA"
-    std::string fetch_datagram();
-    
-	void seek_to_start();
-	 
-    int open_file();
-    int close_file();
+    lidar() : _dev( lidar_config::tty_path ){}
     
 public:
-	lidar();
+	lidar(std::string _path) : _dev( _path ){}
     
-
+    // Scans incoming data up to the first marker ( "0xFA" ) and returns it
+	uint8_t seek();
+    // Scans a NEW packet of data starting from the marker
+    packet& scan(){return scan(seek());}
+    packet& scan(uint8_t _seek);
     
+    //Addes a new layer to the scan returns the most recent scan
+    std::map<timestamp, _360_scan*>::iterator
+    build_scan();
     
+    //Erase all but the most recent N scans
+    void clr_all_but_last(size_t N);
+    
+	// Returns the scan that is N from most recent
+	std::map<timestamp, _360_scan*>::iterator
+	fetch_last(size_t N);
 	
-	/** Scans the field in front are returns a *radial* grid of cells.
-	 *	1)	check that polling() == false
-	 *	2)	check that current() == false
-	 */
-	void update_scan();
-	
-	/// Returns the most recent scan
-	grid &	fetch_scan();
-	
-	/// Returns true while there is no new scan to get.
-	bool	current();
-	
-	/// Returns true if the grid is unfinished
-	bool	polling();
 	
 };
 
