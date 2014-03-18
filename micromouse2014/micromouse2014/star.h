@@ -64,20 +64,21 @@ class star
 	double threshold;	// distance at which it's determined the side walls aren't there
 	double front_threshold; // about the length of a cell. 
 							// when it's determined that an open side is on the left/right, this says if there is a wall in front or not
-
-	grid maze;
-	
+	grid maze;	
 	/*path to_orig;
 	path guess;*/
 	string direction; // direction that mouse is facing
 	double compass;
 	int rightTurns;
 	int leftTurns;
-	
-	
 	std::vector<cell *> traversed;
+	// old
+	///*********** Local Grid ************/
+	//int leftFromViewfinder; // will get the region that the open space (to the left) is currently at in relation to the lidar
+	//int rightFromViewfinder; // will get the region that the open space (to the right) is currently at in relation to the lidar
+	//double frontFromViewfinder; // gets the distance of the region directly in front
 
-	// new
+	/************************* new ********************/
 	double xDistance, yDistance; // the current position of the robot
 	double shift; // represents the difference between the current compass heading and the default, which is 90 degrees
 	std::vector<packet*> vision;
@@ -89,25 +90,14 @@ class star
 	double goalX;
 	double goalY;
 	int startingRow, startingColumn;
+	double headOnDistance;
+	double headOnDistance2;
+	bool atJunction;
 
-	/*********** Local Grid ************/
-	int leftFromViewfinder; // will get the region that the open space (to the left) is currently at in relation to the lidar
-	int rightFromViewfinder; // will get the region that the open space (to the right) is currently at in relation to the lidar
-	double frontFromViewfinder; // gets the distance of the region directly in front
-public:
-	star();
 
 	
-
-	grid *get_scan(); // retrieves scan from lidar 
-	cell * motion(grid &fetched_scan, cell &currentcell, path &junctions, string &direction, string &order); // local motion. calls the turn functions
-	void changeDirection(int turn); // left turn = 1. right turn = 2
-
-	void choose(cell &junction);
-
-	int search(path &traversed, grid &fetched_scan);
-
-	local_grid viewFinder;
+public:
+	star();
 
 
 	// starting fresh
@@ -120,10 +110,14 @@ public:
 	void wallOrienter(wall &wallInQuestion, string &orientation, double &x_displacement, double &y_displacement, double distanceToWall);
 	void addBasedOnCompass(wall &wallInQuestion, string wallOrientation, double &x_displacement, double &y_displacement, double distanceToWall);
 	void markWalls(wall &wallInQuestion, double &staticCoord, double &coordinateAlongWall, string &xORy);
+	//void opposingWall();
+
 	// algorithm, decision-making
 	int decide();
 	void determineFromCost(cell &ce);
 	void determineToCost();
+	void goForwardOne();
+	void PositionChange();
 };
 
 #endif /* defined(__micromouse2014__star__) */
