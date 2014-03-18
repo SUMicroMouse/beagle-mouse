@@ -86,6 +86,9 @@ class star
 	std::vector<cell*> lat_headers; // rows
 	std::vector<cell*> long_headers; // columns
 	int mazeSize;
+	double goalX;
+	double goalY;
+	int startingRow, startingColumn;
 
 	/*********** Local Grid ************/
 	int leftFromViewfinder; // will get the region that the open space (to the left) is currently at in relation to the lidar
@@ -112,9 +115,15 @@ public:
 	void turn(double angle);
 	void createMaze(); // create the linked lists of cells, 16 by 16
 	void addCell(cell &newcell);
-	void updateMaze(double x, double y);
+	cell *findCell(double x, double y);
+	int updateMaze();
 	void wallOrienter(wall &wallInQuestion, string &orientation, double &x_displacement, double &y_displacement, double distanceToWall);
-	void addBasedOnCompass(wall &wallinQuestion, string wallOrientation, double &x_displacement, double &y_displacement, double distanceToWall);
+	void addBasedOnCompass(wall &wallInQuestion, string wallOrientation, double &x_displacement, double &y_displacement, double distanceToWall);
+	void markWalls(wall &wallInQuestion, double &staticCoord, double &coordinateAlongWall, string &xORy);
+	// algorithm, decision-making
+	int decide();
+	void determineFromCost(cell &ce);
+	void determineToCost();
 };
 
 #endif /* defined(__micromouse2014__star__) */

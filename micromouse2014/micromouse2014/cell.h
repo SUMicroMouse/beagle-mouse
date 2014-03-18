@@ -64,17 +64,21 @@ public:
 	cell *	west;
 
 private:
-	bool	b_north; // b for boundary
-	bool	b_south;
-	bool	b_east;
-	bool	b_west;
+	// 0 = unknown. -1 = onfirmed, no wall. 1 = wall confirmed present
+	int	b_north; // b for boundary
+	int	b_south;
+	int	b_east;
+	int	b_west;
 
 	bool start_node; // for cells that have multiple options for different paths
 	bool state; // used to determine if the path is open or closed (already tried or not)
+
+	double x_center, y_center;
 	
 public:
 	cell();
 	cell(int r, int c);
+	cell(double x, double y);
 	cell(int left, int right, int front, string direction);
 	//cell(cell & _adj, direction _dir);
 	
@@ -85,18 +89,25 @@ public:
 	void sEast(bool g) { b_east = g; }
 	void sWest(bool g) { b_west = g; }
 
-	bool gNorth() { return b_north; }
-	bool gSouth() { return b_south; }
-	bool gEast() { return b_east; }
-	bool gWest() { return b_west; }
+	int gNorth() { return b_north; }
+	int gSouth() { return b_south; }
+	int gEast() { return b_east; }
+	int gWest() { return b_west; }
 
 	void markSourceDirection(string direction);
-	void checkVirtualSides(bool &left, bool &right, bool &front, string direction);
-	
+	void checkVirtualSides(int &left, int &right, int &front, string direction);
+	void markWalls(double x, double y, double sourceX, double sourceY);
+	void wallMark(int side, int mode);
+	void declareSideEmpty(double sourceX, double sourceY);
+
 	int checked; // 1 = checked. 2 = has multiple paths...
 	bool deadend;
 	bool finish;
 
+	double fromCost; // cost from the origin
+	double toCost; // estimated cost to the goal
+
+	void figureToCost(double goalX, double goalY);
 };
 
 

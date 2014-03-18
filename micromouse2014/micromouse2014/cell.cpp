@@ -10,6 +10,8 @@
 
 using namespace std;
 
+#define cellsize 16.0
+
 cell::cell()
 {
 	checked = 0;
@@ -26,6 +28,23 @@ cell::cell(int r, int c)
 	checked = 0;
 	deadend = false;
 	finish = false;
+	b_north = 0;
+	b_south = 0;
+	b_east = 0;
+	b_west = 0;
+
+	x_center = (cellsize * column) + 0.5 * cellsize;
+	y_center = (cellsize * row) + 0.5 * cellsize;
+}
+
+// take the coordinates in centimeters and create a cell with the correct row/column attributes
+cell::cell(double x, double y)
+{
+	double rtemp = y / cellsize;
+	double ctemp = x / cellsize;
+
+	row = floor(rtemp);
+	column = floor(ctemp);
 }
 
 // uses the current direction to determine which walls are false or true
@@ -93,7 +112,7 @@ void cell::markSourceDirection(string direction)
 }
 
 // returns the values of left, front, right depending on the direction
-void cell::checkVirtualSides(bool &left, bool &right, bool &front, string direction)
+void cell::checkVirtualSides(int &left, int &right, int &front, string direction)
 {
 	if (direction == "north")
 	{
@@ -121,3 +140,225 @@ void cell::checkVirtualSides(bool &left, bool &right, bool &front, string direct
 	}
 }
 
+// returns true if the point is closer to sideA than sideB
+bool closerTo(double sideA, double sideB, double point)
+{
+	double d1, d2;
+
+	d1 = abs(sideA - point);
+	d2 = abs(sideB - point);
+
+	if (d1 < d2)
+		return true;
+	else
+		return false;
+}
+
+// mark the wall and go to the neighboring cell and mark its corresponding wall
+// mode: 1 = mark. -1 = unmark/empty
+// 1 = north. 2 = south. 3 = west. 4 = east.
+void cell::wallMark(int side, int mode)
+{
+	cell *otherCell;
+
+	if (mode == 1) // mark the wall as being present
+	{
+		switch (side)
+		{
+		case 1:{
+				   b_north = 1;
+				   otherCell = north;
+				   otherCell->b_south = 1;
+		}
+			break;
+		case 2:{
+				   b_south = 1;
+				   otherCell = south;
+				   otherCell->b_north = 1;
+		}
+			break;
+		case 3:{
+				   b_west = 1;
+				   otherCell = west;
+				   otherCell->b_east = 1;
+		}
+			break;
+		case 4:{
+				   b_east = 1;
+				   otherCell = east;
+				   otherCell->b_west = 1;
+		}
+			break;
+		default:
+			break;
+		}
+	}
+	else if (mode == -1) // make the wall nonexistent
+	{
+		switch (side)
+		{
+		case 1:{
+				   b_north = 0;
+				   otherCell = north;
+				   otherCell->b_south = 0;
+		}
+			break;
+		case 2:{
+				   b_south = 0;
+				   otherCell = south;
+				   otherCell->b_north = 0;
+		}
+			break;
+		case 3:{
+				   b_west = 0;
+				   otherCell = west;
+				   otherCell->b_east = 0;
+		}
+			break;
+		case 4:{
+				   b_east = 0;
+				   otherCell = east;
+				   otherCell->b_west = 0;
+		}
+			break;
+		default:
+			break;
+		}
+	}
+	
+}
+
+// check to see if the point is within the cell, including the walls
+void cell::markWalls(double x, double y, double sourceX, double sourceY)
+{
+	double rightBound = x_center + 0.5 * cellsize;
+	double leftBound = x_center - 0.5 * cellsize;
+	// remember that the top left is the origin of the grid
+	double topBound = y_center + 0.5 * cellsize;
+	double bottomBound = y_center - 0.5 * cellsize;
+
+	cell * otherCell;
+
+	// check to see if the point is within the four walls
+	if ((x >= leftBound) && (x <= rightBound))
+	{
+		if ((y >= bottomBound) && (y <= topBound))
+		{
+			if (closerTo(leftBound, rightBound, x))
+			{	// closer to left wall
+				if (closerTo(topBound, bottomBound, y))
+				{	// closer to top wall
+					if (abs(leftBound - x) < abs(topBound - y))
+					{	// left wall must be present rather than the top wall
+						// turn the left boundary to true, and go to that cell and change its right boundary to true
+						wallMark(3, 1);
+					}
+					else
+					{	// top wall must be present instead of the left all
+						wallMark(1, 1);
+					}
+				}
+				else
+				{	// closer to bottom wall
+					if (abs(leftBound - x) < abs(bottomBound - y))
+					{	// left wall is present
+						wallMark(3, 1);
+					}
+					else
+					{	// bottom wall is present
+						wallMark(2, 1);
+					}
+				}				
+			}
+			else
+			{	// closer to right wall
+				if (closerTo(topBound, bottomBound, y))
+				{	// closer to top wall
+					if (abs(rightBound - x) < abs(topBound - y))
+					{	// right wall must be present instead of the top wall
+						wallMark(4, 1);
+					}
+					else
+					{	// top wall must be present instead of the right wall
+						wallMark(1, 1);
+					}
+				}
+				else
+				{	// closer to bottom wall
+					if (abs(rightBound - x) < abs(bottomBound - y))
+					{	// right wall must be present instead of the bottom wall
+						wallMark(4, 1);
+					}
+					else
+					{	// bottom wall must be present instead of the right wall
+						wallMark(2, 1);
+					}
+				}	
+			}
+		}
+	}
+
+
+	/* Naturally, when looking down an empty space, it can be assumed that for each of the cells, the wall closest to the robot is open; otherwise, it would not be possible to see through the cell
+	 mark the sides closest to the robot as open only if it's unknown, to avoid error in the situations where the wall is partially seen, but not fully, blah blah. it works out in the end, with the earlier part of this function.
+	 (an open wall can be closed if it's determined that a wall is there, but not the other way around) */
+	declareSideEmpty(sourceX, sourceY);
+}
+
+void cell::declareSideEmpty(double sourceX, double sourceY)
+{
+	double rightBound = x_center + 0.5 * cellsize;
+	double leftBound = x_center - 0.5 * cellsize;
+	// remember that the top left is the origin of the grid
+	double topBound = y_center + 0.5 * cellsize;
+	double bottomBound = y_center - 0.5 * cellsize;
+
+
+
+
+	if (closerTo(leftBound, rightBound, sourceX))
+	{	// closer to left wall
+		if (closerTo(topBound, bottomBound, sourceY))
+		{	// closer to top wall
+			if (abs(leftBound - sourceX) < abs(topBound - sourceY))
+				wallMark(3, -1);
+			else	
+				wallMark(1, -1);
+		}
+		else
+		{	// closer to bottom wall
+			if (abs(leftBound - sourceX) < abs(bottomBound - sourceY))
+				wallMark(3, -1);
+			else
+				wallMark(2, -1);
+		}
+	}
+	else
+	{	// closer to right wall
+		if (closerTo(topBound, bottomBound, y))
+		{	// closer to top wall
+			if (abs(rightBound - sourceX) < abs(topBound - sourceY))	
+				wallMark(4, -1);
+			else
+				wallMark(1, -1);
+		}
+		else
+		{	// closer to bottom wall
+			if (abs(rightBound - sourceX) < abs(bottomBound - sourceY))
+				wallMark(4, 1);
+			else
+				wallMark(2, -1);
+		}
+	}
+
+}
+
+// figure out the ToCost, which is simply based on the distance to the Goal.
+void cell::figureToCost(double goalX, double goalY)
+{
+	double distance;
+
+	distance = sqrt(((x_center - goalX) * (x_center - goalX)) + ((y_center - goalY) * (y_center - goalY)));
+
+	toCost = distance; // centimeters give a high number...
+}
