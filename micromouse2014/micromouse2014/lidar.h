@@ -30,27 +30,31 @@ struct lidar;
 
 typedef std::chrono::time_point<std::chrono::system_clock> timestamp;
 
+/// Device constants specific to the XV-11 LIDAR
 namespace lidar_config
 {
+    /// The number of bytes in the packet
     constexpr size_t pkt_index_max  = 22;
     
+    /// The full path to the UART terminal the LIDAR is connected to.
     constexpr char tty_path[]       = "/dev/tty01";
 }
 
 
-// A list of data points organized radially (by degree index)
-// Data points are all distances
+/** A list of DATA points organized radially by degree {0-359}.
+ */
 struct _360_scan
 {
-    //Stores reference to each data sub-packet composing the 360 degrees
+    ///Stores pointer to each data sub-packet composing the 360 degrees
     std::map<uint,const data*> deg_index;
-    //The times degree 0 and 359 were entered (respectively)
+    
+    ///The times that degree 0 and 359 were entered (respectively)
     timestamp   begin,end;
     
-    //deconstructs the packet and stores it in the map.
+    ///deconstructs the packet and stores it in the map.
     size_t add_pkt(packet& _p);
     
-    //Print out the list. Template defines whether packet or data(default)
+    ///Print out the list. Template defines whether packet or data(default)
     template <class _t>
     void print();
 };
@@ -59,59 +63,48 @@ struct _360_scan
 
 
 
-
+/** The top-level interface for using the LIDAR
+ */
 class lidar//: protected device_tty
 {
-	/** Hold the most recent scan.
-	 *	A scan is a radial grid.
-	 *	Sample coordinates for cells.
-     
-     +       + ----- + ----- +
-     |               |
-     |               |
-     |               |
-     + ----- +       + ----- +
-     |       |
-     |       |
-     |       |
-     +       +       + ----- +
-     |               |       |
-     |           @   |       |
-     |               |       |
-     +               +       +
-     
-     
-	 */
     
-    // The underlying hardware connection
+    /// The underlying hardware device connection
     device_tty  _dev;
 
 protected:
+    /// A list of previous scans, organized by time taken.
     std::map<timestamp, _360_scan*> scan_hist;
     
+    /// Defualt constructor relys on namespace constants.
     lidar() : _dev( lidar_config::tty_path ){}
     
 public:
+    /// Explicit constructor requires that UART terminal path be provided. 
 	lidar(std::string _path) : _dev( _path ){}
     
-    // Scans incoming data up to the first marker ( "0xFA" ) and returns it
+    /// Scans incoming data up to the start ( "0xFA" ) and returns that.
 	uint8_t seek();
-    // Scans a NEW packet of data starting from the marker
+    
+    /// Scans in a NEW packet starting from 0xFA
     packet& scan(){return scan(seek());}
     packet& scan(uint8_t _seek);
     
-    //Addes a new layer to the scan returns the most recent scan
+    /// Addes a new entry to the scan history; returns the most recent
     std::map<timestamp, _360_scan*>::iterator
     build_scan();
     
-    //Erase all but the most recent N scans
+    /// Erase all but the most recent N scans
     void clr_all_but_last(size_t N);
     
-	// Returns the scan that is N from most recent
+	/// Returns the scan that is N from most recent
 	std::map<timestamp, _360_scan*>::iterator
 	fetch_last(size_t N);
 	
-	
+	/** TODO: Scan history interface.
+     There will probably need to be more methods for using the scan history.
+     It will build rather fast (about 4-5 scans/second), so we need to 
+     figure out how to deal will all that information backlog.
+     */
 };
 
 
