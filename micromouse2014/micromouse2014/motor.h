@@ -77,10 +77,23 @@ protected:
 public:
     motor(device_dir _motor, device_dir _encoder);
     
-    void set_speed(uint _val)
+    // Set speed as ratio of maximum
+    void set_speed(double _val)
     {
-        duty( ( double(_val)/double(UINT_MAX) )*motor_config::max_speed );
+        duty( _val * motor_config::max_speed );
     }
+    
+    // Get speed of motor as ratio of maximum
+    double get_speed();
+    
+    // Turn the motor on ; apply voltage 
+    void enable();
+    
+    // Turn the motor off; cost
+    void disable();
+    
+    // Check to see if the motor is enabled (true) or disabled
+    bool chk_en();
     
     
     
