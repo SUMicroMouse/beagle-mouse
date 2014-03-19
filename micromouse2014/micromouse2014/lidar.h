@@ -38,6 +38,12 @@ namespace lidar_config
     
     /// The full path to the UART terminal the LIDAR is connected to.
     constexpr char tty_path[]       = "/dev/tty01";
+    
+    /// The reference degrees for the distance measurements
+    constexpr uint degree_north     = 90;
+    constexpr uint degree_south     = 270;
+    constexpr uint degree_east      = 0;
+    constexpr uint degree_west      = 180;
 }
 
 

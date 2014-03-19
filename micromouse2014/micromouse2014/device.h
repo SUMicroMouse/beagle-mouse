@@ -19,11 +19,13 @@
 //#include <typeinfo>
 //#include <typeindex>
 
+#ifndef _WIN32
+
 #include <termios.h>
 #include <unistd.h> // UNIX standard function definitions
 #include <fcntl.h> // File control definitions
 
-
+#endif //_WIN32
 
 
 struct dev
