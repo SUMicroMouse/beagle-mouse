@@ -50,7 +50,7 @@ star::star()
 	// scan and update the maze
 	while (true)
 	{
-		scan();	headOnDistance = -1; // set headOnDistance to the packet that represents what is directly in front
+		scan();	headOnDistance = -1; // set headOnDistance to the average of the packets that represent what is directly in front. compensate with compass
 		updateMaze();
 		goForwardOne();
 		scan();	headOnDistance2 = -1;
@@ -517,19 +517,89 @@ void star::markWalls(wall &wallInQuestion, double &staticCoord, double &coordina
 // decision-making 
 int star::decide()
 {
-	// get the current cell in which the robot is located
-	cell * currentCell = findCell(xDistance, yDistance);
-	
+	double moveDistance;
+	cell *currentCell = findCell(xDistance, yDistance);
+
+	// Find the next upcoming junction *************************
+	char sourceDirection;
+	cell *cellPoint = getPointerToJunction(sourceDirection);
+
+		int rowDifference, columnDifference, difference;
+		// difference is either in columns or rows
+		rowDifference = abs(currentCell->row - cellPoint->row);		columnDifference = abs(currentCell->column - cellPoint->column);
+		if (rowDifference > 0)
+			difference = rowDifference;
+		else if (columnDifference > 0)
+			difference = columnDifference;
+
+	if (cellPoint->declareSidesOpen(sourceDirection))
+	{
+		// get to the middle of the junction, as in inside the junction itself
+		moveDistance = cellsize * difference;
+
+		/***** MOVE THIS MUCH *****/
+		for (int i = 0; i < moveDistance; i++)
+			goForwardOne();
+
+		// declare that we are at a junction. inside the junction. Don't scan. Turn first
+		atJunction = true;
+	}
+
 	if (atJunction == true)
 	{
+		// no need to turn, just check latest scan to see which sides are open
 
-
-
-
+		// READ SCAN
 
 	}
 	
 	return 0;
+}
+
+cell * star::getPointerToJunction(char &sourceDirection)
+{
+	// get the current cell in which the robot is located
+	cell * currentCell = findCell(xDistance, yDistance);
+	cell *cellPoint = currentCell;
+
+	//	Check the cells in front for 
+	//	where there's an upcoming junction
+	//
+	if ((compass > 315) && (compass < 45))
+	{ // facing west
+		do{
+			cellPoint = cellPoint->west;
+		} while (cellPoint->declareSidesOpen('e') == false);
+		sourceDirection = 'e';
+	}
+	else if ((compass > 45) && (compass < 135))
+	{ // default direction	
+		do{
+			cellPoint = cellPoint->north;
+		} while (cellPoint->declareSidesOpen('s') == false);
+		sourceDirection = 's';
+	}
+	else if ((compass > 135) && (compass < 225))
+	{ // facing east
+		do{
+			cellPoint = cellPoint->east;
+		} while (cellPoint->declareSidesOpen('w') == false);
+		sourceDirection = 'w';
+	}
+	else if ((compass > 225) && (compass < 315))
+	{ // facing south
+		do{
+			cellPoint = cellPoint->south;
+		} while (cellPoint->declareSidesOpen('n') == false);
+		sourceDirection = 'n';
+	}
+	else if ((compass == 45) || (compass == 135) || (compass == 225) || (compass == 315))
+	{
+		// hmmmm......
+		// possibly a turn instruction
+	}
+
+	return cellPoint;
 }
 
 void star::determineFromCost(cell &ce)

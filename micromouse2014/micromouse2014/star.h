@@ -92,10 +92,9 @@ class star
 	int startingRow, startingColumn;
 	double headOnDistance;
 	double headOnDistance2;
+
+	cell * getPointerToJunction(char &sourceDirection);
 	bool atJunction;
-
-
-	
 public:
 	star();
 

@@ -17,6 +17,8 @@
 struct data;
 struct packet;
 
+typedef unsigned int uint;
+
 /// Specific hard-coded values for the xv-11 LIDAR packet
 namespace packet_config
 {

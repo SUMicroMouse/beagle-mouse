@@ -362,3 +362,103 @@ void cell::figureToCost(double goalX, double goalY)
 
 	toCost = distance; // centimeters give a high number...
 }
+
+// return true if any sides other than the source side are open
+bool cell::declareSidesOpen(char sourceSide)
+{
+	/********** IF TWO ADDITIONAL SIDES ARE OPEN, NOT JUST ONE **********/
+	//
+		//
+		//
+	int count = 0;
+
+	switch (sourceSide)
+	{
+	case 'n':{	// north
+				 if (b_east == -1)
+					 count++;
+				 if (b_south == -1)
+					 count++;
+				 if (b_east == -1)
+					 count++;
+	}
+		break;
+	case 's':{	// south
+				 if (b_east == -1)
+					 count++;
+				 if (b_north == -1)
+					 count++;
+				 if (b_west == -1)
+					 count++;
+	}
+		break;
+	case 'e':{	// east
+				 if (b_north == -1)
+					 count++;
+				 if (b_south == -1)
+					 count++;
+				 if (b_west == -1)
+					 count++;
+	}
+		break;
+	case 'w':{	// west
+				 if (b_east == -1)
+					 count++;
+				 if (b_south == -1)
+					 count++;
+				 if (b_north == -1)
+					 count++;
+	}
+		break;
+	default:
+		break;
+	}
+
+	if (count > 0)
+		return true;
+	else
+		return false;
+}
+
+// return values of 1 for closed sides and -1 for open sides
+void cell::returnSides(int &north, int &south, int &east, int &west, char &sourceDirection)
+{
+	switch (sourceDirection)
+	{
+	case 'n':{
+				 south = b_south;
+				 east = b_east;
+				 west = b_west;
+				 // close off previous side
+				 north = 1;
+	}
+		break;
+	case 's':{
+				 north = b_north;
+				 east = b_east;
+				 west = b_west;
+				 // close off previous side
+				 south = 1;
+	}
+		break;
+	case 'e':{
+				 north = b_north;
+				 west = b_west;
+				 south = b_south;
+				 // close off previous side
+				 east = 1;
+	}
+		break;
+	case 'w':{
+				 north = b_north;
+				 east = b_east;
+				 south = b_south;
+				 // close off previous side
+				 west = 1;
+	}
+		break;
+
+	default:
+		break;
+	}
+}

@@ -64,8 +64,10 @@ public:
 	cell *	west;
 
 private:
-	// 0 = unknown. -1 = onfirmed, no wall. 1 = wall confirmed present
-	int	b_north; // b for boundary
+
+	// boundaries, confirmed/uncomfirmed
+	// 0 = unknown. -1 = confirmed, no wall. 1 = wall confirmed present
+	int	b_north; 
 	int	b_south;
 	int	b_east;
 	int	b_west;
@@ -99,6 +101,13 @@ public:
 	void markWalls(double x, double y, double sourceX, double sourceY);
 	void wallMark(int side, int mode);
 	void declareSideEmpty(double sourceX, double sourceY);
+
+	// return true if more than the source side is open
+	bool declareSidesOpen(char sourceSide);
+
+	// return a value of 1 for closed sides, -1 for open
+	void returnSides(int &north, int &south, int &east, int &west, char &sourceDirection);
+
 
 	int checked; // 1 = checked. 2 = has multiple paths...
 	bool deadend;
