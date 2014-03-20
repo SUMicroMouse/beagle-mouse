@@ -43,7 +43,6 @@ namespace motor_config
     };
     
     constexpr    uint max_period    = 10000000;
-    
     constexpr    uint max_speed     = max_period;
     
     enum{
