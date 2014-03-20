@@ -43,7 +43,6 @@ namespace motor_config
     };
     
     constexpr    uint max_period    = 10000000;
-    
     constexpr    uint max_speed     = max_period;
     
     enum{
@@ -85,6 +84,18 @@ public:
     
     // Get speed of motor as ratio of maximum
     double get_speed();
+    
+    /** Returns the angular position of the attached wheel.
+     *  The origin this arc is measured in reference to is unknown.
+     *  The distance units for this measurement are unknown.
+     *  With consistent movement CW or CCW, the position will increment
+        or decrement consistently upto an unknown (but very large) value,
+        at which point it will reset.
+     *  Clockwise (CW) may be associated with forward movement and an
+        increase in this value.
+     *  Do not rely heavily on this function.
+     */
+    size_t get_angular_position();
     
     // Turn the motor on ; apply voltage 
     void enable();
