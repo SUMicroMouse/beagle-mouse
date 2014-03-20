@@ -32,35 +32,5 @@ public:
     void    whatstheoppositeofadvance() { move_backward(CELL_SIZE);}
 };
 
-void turn_left(unsigned proxydegrees) // unsigned degrees may not work, using proxy variables
-{
-While(encoder_value < whatever_ammount)  // whatever_ammount is the right encoder value to make a 90 deg turn (to the left)
-{
-bool Left_Motor = FALSE;
-bool Right_Motor = TRUE;
-}
-}
 
-void	turn_right(  	unsigned proxydegrees)
-{
-while(encoder_value < whatever_ammount) // see turn_left comment
-{
-bool Left_Motor = TRUE;
-bool Right_Motor = FALSE;
-}
-}
-
-void move_forward( unsigned proxydegrees) //dead reckoning style 
-{
-signed int voltage = 5;
-bool Left_Motor = TRUE;
-bool Right_Motor = TRUE;
-}
-
-void move_backward( unsigned proxydegrees)
-{
-signed int voltage = -5;
-bool Left_Motor = TRUE;
-bool Right_Motor = TRUE;
-}
 #endif /* defined(__micromouse2014__robot__) */
