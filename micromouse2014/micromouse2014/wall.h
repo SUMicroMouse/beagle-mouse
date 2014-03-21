@@ -16,8 +16,12 @@
 
 #include "config.h"
 
-class wall{
+class star;
 
+class wall
+{
+    friend star;
+    
     double length;
     double viewAngle; // angle between the two vectors
     double leftAngle;

@@ -2,11 +2,15 @@
 
 using namespace std;
 
-class EasyDriver
+class nav
 {
 private:
 
 public:
+    void goForwardOne();
+    
+    void turn(double angle);
+    
 	//breaks the right motor, left motor moves forward 
 	void curveleft(float VR);
 	

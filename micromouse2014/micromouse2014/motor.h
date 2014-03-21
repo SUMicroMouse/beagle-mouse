@@ -12,6 +12,7 @@
 #include <iostream>
 //#include "device.h"
 #include "device.cpp"
+#include "gpio.h"
 
 class motor;
 class encoder;
@@ -55,6 +56,7 @@ namespace motor_config
 class motor
 {
     device_dir mtr_dev, enc_dev;
+    gpio enabler;
 protected:
     
 #define make_getter_setter(name)                                    \
@@ -68,10 +70,10 @@ protected:
     
 #undef  make_getter_setter
     
-    motor(motor_config::m_select i = motor_config::LEFT);
+    motor(motor_config::m_select);
     
 public:
-    motor(device_dir _motor, device_dir _encoder);
+    motor(device_dir _motor, device_dir _encoder, gpio _enabler);
     
     // Set speed as ratio of maximum
     void set_speed(double _val);

@@ -21,6 +21,7 @@ namespace gpio_config
     const std::string base_path[] =
     {
         "/sys/class/gpio/gpio69/"
+        "/sys/class/gpio/gpio74/"
     };
 
     const std::set<const std::string> attr =
@@ -30,23 +31,20 @@ namespace gpio_config
     };
 };
 
-class gpio
+struct gpio : device_dir
 {
-    device_dir pin;
-protected:
     
 #define make_getter_setter(name)                            \
-bool name(){      return pin[#name].gt(uint());    }        \
-void name(bool value){   pin[#name].st(value);     }        \
+bool name(){      return (*this)[#name].gt<uint>();    }    \
+void name(std::string val){   (*this)[#name].st(val);  }    \
 
     make_getter_setter(direction  )
     make_getter_setter(value      )
     
 #undef  make_getter_setter
     
-public:
-    gpio(): pin( gpio_config::base_path[0],gpio_config::attr ){}
-    
+    gpio(const std::string _path,
+         const std::set<const std::string> _attr);    
 };
 
 

@@ -6,10 +6,7 @@
 // Created at Syracuse University for the 2014 micromouse competition
 //
 
-#include "config.h"
-#include "lidar.h"
-#include "motor.h"
-
+#include "robot.h"
 
 
 int main(int argc, const char * argv[])

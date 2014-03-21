@@ -12,7 +12,9 @@ using namespace motor_config;
 
 motor::motor(m_select i):
 mtr_dev(mtr[i],motor_attr),
-enc_dev(enc[i],encoder_attr)
+enc_dev(enc[i],encoder_attr),
+enabler(gpio_config::base_path[i],
+        gpio_config::attr)
 {
     
 }
@@ -40,17 +42,20 @@ motor::get_angular_position()
 void 
 motor::enable()
 {
-    
+    enabler.direction("out");
+    enabler.value("1");
 }
 
 void 
 motor::disable()
 {
-    
+    enabler.direction("out");
+    enabler.value("0");
 }
 
 bool 
 motor::chk_en()
 {
-    
+    enabler.direction("in");
+    return enabler.value();
 }

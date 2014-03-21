@@ -11,14 +11,14 @@ dir_path(_base), dev_attr(_attr)
 }
 
 string
-device_dir::chk_name(const string& _name)
+device_dir::chk_name(const string & _name)
 {
     set<const string>::iterator it = dev_attr.find(_name);
     if(it != dev_attr.end()) return  *it;
     throw exception();
 }
 
-template <class _type>
+template <typename _type>
 void
 dev::st(_type val)
 {
@@ -32,9 +32,9 @@ dev::st(_type val)
     _f.close();
 }
 
-template <class _type>
+template <typename _type>
 _type
-dev::gt(_type)
+dev::gt()
 {
     ifstream _f;
     _f.open(dev_path);

@@ -17,29 +17,28 @@
 #include <string>
 
 
-#include "config.h"
-
 #include "grid.h"
 #include "wall.h"
 
-#include "packet.h"
+#include "robot.h"
 
-
-typedef
-std::vector<cell*> path;
-
-typedef
-std::vector<packet*> packets;
-
-typedef
-std::deque<wall*> walls;
-
-typedef
-std::vector<double> vect;
-
-typedef
-std::string string;
-
+namespace star_config
+{
+    typedef
+    std::vector<cell*> path;
+    
+    typedef
+    std::vector<packet*> packets;
+    
+    typedef
+    std::deque<wall*> walls;
+    
+    typedef
+    std::vector<double> vect;
+    
+    typedef
+    std::string string;   
+}
 
 
 /* This will simplify data input into 19 regions. 
@@ -52,44 +51,38 @@ class local_grid
 	std::vector<double> previous;
     
 public:
-	local_grid() { viewfinder.resize(90); previous.resize(90); }
+	local_grid(): viewfinder(90), previous(90){}
 
 	// takes the grid from the lidar scan and simplifies the data
-	void updateView(grid &fetched_scan, int &returnedLeft, int &returnedRight, double &returnedFront); 
+	void updateView(grid &fetched_scan,
+                    int &returnedLeft, 
+                    int &returnedRight,
+                    double &returnedFront       ); 
 };
 
 
 
 class star
 {
-	// size of cells
-	double lengthwidth;
-	double threshold;	// distance at which it's determined the side walls aren't there
-	double front_threshold; // about the length of a cell. 
-							// when it's determined that an open side is on the left/right, this says if there is a wall in front or not
 	grid maze;	
-	string direction; // direction that mouse is facing
-	double compass;
+    
+    robot rob;
+    
 	int rightTurns;
 	int leftTurns;
 	std::vector<cell *> traversed;
 
-	/************************* new ********************/
-	double xDistance, yDistance; // the current position of the robot
-	double shift; // represents the difference between the current compass heading and the default, which is 90 degrees
-	std::vector<packet*> vision;
-	std::deque<wall*> wallDeq;
-	int num_packets; // 90
-	std::vector<cell*> lat_headers; // rows
+    std::vector<cell*> lat_headers; // rows
 	std::vector<cell*> long_headers; // columns
-	int mazeSize;
-	double goalX;
-	double goalY;
-	int startingRow, startingColumn;
+	
+    _360_scan vision;
+	std::deque<wall*> wallDeq;
+    
+#define num_packets packet_config::index_range // 90
+
 	double headOnDistance;
 	double headOnDistance2;
 
-	cell * getPointerToJunction(char &sourceDirection);
 	bool atJunction;
     
     
@@ -97,25 +90,16 @@ public:
 	star();
 
 	// starting fresh
-	void scan(); // modifies local grid
-	void turn(double angle);
-	void createMaze(); // create the linked lists of cells, 16 by 16
-	void markGoalCells();
-	void addCell(cell &newcell);
-	cell *findCell(double x, double y);
-	cell *getCell(double row, double column);
-	int updateMaze();
-	void wallOrienter(wall &wallInQuestion, string &orientation, double &x_displacement, double &y_displacement, double distanceToWall);
-	void addBasedOnCompass(wall &wallInQuestion, string wallOrientation, double &x_displacement, double &y_displacement, double distanceToWall);
-	void markWalls(wall &wallInQuestion, double &staticCoord, double &coordinateAlongWall, string &xORy);
-	//void opposingWall();
+	void scan(); // modifies local grid	
+	
+		//void opposingWall();
 
 	// algorithm, decision-making
 	int decide();
 	void determineMovementCost(cell &ce);
 	void determineheuristicCost();
-	void goForwardOne();
-	void PositionChange();
+	
+	
 
 	// determining movementCost & heuristicCost
 	void breadthSearch();

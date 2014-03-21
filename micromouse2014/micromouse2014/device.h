@@ -38,10 +38,7 @@ struct dev
     void st(_type value);
     
     template<typename _type>
-    _type gt(_type);
-    
-    template<typename _type>
-    _type gt(){return gt(_type());}
+    _type gt();
     
 };
 

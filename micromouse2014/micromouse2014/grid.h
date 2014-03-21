@@ -15,9 +15,21 @@
 
 
 
-#include "config.h"
+#include "wall.h"
 #include "cell.h"
 
+namespace grid_config 
+{
+    /// The size of the maze in cells
+    const int MAZE_SIZE = 16;
+    
+
+	const int mazeSize;
+	double goalX, goalY;
+	int  startingRow =0, startingColumn=0;
+    
+
+}
 
 
 
@@ -38,6 +50,29 @@ class grid
 public:
 	grid();
 	grid(uint x_dim, uint y_dim);
+    
+    cell *getCell(double row, double column);
+    cell *findCell(double x, double y);
+    void addCell(cell &newcell);
+    void createMaze(); // create the linked lists of cells, 16 by 16
+	void markGoalCells();
+    
+    int  updateMaze(_360_scan wall_points);
+	void wallOrienter(wall &wallInQuestion, 
+                      std::string &orientation, 
+                      double &x_displacement, 
+                      double &y_displacement, 
+                      double distanceToWall     );
+	void addBasedOnCompass(wall &wallInQuestion, 
+                           std::string wallOrientation, 
+                           double &x_displacement, 
+                           double &y_displacement, 
+                           double distanceToWall    );
+	void markWalls(wall &wallInQuestion, 
+                   double &staticCoord, 
+                   double &coordinateAlongWall, 
+                   std::string &xORy        );
+
 	
 };
 
