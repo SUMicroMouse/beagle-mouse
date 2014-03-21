@@ -45,7 +45,7 @@ namespace motor_config
     constexpr    uint max_period    = 10000000;
     constexpr    uint max_speed     = max_period;
     
-    enum{
+    enum m_select{
         LEFT    = 0,
         RIGHT   = 1
     };
@@ -68,19 +68,13 @@ protected:
     
 #undef  make_getter_setter
     
-    motor(uint i = motor_config::LEFT):
-        mtr_dev(motor_config::mtr[i],motor_config::motor_attr),
-        enc_dev(motor_config::enc[i],motor_config::encoder_attr)
-    {}
+    motor(motor_config::m_select i = motor_config::LEFT);
     
 public:
     motor(device_dir _motor, device_dir _encoder);
     
     // Set speed as ratio of maximum
-    void set_speed(double _val)
-    {
-        duty( _val * motor_config::max_speed );
-    }
+    void set_speed(double _val);
     
     // Get speed of motor as ratio of maximum
     double get_speed();

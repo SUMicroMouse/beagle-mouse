@@ -7,12 +7,9 @@
 //
 
 #include "config.h"
-#include "cell.h"
-#include "grid.h"
 #include "lidar.h"
-#include "star.h"
-#include "sonar.h"
-#include "robot.h"
+#include "motor.h"
+
 
 
 int main(int argc, const char * argv[])
