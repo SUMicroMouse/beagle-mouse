@@ -5,13 +5,13 @@
 using namespace std;
 
 /********************     Directory Style Device       *********************/
-device_dir::device_dir(const string& _base, const set<const string>&  _attr):
+device_dir::device_dir(string _base, set<string>  _attr):
 dir_path(_base), dev_attr(_attr)
 {
 }
 
 string
-device_dir::chk_name(const string & _name)
+device_dir::chk_name(string  _name)
 {
     set<const string>::iterator it = dev_attr.find(_name);
     if(it != dev_attr.end()) return  *it;
@@ -49,14 +49,14 @@ dev::gt()
 }
 
 dev
-device_dir::operator[](const std::string& attr)
+device_dir::operator[](std::string _attr)
 {
     return dev(dir_path +"/"+ chk_name(attr));
 }
 
 
 /********************    Teletype Style Device        **********************/
-device_tty::device_tty(const std::string& _path):
+device_tty::device_tty(const std::string _path):
 tty_path (_path)
 {
     fd = open (tty_path.c_str(), O_RDWR | O_NOCTTY | O_SYNC | O_NONBLOCK );

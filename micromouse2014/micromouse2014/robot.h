@@ -17,6 +17,9 @@
 
 class robot
 {
+    lidar view;
+    nav navigator;
+    
     std::string direction; // direction that mouse is facing
 	double compass;
     double xDistance, yDistance; // the current position of the robot

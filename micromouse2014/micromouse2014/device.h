@@ -30,7 +30,7 @@
 
 struct dev
 {
-    dev(const std::string& _n):dev_path(_n){}
+    dev(std::string _n):dev_path(_n){}
     
     const std::string dev_path;
     
@@ -50,17 +50,17 @@ class device_dir
     std::string dir_path;
     // The device attribute(s) to be controlled.
     const
-    std::set<const std::string> dev_attr;
+    std::set<std::string> dev_attr;
     
 protected:
     friend dev;
-    std::string chk_name(const std::string & _name);
+    std::string chk_name(std::string  _name);
     
 public:
-	device_dir(const std::string& _base, 
-               const std::set<const std::string>&  _attr);
+	device_dir(std::string _base, 
+               std::set<std::string>  _attr);
     
-    dev operator[] (const std::string& attr);
+    dev operator[] (std::string _attr);
 
 };
 
@@ -79,7 +79,7 @@ protected:
     
 public:
     
-	device_tty(const std::string& _path);
+	device_tty(std::string _path);
     
 	template <typename _type>
     _type   rd_(size_t num);
