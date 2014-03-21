@@ -9,6 +9,7 @@
 #include "packet.h"
 #include "wall.h"
 #include <math.h>
+#include <iostream>
 
 #define cellsize 16
 bool deadend = false;
@@ -44,7 +45,7 @@ star::star()
 	// create the maze
 	createMaze();
 
-	/********* Give the cells their toCost, the estimated cost to the goal ******/
+	/********* Give the cells their heuristicCost, the estimated cost to the goal ******/
 
 
 	// scan and update the maze
@@ -153,6 +154,25 @@ void star::createMaze()
 	}
 }
 
+void star::markGoalCells()
+{
+	double row1, row2, column1, column2;
+	row1 = floor(mazeSize / 2);
+	row2 = row1 + 1;
+	column1 = floor(mazeSize / 2);
+	column2 = column1 + 1;
+
+	cell *cellP = getCell(row1, column1);
+		cellP->goalCell = true;
+	cellP = getCell(row1, column2);
+		cellP->goalCell = true;
+	cellP = getCell(row2, column1);
+		cellP->goalCell = true;
+	cellP = getCell(row2, column2);
+
+
+}
+
 void star::addCell(cell &newcell) // add in reverse...
 {
 	cell *adder;
@@ -219,6 +239,26 @@ cell *star::findCell(double x, double y)
 	}
 }
 
+// find the current cell based on the row/column
+cell * star::getCell(double row, double column)
+{
+	cell *point;
+	
+	int r = row;
+	int c = column;
+
+	for (int i = 0; i < mazeSize; i++)
+	{
+		point = lat_headers[i];
+		while (point != nullptr)
+		{
+			if ((point->column == c) && (point->row == r))
+				return point;
+
+			point = point->east;
+		}
+	}
+}
 
 /*********** movement **********/
 
@@ -309,6 +349,60 @@ int star::updateMaze()
 	}
 
 
+	// Add to cells the empty boundaries that must exist where it has been determined that there is no wall
+	cell *cellPoint = findCell(xDistance, yDistance);
+
+	if ((compass > 315) && (compass < 45))
+	{ // facing west
+		do{
+			cellPoint = cellPoint->west;
+
+			if (cellPoint->gNorth() == 0)
+				cellPoint->sNorth(-1);
+			if (cellPoint->gSouth() == 0)
+				cellPoint->sSouth(-1);
+		} while (cellPoint->gWest() != 1);
+	}
+	else if ((compass > 45) && (compass < 135))
+	{ // default direction	
+		do{
+			cellPoint = cellPoint->north;
+
+			if (cellPoint->gEast() == 0)
+				cellPoint->sEast(-1);
+			if (cellPoint->gWest() == 0)
+				cellPoint->sWest(-1);
+		} while (cellPoint->gNorth() != 1);
+	}
+	else if ((compass > 135) && (compass < 225))
+	{ // facing east
+		do{
+			cellPoint = cellPoint->east;
+
+			if (cellPoint->gNorth() == 0)
+				cellPoint->sNorth(-1);
+			if (cellPoint->gSouth() == 0)
+				cellPoint->sSouth(-1);
+		} while (cellPoint->gEast() != 1);
+	}
+	else if ((compass > 225) && (compass < 315))
+	{ // facing south
+		do{
+			cellPoint = cellPoint->south;
+
+			if (cellPoint->gEast() == 0)
+				cellPoint->sEast(-1);
+			if (cellPoint->gWest() == 0)
+				cellPoint->sWest(-1);
+
+		} while (cellPoint->gSouth() != 1);
+	}
+	else if ((compass == 45) || (compass == 135) || (compass == 225) || (compass == 315))
+	{
+		// hmmmm......
+	}
+
+
 
 	return 0;
 }
@@ -385,6 +479,7 @@ void star::wallOrienter(wall &wallInQuestion, string &orientation, double &x_dis
 }
 
 // take the info of the wall from wallOrienter and add it to the map of the maze
+// (calls markWalls)
 void star::addBasedOnCompass(wall &wallInQuestion, string wallOrientation, double &x_displacement, double &y_displacement, double distanceToWall)
 {
 	double x_wall, y_wall;
@@ -476,9 +571,10 @@ void star::addBasedOnCompass(wall &wallInQuestion, string wallOrientation, doubl
 	
 }
 
-// mark the walls of the cells along which the wall runs.
+// mark the walls of the cells along which the wall runs, and make mark of the empty walls
 // coordinateAlongWall: the coordinate along the wall is the one on which all the test points are based
 // xORy: x means x corresponds to the coordinateAlongWall. y means y corresponds to the coordinateAlongWall
+// - called by addBasedOnCompass
 void star::markWalls(wall &wallInQuestion, double &staticCoord, double &coordinateAlongWall, string &xORy) 
 {
 	//************* UPDATE **********************
@@ -514,24 +610,27 @@ void star::markWalls(wall &wallInQuestion, double &staticCoord, double &coordina
 
 }
 
-// decision-making 
+// decision-making at junctions. updates the map with new scans from the middle of the junction.
+// does a breadth search to guess which path is faster, and gives movement costs based on this search.
+// Then a breadth search from the goal to the current position is performed, updating the heuristic costs
 int star::decide()
 {
 	double moveDistance;
 	cell *currentCell = findCell(xDistance, yDistance);
 
-	// Find the next upcoming junction *************************
+	/******************* Find the next upcoming junction *************************/
 	char sourceDirection;
 	cell *cellPoint = getPointerToJunction(sourceDirection);
 
 		int rowDifference, columnDifference, difference;
 		// difference is either in columns or rows
-		rowDifference = abs(currentCell->row - cellPoint->row);		columnDifference = abs(currentCell->column - cellPoint->column);
+			rowDifference = abs(currentCell->row - cellPoint->row);		columnDifference = abs(currentCell->column - cellPoint->column);
 		if (rowDifference > 0)
 			difference = rowDifference;
 		else if (columnDifference > 0)
 			difference = columnDifference;
 
+	// An upcoming junction has been found; move to it
 	if (cellPoint->declareSidesOpen(sourceDirection))
 	{
 		// get to the middle of the junction, as in inside the junction itself
@@ -545,16 +644,96 @@ int star::decide()
 		atJunction = true;
 	}
 
+	
 	if (atJunction == true)
 	{
-		// no need to turn, just check latest scan to see which sides are open
-
+		// no need to turn, just check latest scan to see and update the grid even MORE
 		// READ SCAN
-
+		scan();
+		updateMaze();
 	}
+
+
+
+
+
+
+
 	
 	return 0;
 }
+
+void star::pushChildCellsToDeque(std::deque<cell*> &childCells)
+{
+
+}
+
+void star::breadthSearch()
+{
+	int countCost = 1; // the movement cost increments every time you get to a new set of children
+	cell *currentCell = findCell(xDistance, yDistance);
+	
+	
+	std::deque<cell*> childCells; // used for the breadth search, contains the current child cells. queue is not supported for some reason, so use in the same way. push_back, pop front
+
+
+
+	/********** CLEAR CELL VALUES ***********/
+
+
+
+
+
+	// look at child cells
+	cell *cellP = currentCell;
+	int north, south, east, west;
+	cellP->returnSides(north, south, east, west);
+
+
+	// add any cell as long as there's no wall between it and the current cell pointer
+	// add their movement costs
+	do{
+		if (north < 1)
+		{
+			cellP->north->movementCost = countCost;
+			cellP->north->sourceDirection = 'n';
+			childCells.push_back(cellP->north);
+		}
+		if (west < 1)
+		{
+			cellP->west->movementCost = countCost;
+			cellP->west->sourceDirection = 'w';
+			childCells.push_back(cellP->west);
+		}
+		if (south < 1)
+		{
+			cellP->south->movementCost = countCost;
+			cellP->south->sourceDirection = 's';
+			childCells.push_back(cellP->south);
+		}
+		if (east < 1)
+		{
+			if ()
+			cellP->east->movementCost = countCost;
+			cellP->east->sourceDirection = 'e';
+			childCells.push_back(cellP->east);
+		}
+
+		// move the pointer to one of the next child cells in the 'queue'
+		cellP = childCells.front();
+		childCells.pop_front(); // remove the child cell from the queue
+
+		// return the sides of the child cell excluding the source side
+		cellP->returnSides(north, south, east, west, cellP->sourceDirection);
+
+	} while (!cellP->goalCell);
+
+
+	//give the cells their new heuristic cost
+
+}
+
+
 
 cell * star::getPointerToJunction(char &sourceDirection)
 {
@@ -602,7 +781,7 @@ cell * star::getPointerToJunction(char &sourceDirection)
 	return cellPoint;
 }
 
-void star::determineFromCost(cell &ce)
+void star::determineMovementCost(cell &ce)
 {
 	cell * cellIt;
 	cellIt = findCell(0, 0);
@@ -611,7 +790,8 @@ void star::determineFromCost(cell &ce)
 
 }
 
-void star::determineToCost()
+// find the initial heuristic cost for all of the cells
+void star::determineheuristicCost()
 {
 	// it's okay to measure from the exact center rather than the range of the cell in the center
 	goalX = mazeSize * cellsize * 0.5;

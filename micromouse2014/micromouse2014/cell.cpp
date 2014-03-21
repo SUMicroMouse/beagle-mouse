@@ -11,6 +11,7 @@
 using namespace std;
 
 #define cellsize 16.0
+#define mazesize 16.0
 
 cell::cell()
 {
@@ -32,6 +33,8 @@ cell::cell(int r, int c)
 	b_south = 0;
 	b_east = 0;
 	b_west = 0;
+
+	goalCell = false;
 
 	x_center = (cellsize * column) + 0.5 * cellsize;
 	y_center = (cellsize * row) + 0.5 * cellsize;
@@ -305,6 +308,7 @@ void cell::markWalls(double x, double y, double sourceX, double sourceY)
 	declareSideEmpty(sourceX, sourceY);
 }
 
+//
 void cell::declareSideEmpty(double sourceX, double sourceY)
 {
 	double rightBound = x_center + 0.5 * cellsize;
@@ -353,14 +357,14 @@ void cell::declareSideEmpty(double sourceX, double sourceY)
 
 }
 
-// figure out the ToCost, which is simply based on the distance to the Goal.
-void cell::figureToCost(double goalX, double goalY)
+// figure out the heuristicCost, which is simply based on the distance to the Goal.
+void cell::figureheuristicCost(double goalX, double goalY)
 {
 	double distance;
 
 	distance = sqrt(((x_center - goalX) * (x_center - goalX)) + ((y_center - goalY) * (y_center - goalY)));
 
-	toCost = distance; // centimeters give a high number...
+	heuristicCost = distance; // centimeters give a high number...
 }
 
 // return true if any sides other than the source side are open
@@ -414,12 +418,19 @@ bool cell::declareSidesOpen(char sourceSide)
 		break;
 	}
 
-	if (count > 0)
+	if (count > 1)
 		return true;
 	else
 		return false;
 }
 
+void cell::returnSides(int &north, int &south, int &east, int &west)
+{
+	north = b_north;
+	south = b_south;
+	east = b_east;
+	west = b_west;
+}
 // return values of 1 for closed sides and -1 for open sides
 void cell::returnSides(int &north, int &south, int &east, int &west, char &sourceDirection)
 {
