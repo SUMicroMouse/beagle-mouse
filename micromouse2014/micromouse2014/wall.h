@@ -21,12 +21,12 @@ class star;
 class wall
 {
     friend star;
-    
-    double length;
-    double viewAngle; // angle between the two vectors
-    double leftAngle;
-    double rightAngle;
-    
+public:
+	double length;
+	double viewAngle; // angle between the two vectors
+	double leftAngle;
+	double rightAngle;
+
     // the measurements that helped create the wall
     double radiusLeft;
     double radiusRight;
@@ -44,6 +44,7 @@ public:
 	wall() { length = 0; }
 	wall(double difference) { length = difference; }
 	wall(double radius1, double radius2, double angle1, double angle2);
+	
 	
 };
 

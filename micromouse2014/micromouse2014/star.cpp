@@ -21,24 +21,24 @@ bool deadend = false;
 star::star()
 {
 	
-	direction = "north";
-	compass = 90; // starting position is 90 degrees, which will be "north". 0 degrees is to the left to match up with the lidar
-	shift = 0.0; // default position, so shift is 0 degrees
+	maze.direction = "north";
+	maze.compass = 90; // starting position is 90 degrees, which will be "north". 0 degrees is to the left to match up with the lidar
+	maze.shift = 0.0; // default position, so shift is 0 degrees
     
-	startingRow = 0;
-	startingColumn = 0;
+	maze.startingRow = 0;
+	maze.startingColumn = 0;
 	atJunction = false;
 
 
 	// The goal cell's attributes, assuming the goal is always the center
-	goalX = (mazeSize / 2) * cellsize;	// halfway through the maze, multiplied by the centimeters in each cell
-	goalY = goalX;
+	maze.goalX = (maze.mazeSize / 2) * cellsize;	// halfway through the maze, multiplied by the centimeters in each cell
+	maze.goalY = maze.goalX;
 
 	rightTurns = 0;
 	leftTurns = 0;
 
 	// create the maze
-	createMaze();
+	maze.createMaze();
 
 	/********* Give the cells their heuristicCost, the estimated cost to the goal ******/
 
@@ -47,11 +47,11 @@ star::star()
 	while (true)
 	{
 		scan();	headOnDistance = -1; // set headOnDistance to the average of the packets that represent what is directly in front. compensate with compass
-		updateMaze();
+		maze.updateMaze();
 		goForwardOne();
 		scan();	headOnDistance2 = -1;
-		updateMaze();
-		PositionChange();
+		maze.updateMaze();
+		rob.PositionChange();
 
 		decide(); // decide will check current spot, choose to go forward, left, right, blah blah
 	}
@@ -114,11 +114,11 @@ void star::scan()
 int star::decide()
 {
 	double moveDistance;
-	cell *currentCell = findCell(xDistance, yDistance);
+	cell *currentCell = maze.findCell(maze.xDistance, maze.yDistance);
 
 	/******************* Find the next upcoming junction *************************/
 	char sourceDirection;
-	cell *cellPoint = getPointerToJunction(sourceDirection);
+	cell *cellPoint = maze.getPointerToJunction(sourceDirection);
 
 		int rowDifference, columnDifference, difference;
 		// difference is either in columns or rows
@@ -148,7 +148,7 @@ int star::decide()
 		// no need to turn, just check latest scan to see and update the grid even MORE
 		// READ SCAN
 		scan();
-		updateMaze();
+		maze.updateMaze();
     }
 	return 0;
 }
@@ -161,9 +161,9 @@ void star::pushChildCellsToDeque(std::deque<cell*> &childCells)
 void star::breadthSearch()
 {
 	int countCost = 1; // the movement cost increments every time you get to a new set of children
-	cell *currentCell = findCell(xDistance, yDistance);
-	
-	
+	cell *currentCell = maze.findCell(maze.xDistance, maze.yDistance);
+
+
 	std::deque<cell*> childCells; // used for the breadth search, contains the current child cells. queue is not supported for some reason, so use in the same way. push_back, pop front
 
 
@@ -179,34 +179,46 @@ void star::breadthSearch()
 	int north, south, east, west;
 	cellP->returnSides(north, south, east, west);
 
+	int i = 1;
 
 	// add any cell as long as there's no wall between it and the current cell pointer
 	// add their movement costs
 	do{
 		if (north < 1)
 		{
-			cellP->north->movementCost = countCost;
-			cellP->north->sourceDirection = 'n';
-			childCells.push_back(cellP->north);
+			if (!cellP->north->goalCell)
+			{
+				cellP->north->movementCost = countCost;
+				cellP->north->sourceDirection = 'n';
+				childCells.push_back(cellP->north);
+			}
 		}
 		if (west < 1)
 		{
-			cellP->west->movementCost = countCost;
-			cellP->west->sourceDirection = 'w';
-			childCells.push_back(cellP->west);
+			if (!cellP->west->goalCell)
+			{
+				cellP->west->movementCost = countCost;
+				cellP->west->sourceDirection = 'w';
+				childCells.push_back(cellP->west);
+			}
 		}
 		if (south < 1)
 		{
-			cellP->south->movementCost = countCost;
-			cellP->south->sourceDirection = 's';
-			childCells.push_back(cellP->south);
+			if (!cellP->south->goalCell)
+			{
+				cellP->south->movementCost = countCost;
+				cellP->south->sourceDirection = 's';
+				childCells.push_back(cellP->south);
+			}
 		}
 		if (east < 1)
 		{
-			if ()
-			cellP->east->movementCost = countCost;
-			cellP->east->sourceDirection = 'e';
-			childCells.push_back(cellP->east);
+			if (!cellP->east->goalCell)
+			{
+				cellP->east->movementCost = countCost;
+				cellP->east->sourceDirection = 'e';
+				childCells.push_back(cellP->east);
+			}
 		}
 
 		// move the pointer to one of the next child cells in the 'queue'
@@ -216,19 +228,137 @@ void star::breadthSearch()
 		// return the sides of the child cell excluding the source side
 		cellP->returnSides(north, south, east, west, cellP->sourceDirection);
 
-	} while (!cellP->goalCell);
+		i++;
+	} while ((i < ((maze.mazeSize*maze.mazeSize) - 4)));	// do every cell except the goal cell
 
 
-	//give the cells their new heuristic cost
+	//give the cells their new heuristic cost *************************
+	// WORKING from the goal to the current position
+
+	// look at child cells
+	cellP = maze.findClosestGoalCell(cellP->x_center, cellP->y_center);
+	int north, south, east, west;
+	cellP->returnSides(north, south, east, west);
+
+	countCost = 1;
+	i = 1;
+
+	// add any cell as long as there's no wall between it and the current cell pointer
+	// add their movement costs
+	do{
+		if (north < 1)
+		{
+			if (!cellP->north->goalCell)
+			{
+				cellP->north->heuristicCost = countCost;
+				cellP->north->sourceDirection = 'n';
+				childCells.push_back(cellP->north);
+			}
+		}
+		if (west < 1)
+		{
+			if (!cellP->west->goalCell)
+			{
+				cellP->west->heuristicCost = countCost;
+				cellP->west->sourceDirection = 'w';
+				childCells.push_back(cellP->west);
+			}
+		}
+		if (south < 1)
+		{
+			if (!cellP->south->goalCell)
+			{
+				cellP->south->heuristicCost = countCost;
+				cellP->south->sourceDirection = 's';
+				childCells.push_back(cellP->south);
+			}
+		}
+		if (east < 1)
+		{
+			if (!cellP->east->goalCell)
+			{
+				cellP->east->heuristicCost = countCost;
+				cellP->east->sourceDirection = 'e';
+				childCells.push_back(cellP->east);
+			}
+		}
+
+		// move the pointer to one of the next child cells in the 'queue'
+		cellP = childCells.front();
+		childCells.pop_front(); // remove the child cell from the queue
+
+		// return the sides of the child cell excluding the source side
+		cellP->returnSides(north, south, east, west, cellP->sourceDirection);
+
+		i++;
+	} while ((i < ((maze.mazeSize*maze.mazeSize) - 4)));	// do every cell except the current cell
+
+
+
+
+
+
+
+	/********* depth search ***********/
+
+
+
+
 
 }
 
+int star::depthSearch(cell &sender, cell &current, std::stack<cell*> &tempStack, std::deque<cell*> &path)
+{
+	// start at current cell once again
+	cell *cellP = maze.findCell(maze.xDistance, maze.yDistance);
+	cell *closestGoalCell = maze.findClosestGoalCell(cellP->x_center, cellP->y_center);
 
+	// prepare to check walls
+	int north, south, east, west;
+
+	std::stack<cell*> tempStack;
+
+	double x = cellP->x_center - closestGoalCell->x_center;
+	double y = cellP->y_center - closestGoalCell->y_center;
+	double distance = sqrt((x*x) + (y*y));
+
+	cellP->returnSides(north, south, east, west);
+
+	if (north < 1)
+	{
+		if (!cellP->north->goalCell)
+		{
+			tempStack.push(cellP->north);
+		}
+	}
+	if (south < 1)
+	{
+		if (!cellP->south->goalCell)
+		{
+			tempStack.push(cellP->south);
+		}
+	}
+	if (east < 1)
+	{
+		if (!cellP->east->goalCell)
+		{
+			tempStack.push(cellP->east);
+		}
+	}
+	if (west < 1)
+	{
+		if (!cellP->west->goalCell)
+		{
+			tempStack.push(cellP->west);
+		}
+	}
+
+}
 
 void star::determineMovementCost(cell &ce)
 {
 	cell * cellIt;
-	cellIt = findCell(0, 0);
+	cellIt = maze.findCell(0, 0);
 
 
 
@@ -238,8 +368,8 @@ void star::determineMovementCost(cell &ce)
 void star::determineheuristicCost()
 {
 	// it's okay to measure from the exact center rather than the range of the cell in the center
-	goalX = mazeSize * cellsize * 0.5;
-	goalY = goalX;
+	maze.goalX = maze.mazeSize * cellsize * 0.5;
+	maze.goalY = maze.goalX;
 
 
 }

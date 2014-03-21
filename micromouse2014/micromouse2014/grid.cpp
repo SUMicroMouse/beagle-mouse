@@ -7,12 +7,13 @@
 //
 
 #include "grid.h"
+#include "wall.h"
 
 using namespace std;
 
 grid::grid():
-axis_x(*new vector<vector<cell*>>(1,vector<cell*>(1, nullptr))),
-axis_y(*new vector<vector<cell*>>(1,vector<cell*>(1, nullptr)))
+lat_headers(*new vector<vector<cell*>>(1,vector<cell*>(1, nullptr))),
+long_headers(*new vector<vector<cell*>>(1,vector<cell*>(1, nullptr)))
 {
     origin = goal = center = nullptr;
 }
@@ -40,7 +41,7 @@ grid::getCell(double row, double column)
 }
 
 // create a maze with a coordinates that start in the bottom left
-void star::createMaze()
+void grid::createMaze()
 {
 	lat_headers.resize(mazeSize);
 	long_headers.resize(mazeSize);
@@ -56,7 +57,7 @@ void star::createMaze()
 	}
 }
 
-void star::markGoalCells()
+void grid::markGoalCells()
 {
 	double row1, row2, column1, column2;
 	row1 = floor(mazeSize / 2);
@@ -75,7 +76,7 @@ void star::markGoalCells()
     
 }
 
-void star::addCell(cell &newcell) // add in reverse...
+void grid::addCell(cell &newcell) // add in reverse...
 {
 	cell *adder;
 	adder = lat_headers[mazeSize - (newcell.row + 1)]; // reverse
@@ -118,7 +119,7 @@ void star::addCell(cell &newcell) // add in reverse...
 }
 
 // find the current cell based on the coordinates in centimeters
-cell *star::findCell(double x, double y)
+cell *grid::findCell(double x, double y)
 {
 	double rtemp = y / cellsize;
 	double ctemp = x / cellsize;
@@ -144,7 +145,7 @@ cell *star::findCell(double x, double y)
 
 // get the wall's orientation relative to the robot's field of vision
 // called by updateMaze
-void star::wallOrienter(wall &wallInQuestion, string &orientation, double &x_displacement, double &y_displacement, double distanceToWall)
+void grid::wallOrienter(wall &wallInQuestion, string &orientation, double &x_displacement, double &y_displacement, double distanceToWall)
 {
 	// only five possibilities
 	double angle;
@@ -215,7 +216,7 @@ void star::wallOrienter(wall &wallInQuestion, string &orientation, double &x_dis
 
 // take the info of the wall from wallOrienter and add it to the map of the maze
 // (calls markWalls)
-void star::addBasedOnCompass(wall &wallInQuestion, string wallOrientation, double &x_displacement, double &y_displacement, double distanceToWall)
+void grid::addBasedOnCompass(wall &wallInQuestion, string wallOrientation, double &x_displacement, double &y_displacement, double distanceToWall)
 {
 	double x_wall, y_wall;
 	string xx = "x";
@@ -310,7 +311,7 @@ void star::addBasedOnCompass(wall &wallInQuestion, string wallOrientation, doubl
 // coordinateAlongWall: the coordinate along the wall is the one on which all the test points are based
 // xORy: x means x corresponds to the coordinateAlongWall. y means y corresponds to the coordinateAlongWall
 // - called by addBasedOnCompass
-void star::markWalls(wall &wallInQuestion, double &staticCoord, double &coordinateAlongWall, string &xORy) 
+void grid::markWalls(wall &wallInQuestion, double &staticCoord, double &coordinateAlongWall, string &xORy) 
 {
 	//************* UPDATE **********************
 	// The string is actually not needed. When this function is called in "addBasedOnCompass", the x and y coordinates are switched depending on the situation
@@ -344,3 +345,63 @@ void star::markWalls(wall &wallInQuestion, double &staticCoord, double &coordina
     
     
 }
+
+cell * grid::getPointerToJunction(char &sourceDirection)
+{
+	// get the current cell in which the robot is located
+	cell * currentCell = findCell(xDistance, yDistance);
+	cell *cellPoint = currentCell;
+
+	//	Check the cells in front for 
+	//	where there's an upcoming junction
+	//
+	if ((compass > 315) && (compass < 45))
+	{ // facing west
+		do{
+			cellPoint = cellPoint->west;
+		} while (cellPoint->declareSidesOpen('e') == false);
+		sourceDirection = 'e';
+	}
+	else if ((compass > 45) && (compass < 135))
+	{ // default direction	
+		do{
+			cellPoint = cellPoint->north;
+		} while (cellPoint->declareSidesOpen('s') == false);
+		sourceDirection = 's';
+	}
+	else if ((compass > 135) && (compass < 225))
+	{ // facing east
+		do{
+			cellPoint = cellPoint->east;
+		} while (cellPoint->declareSidesOpen('w') == false);
+		sourceDirection = 'w';
+	}
+	else if ((compass > 225) && (compass < 315))
+	{ // facing south
+		do{
+			cellPoint = cellPoint->south;
+		} while (cellPoint->declareSidesOpen('n') == false);
+		sourceDirection = 'n';
+	}
+	else if ((compass == 45) || (compass == 135) || (compass == 225) || (compass == 315))
+	{
+		// hmmmm......
+		// possibly a turn instruction
+	}
+
+	return cellPoint;
+}
+
+cell * grid::findClosestGoalCell(double x, double y)
+{
+
+}
+
+bool grid::closeEnough(double angle1, double angle2)
+{
+	if (abs(angle2 - angle1) <= 1.0)
+		return true;
+	else
+		return false;
+}
+

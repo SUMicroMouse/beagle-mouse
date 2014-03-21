@@ -40,13 +40,12 @@ class grid
     // A pair of axis intercepts for each cell element
     // The intercept is a line of cell references
 	// It should not be assumed that these are cartesian coordinates
-	std::vector<std::vector<cell*>>	axis_x;
-	std::vector<std::vector<cell*>>	axis_y;
+	std::vector<cell*> lat_headers; // rows
+	std::vector<cell*> long_headers; // columns
 	
 	cell	*	origin;
 	cell	*	goal;
 	cell	*	center;
-	
 public:
 	grid();
 	grid(uint x_dim, uint y_dim);
@@ -72,6 +71,21 @@ public:
                    double &staticCoord, 
                    double &coordinateAlongWall, 
                    std::string &xORy        );
+	cell *getPointerToJunction(char &sourceDirection);
+	cell *findClosestGoalCell(double x, double y);
+	bool closeEnough(double angle1, double angle2);
+
+	double mazeSize;
+	double cellsize;
+	double compass;
+	double xDistance, yDistance;
+	double goalX, goalY;
+
+	// probably not needed
+	string direction;
+	double shift;
+	startingRow;
+	startingColumn;
 
 	
 };
