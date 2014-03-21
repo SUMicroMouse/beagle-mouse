@@ -10,7 +10,7 @@
 #define __micromouse2014__cell__
 
 #include <iostream>
-
+#include <cmath>
 
 #include "config.h"
 
@@ -54,7 +54,7 @@ std::string string;
  */
 class cell
 {
-public:
+
 	int row; // lat
 	int column; // long
 
@@ -63,7 +63,14 @@ public:
 	cell *	east;
 	cell *	west;
 
-private:
+    
+	int checked; // 1 = checked. 2 = has multiple paths...
+	bool deadend;
+	bool finish;
+    
+	double movementCost; // cost from the origin
+	double heuristicCost; // estimated cost to the goal
+
 
 	// boundaries, confirmed/uncomfirmed
 	// 0 = unknown. -1 = confirmed, no wall. 1 = wall confirmed present
@@ -76,7 +83,12 @@ private:
 	bool state; // used to determine if the path is open or closed (already tried or not)
 
 	double x_center, y_center;
-	
+    
+    /******** goal cells *********/
+	bool goalCell;
+    
+	char sourceDirection; // used for breadth search, so as not to go backward
+
 public:
 	cell();
 	cell(int r, int c);
@@ -110,17 +122,6 @@ public:
 	void returnSides(int &north, int &south, int &east, int &west, char &sourceDirection);
 
 
-	int checked; // 1 = checked. 2 = has multiple paths...
-	bool deadend;
-	bool finish;
-
-	double movementCost; // cost from the origin
-	double heuristicCost; // estimated cost to the goal
-
-	/******** goal cells *********/
-	bool goalCell;
-
-	char sourceDirection; // used for breadth search, so as not to go backward
 
 	void figureheuristicCost(double goalX, double goalY);
 };
