@@ -41,10 +41,6 @@ typedef
 std::string string;
 
 
-// contains 
-class item{
-
-};
 
 /* This will simplify data input into 19 regions. 
 The angle of the data from the lidar will determine the position in viewfinder, 
@@ -72,18 +68,11 @@ class star
 	double front_threshold; // about the length of a cell. 
 							// when it's determined that an open side is on the left/right, this says if there is a wall in front or not
 	grid maze;	
-//	path to_orig;
-//	path guess;
 	string direction; // direction that mouse is facing
 	double compass;
 	int rightTurns;
 	int leftTurns;
 	std::vector<cell *> traversed;
-// old
-	///*********** Local Grid ************/
-//    int leftFromViewfinder;       // will get the region that the open space (to the left) is currently at in relation to the lidar
-//    int rightFromViewfinder;      // will get the region that the open space (to the right) is currently at in relation to the lidar
-//    double frontFromViewfinder;   // gets the distance of the region directly in front
 
 	/************************* new ********************/
 	double xDistance, yDistance; // the current position of the robot
