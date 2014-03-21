@@ -11,6 +11,7 @@
 
 #include <iostream>
 
+#include <cmath>
 
 #include "config.h"
 
@@ -54,7 +55,7 @@ std::string string;
  */
 class cell
 {
-public:
+
 	int row; // lat
 	int column; // long
 
@@ -63,7 +64,12 @@ public:
 	cell *	east;
 	cell *	west;
 
-private:
+    int checked; // 1 = checked. 2 = has multiple paths...
+	bool deadend;
+	bool finish;
+    
+	double fromCost; // cost from the origin
+	double toCost; // estimated cost to the goal
 
 	// boundaries, confirmed/uncomfirmed
 	// 0 = unknown. -1 = confirmed, no wall. 1 = wall confirmed present
@@ -85,16 +91,16 @@ public:
 	//cell(cell & _adj, direction _dir);
 	
 	void set_adjacent(cell & _adj);
+    
+	void sNorth(bool g) { b_north = g;  }
+	void sSouth(bool g) { b_south = g;  }
+	void sEast(bool g)  { b_east = g;   }
+	void sWest(bool g)  { b_west = g;   }
 
-	void sNorth(bool g) { b_north = g; }
-	void sSouth(bool g) { b_south = g; }
-	void sEast(bool g) { b_east = g; }
-	void sWest(bool g) { b_west = g; }
-
-	int gNorth() { return b_north; }
-	int gSouth() { return b_south; }
-	int gEast() { return b_east; }
-	int gWest() { return b_west; }
+	int gNorth() { return b_north;  }
+	int gSouth() { return b_south;  }
+	int gEast()  { return b_east;   }
+	int gWest()  { return b_west;   }
 
 	void markSourceDirection(string direction);
 	void checkVirtualSides(int &left, int &right, int &front, string direction);
@@ -109,12 +115,7 @@ public:
 	void returnSides(int &north, int &south, int &east, int &west, char &sourceDirection);
 
 
-	int checked; // 1 = checked. 2 = has multiple paths...
-	bool deadend;
-	bool finish;
 
-	double fromCost; // cost from the origin
-	double toCost; // estimated cost to the goal
 
 	void figureToCost(double goalX, double goalY);
 };

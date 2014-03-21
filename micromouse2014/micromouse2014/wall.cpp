@@ -1,3 +1,11 @@
+//
+//  wall.cpp
+//  micromouse2014
+//
+//  Created by Lyle Moffitt on 1/21/14.
+//  Copyright (c) 2014 Lyle Moffitt. All rights reserved.
+//
+
 #include "wall.h"
 #include <math.h>
 
@@ -27,3 +35,4 @@ wall::wall(double radius1, double radius2, double angle1, double angle2)
 	yBegin = -1;
 	yEnd = -1;
 }
+

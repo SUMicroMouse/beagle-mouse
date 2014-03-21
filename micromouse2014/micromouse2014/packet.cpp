@@ -48,7 +48,7 @@ chksum(_v[21]<<8 | _v[20]),
 p_time(std::chrono::system_clock::now())
 {
     // Calculate the speed
-    int16_t b,a =( _v[2]<<8 | _v[3] );
+    int16_t b=0,a =( _v[2]<<8 | _v[3] );
     for (uint16_t _u = 0x0001; _u&0xFFFF; _u<<=1){ b= (b<<1) + (_u & a); }
     speed 	= double(b) / 64.0;
     

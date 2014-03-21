@@ -335,7 +335,7 @@ void cell::declareSideEmpty(double sourceX, double sourceY)
 	}
 	else
 	{	// closer to right wall
-		if (closerTo(topBound, bottomBound, y))
+		if (closerTo(topBound, bottomBound, sourceY))
 		{	// closer to top wall
 			if (abs(rightBound - sourceX) < abs(topBound - sourceY))	
 				wallMark(4, -1);
