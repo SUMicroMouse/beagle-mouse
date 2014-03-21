@@ -36,6 +36,7 @@ std::vector<double> vect;
 typedef
 std::string string;
 
+
 // contains 
 class item{
 
@@ -103,8 +104,10 @@ public:
 	void scan(); // modifies local grid
 	void turn(double angle);
 	void createMaze(); // create the linked lists of cells, 16 by 16
+	void markGoalCells();
 	void addCell(cell &newcell);
 	cell *findCell(double x, double y);
+	cell *getCell(double row, double column);
 	int updateMaze();
 	void wallOrienter(wall &wallInQuestion, string &orientation, double &x_displacement, double &y_displacement, double distanceToWall);
 	void addBasedOnCompass(wall &wallInQuestion, string wallOrientation, double &x_displacement, double &y_displacement, double distanceToWall);
@@ -113,10 +116,14 @@ public:
 
 	// algorithm, decision-making
 	int decide();
-	void determineFromCost(cell &ce);
-	void determineToCost();
+	void determineMovementCost(cell &ce);
+	void determineheuristicCost();
 	void goForwardOne();
 	void PositionChange();
+
+	// determining movementCost & heuristicCost
+	void breadthSearch();
+	void pushChildCellsToDeque(std::deque<cell*> &childCells);
 };
 
 #endif /* defined(__micromouse2014__star__) */

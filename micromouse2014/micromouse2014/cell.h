@@ -86,10 +86,10 @@ public:
 	
 	void set_adjacent(cell & _adj);
 
-	void sNorth(bool g) { b_north = g; }
-	void sSouth(bool g) { b_south = g; }
-	void sEast(bool g) { b_east = g; }
-	void sWest(bool g) { b_west = g; }
+	void sNorth(int g) { b_north = g; }
+	void sSouth(int g) { b_south = g; }
+	void sEast(int g) { b_east = g; }
+	void sWest(int g) { b_west = g; }
 
 	int gNorth() { return b_north; }
 	int gSouth() { return b_south; }
@@ -106,6 +106,7 @@ public:
 	bool declareSidesOpen(char sourceSide);
 
 	// return a value of 1 for closed sides, -1 for open
+	void returnSides(int &north, int &south, int &east, int &west);
 	void returnSides(int &north, int &south, int &east, int &west, char &sourceDirection);
 
 
@@ -113,10 +114,15 @@ public:
 	bool deadend;
 	bool finish;
 
-	double fromCost; // cost from the origin
-	double toCost; // estimated cost to the goal
+	double movementCost; // cost from the origin
+	double heuristicCost; // estimated cost to the goal
 
-	void figureToCost(double goalX, double goalY);
+	/******** goal cells *********/
+	bool goalCell;
+
+	char sourceDirection; // used for breadth search, so as not to go backward
+
+	void figureheuristicCost(double goalX, double goalY);
 };
 
 
