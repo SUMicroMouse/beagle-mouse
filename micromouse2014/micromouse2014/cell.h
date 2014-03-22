@@ -56,7 +56,7 @@ class cell
     
 	double movementCost; // cost from the origin
 	double heuristicCost; // estimated cost to the goal
-
+	double sum;
 
 	// boundaries, confirmed/uncomfirmed
 	// 0 = unknown. -1 = confirmed, no wall. 1 = wall confirmed present
@@ -109,7 +109,7 @@ public:
 	void returnSides(int &north, int &south, int &east, int &west, 
                      char &sourceDirection);
 
-
+	double returnSum() { return sum; }
 
 	void figureheuristicCost(double goalX, double goalY);
 };

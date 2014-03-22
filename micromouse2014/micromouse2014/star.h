@@ -60,7 +60,13 @@ public:
                     double &returnedFront       ); 
 };
 
+class path{
+public:
+	path();
 
+	int in_path_walls;
+	int adjacent_walls;
+};
 
 class star
 {
@@ -103,7 +109,7 @@ public:
 
 	// determining movementCost & heuristicCost
 	void breadthSearch();
-	int depthSearch(cell &sender, cell &current, std::stack<cell*> &tempStack, std::deque<cell*> &path);
+	int depthSearch(cell &sender, cell &current, std::stack<cell*> &tempStack, std::deque<cell*> &path, std::deque<cell*> &pathUnknown, int &unknownSides, int mode);
 	void pushChildCellsToDeque(std::deque<cell*> &childCells);
 };
 
