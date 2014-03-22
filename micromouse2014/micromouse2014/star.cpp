@@ -309,8 +309,7 @@ void star::breadthSearch()
 
 	/********* depth search ***********/
 
-	// start at current cell once again
-	cell *cellP = maze.findCell(maze.xDistance, maze.yDistance);
+	
 	int unknownSides = 0;
 
 
@@ -319,13 +318,15 @@ void star::breadthSearch()
 
 // mode 1 = go with the "known" path
 // mode 2 = go with the "unknown" path
-int star::depthSearch(cell &sender, cell &current, std::stack<cell*> &tempStack, std::deque<cell*> &pathKnown, std::deque<cell*> &pathUnknown, int &unknownSides, int mode)
+int star::depthSearch(cell &sender, std::stack<cell*> &tempStack, std::deque<cell*> &pathKnown, std::deque<cell*> &pathUnknown, int &unknownSides, int mode)
 {
+	// start at current cell once again
+	cell *current = maze.findCell(maze.xDistance, maze.yDistance);
 	// prepare to check walls
 	int north, south, east, west;
 
 	// check for dead end. if it's a dead end, return
-	current.returnSides(north, south, east, west);
+	current->returnSides(north, south, east, west);
 	int walls = north + south + east + west;
 	if (walls >= 3)
 		return -1;	// dead end
@@ -347,9 +348,9 @@ int star::depthSearch(cell &sender, cell &current, std::stack<cell*> &tempStack,
 	std::stack<cell*> tempStack;
 	int result;
 
-	cell *closestGoalCell = maze.findClosestGoalCell(current.x_center, current.y_center);
-	double x = current.x_center - closestGoalCell->x_center;
-	double y = current.y_center - closestGoalCell->y_center;
+	cell *closestGoalCell = maze.findClosestGoalCell(current->x_center, current->y_center);
+	double x = current->x_center - closestGoalCell->x_center;
+	double y = current->y_center - closestGoalCell->y_center;
 	double distance = sqrt((x*x) + (y*y));
 	//if (distance < cellsize) // if they're the same, or close to it...
 	//{
@@ -359,48 +360,94 @@ int star::depthSearch(cell &sender, cell &current, std::stack<cell*> &tempStack,
 	double lowestSum;
 	cell *lowestNeighbor; // add the neighbor with the lowest sum to the path
 
+	/***** container for the possible paths *****/
+	vector<path*> possiblePaths;
+
 	switch (mode)
 	{
 	case 1:{	// go with the known path
-			   while (true)
+			   
+			   if (north < 1)
 			   {
+				   if (current->north->returnSum() <= current->returnSum()) // a dead end will have a sum greater than the current cell
+				   {
+					   path *p1 = new path();
+					   cell *c1;
+					   
+					   while (true)
+					   {	// go to the child cells and add cells with the same sum to the path
+						   c1 = nextCellinPath(*current);
+						   if (c1->goalCell)
+						   {
 
+						   }
+
+					   }
+
+					   possiblePaths.push_back(p1);
+				   }
 			   }
+			   if (south < 1)
+			   {
+				   if (current->south->returnSum() <= current->returnSum()) // a dead end will have a sum greater than the current cell
+				   {
+					   path *p2 = new path();
+					   possiblePaths.push_back(p2);
+				   }
+			   }
+			   if (east < 1)
+			   {
+				   if (current->east->returnSum() <= current->returnSum()) // a dead end will have a sum greater than the current cell
+				   {
+					   path *p3 = new path();
+					   possiblePaths.push_back(p3);
+				   }
+			   }
+			   if (west < 1)
+			   {
+				   if (current->west->returnSum() <= current->returnSum()) // a dead end will have a sum greater than the current cell
+				   {
+					   path *p4 = new path();
+					   possiblePaths.push_back(p4);
+				   }
+			   }
+
+
 
 			   int confirmedSides = 0;
 			   if (north == -1)
 			   {
-				   if (!current.north->goalCell)
+				   if (!current->north->goalCell)
 				   {
-					   lowestSum = current.north->returnSum();
-					   lowestNeighbor = current.north;
+					   lowestSum = current->north->returnSum();
+					   lowestNeighbor = current->north;
 					   confirmedSides++;
 				   }
 			   }
 			   if (south == -1)
 			   {
-				   if (!current.south->goalCell)
+				   if (!current->south->goalCell)
 				   {
-					   if (current.south->returnSum() <= lowestSum)
-						   lowestNeighbor = current.south;
+					   if (current->south->returnSum() <= lowestSum)
+						   lowestNeighbor = current->south;
 					   confirmedSides++;
 				   }
 			   }
 			   if (east == -1)
 			   {
-				   if (!current.east->goalCell)
+				   if (!current->east->goalCell)
 				   {
-					   if (current.east->returnSum() <= lowestSum)
-						   lowestNeighbor = current.east;
+					   if (current->east->returnSum() <= lowestSum)
+						   lowestNeighbor = current->east;
 					   confirmedSides++;
 				   }
 			   }
 			   if (west == -1)
 			   {
-				   if (!current.west->goalCell)
+				   if (!current->west->goalCell)
 				   {
-					   if (current.west->returnSum() <= lowestSum)
-						   lowestNeighbor = current.west;
+					   if (current->west->returnSum() <= lowestSum)
+						   lowestNeighbor = current->west;
 					   confirmedSides++;
 				   }
 			   }
@@ -412,48 +459,48 @@ int star::depthSearch(cell &sender, cell &current, std::stack<cell*> &tempStack,
 			   pathKnown.push_back(lowestNeighbor);
 
 			   // search through this child element
-			   result = depthSearch(current, *current.north, tempStack, pathKnown, pathUnknown, unknownSides, mode);
+			   result = depthSearch(current, *current->north, tempStack, pathKnown, pathUnknown, unknownSides, mode);
 
 	}	break;
 	case 2:{	// go with the unknown path
 			   if (north < 1)
 			   {
-				   if (!current.north->goalCell)
+				   if (!current->north->goalCell)
 				   {
-					   tempStack.push(current.north);
+					   tempStack.push(current->north);
 
 					   // search through this child element
-					   result = depthSearch(current, *current.north, tempStack, pathKnown, pathUnknown, unknownSides, mode);
+					   result = depthSearch(current, *current->north, tempStack, pathKnown, pathUnknown, unknownSides, mode);
 				   }
 			   }
 			   if (south < 1)
 			   {
-				   if (!current.south->goalCell)
+				   if (!current->south->goalCell)
 				   {
-					   tempStack.push(current.south);
+					   tempStack.push(current->south);
 
 					   // search through this child element
-					   result = depthSearch(current, *current.south, tempStack, pathKnown, pathUnknown, unknownSides, mode);
+					   result = depthSearch(current, *current->south, tempStack, pathKnown, pathUnknown, unknownSides, mode);
 				   }
 			   }
 			   if (east < 1)
 			   {
-				   if (!current.east->goalCell)
+				   if (!current->east->goalCell)
 				   {
-					   tempStack.push(current.east);
+					   tempStack.push(current->east);
 
 					   // search through this child element
-					   result = depthSearch(current, *current.east, tempStack, pathKnown, pathUnknown, unknownSides, mode);
+					   result = depthSearch(current, *current->east, tempStack, pathKnown, pathUnknown, unknownSides, mode);
 				   }
 			   }
 			   if (west < 1)
 			   {
-				   if (!current.west->goalCell)
+				   if (!current->west->goalCell)
 				   {
-					   tempStack.push(current.west);
+					   tempStack.push(current->west);
 
 					   // search through this child element
-					   result = depthSearch(current, *current.west, tempStack, pathKnown, pathUnknown, unknownSides, mode);
+					   result = depthSearch(current, *current->west, tempStack, pathKnown, pathUnknown, unknownSides, mode);
 				   }
 			   }
 	}
@@ -461,6 +508,39 @@ int star::depthSearch(cell &sender, cell &current, std::stack<cell*> &tempStack,
 		break;
 	}
 
+}
+
+/*(used in depthSearch)
+return the adjacent cell that has the same sum as the current cell, meaning it's the next cell in the path.
+exclude the previous cell
+*/
+cell *star::nextCellinPath(cell &current)
+{
+	int north, south, east, west;
+
+	if ((north < 1) && (current.north != current.previousCell))
+	{
+		if ((current.north->returnSum() == current.returnSum()) || (current.north->goalCell))
+			return current.north;
+
+		if (current.north->goalCell)
+			return current.north;
+	}
+	if ((south < 1) && (current.south != current.previousCell))
+	{
+		if ((current.south->returnSum() == current.returnSum()) || (current.south->goalCell))
+			return current.south;
+	}
+	if ((east < 1) && (current.east != current.previousCell))
+	{
+		if ((current.east->returnSum() == current.returnSum()) || (current.east->goalCell))
+			return current.east;
+	}
+	if ((west < 1) && (current.west != current.previousCell))
+	{
+		if ((current.west->returnSum() == current.returnSum()) || (current.west->goalCell))
+			return current.west;
+	}
 }
 
 void star::determineMovementCost(cell &ce)

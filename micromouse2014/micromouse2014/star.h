@@ -109,7 +109,8 @@ public:
 
 	// determining movementCost & heuristicCost
 	void breadthSearch();
-	int depthSearch(cell &sender, cell &current, std::stack<cell*> &tempStack, std::deque<cell*> &path, std::deque<cell*> &pathUnknown, int &unknownSides, int mode);
+	int depthSearch(cell &sender, std::stack<cell*> &tempStack, std::deque<cell*> &path, std::deque<cell*> &pathUnknown, int &unknownSides, int mode);
+	cell *nextCellinPath(cell &current);
 	void pushChildCellsToDeque(std::deque<cell*> &childCells);
 };
 
