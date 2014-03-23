@@ -15,6 +15,8 @@
 #include "lidar.h"
 #include "motor.h"
 
+
+
 class robot
 {
     lidar view;
@@ -26,6 +28,8 @@ class robot
 	double shift; // represents the difference between the current compass heading and the default, which is 90 degrees
 
 public:
+    robot();
+    
     void PositionChange();
     
 };

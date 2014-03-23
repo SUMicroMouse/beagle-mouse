@@ -9,10 +9,3 @@
 #include "gpio.h"
 
 using namespace std;
-
-gpio(const string _path,
-     const set<const string> _attr): 
-device_dir( _path , _attr )
-{
-    
-}

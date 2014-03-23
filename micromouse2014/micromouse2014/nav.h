@@ -4,7 +4,7 @@ using namespace std;
 
 class nav
 {
-private:
+    
 
 public:
     void goForwardOne();

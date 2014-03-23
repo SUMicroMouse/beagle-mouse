@@ -10,26 +10,20 @@
 
 using namespace motor_config;
 
-motor::motor(m_select i):
-mtr_dev(mtr[i],motor_attr),
-enc_dev(enc[i],encoder_attr),
-enabler(gpio_config::base_path[i],
-        gpio_config::attr)
-{
-    
-}
+
 
 void 
 motor::set_speed(double _val)
 {
-    duty( _val * max_speed );
+    duty( _val * motor_config::max_speed );
 }
 
 
 double 
 motor::get_speed()
 {
-    return duty();
+    //place holder
+    return  double(duty()) / double(motor_config::max_speed) ;
 }
 
 
@@ -59,3 +53,6 @@ motor::chk_en()
     enabler.direction("in");
     return enabler.value();
 }
+
+
+

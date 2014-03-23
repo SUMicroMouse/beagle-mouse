@@ -19,25 +19,25 @@ class encoder;
 
 namespace motor_config
 {
-    const std::string mtr[] =
+    static auto mtr_path =
     {
         "/sys/devices/ocp.3/pwm_test_45.11/",//The base bath for motor1
         "/sys/devices/ocp.3/pwm_test_46.13/" //The base bath for motor2
     };
-    const std::string enc[] =
+    static auto enc_path =
     {
         "/dev/path/of/the/encoder/for/mtr[0]",
         "/dev/path/of/the/encoder/for/mtr[1]"
     };
     
-    const std::set<const std::string> motor_attr     =
+    static auto mtr_attr   =
     {
         "period",
         "duty",
         "polarity",
         "run"
     };
-    const std::set<const std::string> encoder_attr   =
+    static auto enc_attr   =
     {
         "speed",
         "radian"
@@ -46,7 +46,8 @@ namespace motor_config
     constexpr    uint max_period    = 10000000;
     constexpr    uint max_speed     = max_period;
     
-    enum m_select{
+    enum m_select
+    {
         LEFT    = 0,
         RIGHT   = 1
     };
@@ -55,25 +56,36 @@ namespace motor_config
 
 class motor
 {
-    device_dir mtr_dev, enc_dev;
+    device_dir mtr_dev;//, enc_dev;
     gpio enabler;
-protected:
     
-#define make_getter_setter(name)                                    \
-    uint name(){      return mtr_dev[#name].gt(uint());    }        \
-    void name(uint value){   mtr_dev[#name].st(value);     }        \
+protected:
 
-    make_getter_setter(period   )
-    make_getter_setter(duty     )
-    make_getter_setter(polarity )
-    make_getter_setter(run      )
+#define make_getter_setter(name, type, i)           \
+type name(){    return mtr_dev[#name].gt<i>();  }   \
+void name(type val){   mtr_dev[#name].st(val);  }   \
+
+    make_getter_setter(period    ,int ,int )
+    make_getter_setter(duty      ,int ,int )
+    make_getter_setter(polarity  ,int ,int )
+    make_getter_setter(run       ,int ,int )
     
 #undef  make_getter_setter
+
     
-    motor(motor_config::m_select);
     
 public:
-    motor(device_dir _motor, device_dir _encoder, gpio _enabler);
+
+    
+//template<typename... Args> motor(Args&&... args):mtr_dev( args... ){}
+    
+    motor(motor_config::m_select side):
+        mtr_dev(motor_config::mtr_path.begin()[side], 
+                motor_config::attr_ls),
+        enabler(side)
+    {}
+    
+    //motor(device_dir _motor, device_dir _encoder, gpio _enabler);
     
     // Set speed as ratio of maximum
     void set_speed(double _val);
