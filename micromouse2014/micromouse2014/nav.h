@@ -79,7 +79,7 @@ public:
 	void veerright(float VL, float VR);
 	
 	//accelerates the rover forward  
-	void XLR8(double a);
+	void XLR8();
 	
 	//cuts speed down? 
 	void coast();
@@ -90,7 +90,7 @@ public:
 	//moves a distance in terms of mm 
 	void movedistancevariable(float VL, float VR);
 	
-	void getdistance_forward(); // fetches the distance forward
+	int getdistance_forward(); // fetches the distance forward
 	
 };
 

@@ -82,7 +82,7 @@ nav::turn(double angle)
 
 
 void 
-nav::curveleft(float VR, float speed)
+nav::curveleft(float VL ,float speed)
 {
 	
 }
@@ -128,83 +128,99 @@ nav::turnright(double angle)
 
 void nav::moveforward()
 {
-    
+    double speed = min_speed;
 	left.enable();
 	right.enable();
 	
-	synchronize();
+	synchronize(speed);
 	
-	left.set_speed();
-	right.set_speed();
+	left.set_speed(speed);
+	right.set_speed(speed);
 
 	left.get_speed();
 	right.get_speed(); // 	 
 
 	while(left.get_speed() == 1 || right.get_speed() == 1)
-	synchronize();
+	synchronize(speed);
 	 
-};
+}
 
 void nav::movebackward()
 {
-    
+	double speed = min_negspeed;
 	left.enable();
 	right.enable();
 
-	synchronize();
+	synchronize(speed);
 
-	left.set_speed();
-	right.set_speed();
+	left.set_speed(speed);
+	right.set_speed(speed);
 
 	left.get_speed();
 	right.get_speed();
     
 	while(left.get_speed() == 0 || right.get_speed() == 0)
-	synchronize();
+	synchronize(speed);
 
-};
+}
 
 void 
 nav::veerleft(float VR, float VL)
 {
-    
+    moveforward();
+	left.disable();
+	XLR8();
+	left.enable();
 }
 
 
 void 
 nav::veerright(float VR, float VL)
 {
-    
+    moveforward();
+	right.disable();
+	XLR8();
+	right.enable();
 }
 
 void 
-nav::XLR8(float VR, float VL)
+nav::XLR8()
 {
-    
-	VR = VR*2;
-	VL = VL*2;
-    
+    left.enable();
+	right.enable();
+
+	synchronize();
+
+	do
+	{
+	right.get_speed();
+	left.get_speed();
+	}
+	while(right.get_speed() && left.get_speed() != 0);
+	nav::moveforward();
+
 }
 
 void 
-nav::coast(float VR, float VL)
+nav::coast() //not sure if neccessary  // let's try toggling the state of the motors to slow it down
 {
-    
-    
-	VR = VR/2;
-	VL = VL/2;
-    
-}
-
-
-
-void 
-nav::stop();
-{
-    
+    left.enable();
+    right.enable();
 	left.disable();
 	right.disable();
     
+}
+
+
+
+void 
+nav::stop()
+{
+	while(left.chk_en() || right.chk_en() == 1)
+	{
+	left.disable();
+	right.disable();
+	}
 }
 
 void 
@@ -234,9 +250,10 @@ nav::synchronize(double speed) // should go in go forward
 }
 
 void 
-nav::movedistancevariable(float VL, float VR)
+nav::movedistancevariable(int dist)
 {
-	lidar.last;
+	for(int i= 0;i<dist;i++)
+	goForwardOne();
     
 }
 
@@ -248,7 +265,7 @@ nav::getdistance_forward() // fetches the distance forward
 	
     do 
 	{ 
-        dist = lidar.last_scan()->deg_index.at(lidar_config::degree_north).second()->eval_dist();
+        dist = lidar.last_scan()->deg_index.at(lidar_config:: degree_north).second()->eval_dist();
 	}
 	while(dist == -1);
     
