@@ -52,10 +52,10 @@ public:
 	void goForwardOne();
 
 	//breaks the right motor, left motor moves forward 
-	void curveleft(float VR, float speed);
+	void curveleft();
 	
 	//breaks the left motor, right motor moves forward 
-	void curveright(float VL, float speed);
+	void curveright();
 	
 	// turns rover 90 deg to the left (static)
 	void turnleft(double angle);
@@ -88,7 +88,7 @@ public:
 	void stop();
 	
 	//moves a distance in terms of mm 
-	void movedistancevariable(float VL, float VR);
+	void movedistancevariable(int dist);
 	
 	int getdistance_forward(); // fetches the distance forward
 	
