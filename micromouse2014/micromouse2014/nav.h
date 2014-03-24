@@ -5,9 +5,14 @@ using namespace std;
 
 class nav
 {
+<<<<<<< HEAD
 private:
 	motor left; 
 	motor right;
+=======
+    
+
+>>>>>>> 584141a692497396a4241499915ffccd4f264129
 public:
 	//breaks the right motor, left motor moves forward 
 	void curveleft(float VR, float speed);

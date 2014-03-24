@@ -56,7 +56,7 @@ class cell
     
 	double movementCost; // cost from the origin
 	double heuristicCost; // estimated cost to the goal
-
+	double sum;
 
 	// boundaries, confirmed/uncomfirmed
 	// 0 = unknown. -1 = confirmed, no wall. 1 = wall confirmed present
@@ -78,9 +78,10 @@ public:
 	cell(double x, double y);
 	cell(int left, int right, int front, std::string direction);
 	//cell(cell & _adj, direction _dir);
+
+	bool operator==(cell &oC); // important
 	
 	void set_adjacent(cell & _adj);
-    
     
 	void sNorth(int g){ b_north = g;    }
 	void sSouth(int g){ b_south = g;    }
@@ -109,9 +110,11 @@ public:
 	void returnSides(int &north, int &south, int &east, int &west, 
                      char &sourceDirection);
 
-
-
+	double returnSum() { return sum; }
 	void figureheuristicCost(double goalX, double goalY);
+
+	// pointer to previous cell. used in depth search to make sure the process doesn't go backward
+	cell * previousCell;
 };
 
 

@@ -431,6 +431,7 @@ void cell::returnSides(int &north, int &south, int &east, int &west)
 	east = b_east;
 	west = b_west;
 }
+
 // return values of 1 for closed sides and -1 for open sides
 void cell::returnSides(int &north, int &south, int &east, int &west, char &sourceDirection)
 {
@@ -472,4 +473,13 @@ void cell::returnSides(int &north, int &south, int &east, int &west, char &sourc
 	default:
 		break;
 	}
+}
+
+// operator ==
+bool cell::operator==(cell &oC)
+{
+	if ((row == oC.row) && (column == oC.column))
+		return true;
+	else
+		return false;
 }

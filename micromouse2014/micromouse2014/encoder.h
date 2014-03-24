@@ -20,8 +20,13 @@ namespace encoder_config
         "/sys/devices/ocp.*/48302000.epwmss/48302180.eqep/"
         "/sys/devices/ocp.*/48304000.epwmss/48304180.eqep/"
     };
+    static auto path_ls   =
+    {
+        "/dev/path/of/the/encoder/for/mtr[0]",
+        "/dev/path/of/the/encoder/for/mtr[1]"
+    };
     
-    const std::set<const std::string> attr =
+    static auto attr_ls =
     {
         "enabled",  // Enable hardware (0/1) = off/on
         "mode"      // Capture mode (0/1) = Absolute/Relative

@@ -79,7 +79,7 @@ struct data
     /// Pointer to the containing packet
     const packet *      source;
     
-    
+    int  eval_dist(){   return (invalid_data?-1:distance); }
     void print(const uint index) const;
     
  };

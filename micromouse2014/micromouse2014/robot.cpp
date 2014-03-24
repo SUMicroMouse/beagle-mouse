@@ -40,7 +40,8 @@ void star::PositionChange()
 }
 
 
-cell * star::getPointerToJunction(char &sourceDirection)
+cell * 
+robot::getPointerToJunction(char &sourceDirection)
 {
 	// get the current cell in which the robot is located
 	cell * currentCell = findCell(xDistance, yDistance);

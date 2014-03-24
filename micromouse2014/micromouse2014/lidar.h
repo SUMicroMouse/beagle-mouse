@@ -20,7 +20,7 @@
 #include <map>
 
 #include "packet.h"
-#include "device.h"
+#include "tty.cpp"
 
 //#include "config.h"
 //#include "grid.h"
@@ -37,7 +37,7 @@ namespace lidar_config
     constexpr size_t pkt_index_max  = 22;
     
     /// The full path to the UART terminal the LIDAR is connected to.
-    constexpr char tty_path[]       = "/dev/tty01";
+    static auto tty_path       = "/dev/tty01";
     
     /// The reference degrees for the distance measurements
     constexpr uint degree_north     = 90;
@@ -73,7 +73,6 @@ struct _360_scan
  */
 class lidar//: protected device_tty
 {
-    
     /// The underlying hardware device connection
     device_tty  _dev;
 
@@ -106,6 +105,9 @@ public:
 	std::map<timestamp, _360_scan*>::iterator
 	fetch_last(size_t N);
 	
+    _360_scan*
+    last_scan();
+    
 	/** TODO: Scan history interface.
      There will probably need to be more methods for using the scan history.
      It will build rather fast (about 4-5 scans/second), so we need to 
