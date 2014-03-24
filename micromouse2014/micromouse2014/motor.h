@@ -11,36 +11,27 @@
 
 #include <iostream>
 //#include "device.h"
-#include "device.cpp"
 #include "gpio.h"
+//#include "device.cpp"
+
 
 class motor;
 class encoder;
 
 namespace motor_config
 {
-    static auto mtr_path =
+    static auto path_ls    =
     {
         "/sys/devices/ocp.3/pwm_test_45.11/",//The base bath for motor1
         "/sys/devices/ocp.3/pwm_test_46.13/" //The base bath for motor2
     };
-    static auto enc_path =
-    {
-        "/dev/path/of/the/encoder/for/mtr[0]",
-        "/dev/path/of/the/encoder/for/mtr[1]"
-    };
-    
-    static auto mtr_attr   =
+
+    static auto attr_ls    =
     {
         "period",
         "duty",
         "polarity",
         "run"
-    };
-    static auto enc_attr   =
-    {
-        "speed",
-        "radian"
     };
     
     constexpr    uint max_period    = 10000000;
@@ -60,7 +51,7 @@ class motor
     gpio enabler;
     
 protected:
-
+public:
 #define make_getter_setter(name, type, i)           \
 type name(){    return mtr_dev[#name].gt<i>();  }   \
 void name(type val){   mtr_dev[#name].st(val);  }   \
@@ -80,12 +71,13 @@ public:
 //template<typename... Args> motor(Args&&... args):mtr_dev( args... ){}
     
     motor(motor_config::m_select side):
-        mtr_dev(motor_config::mtr_path.begin()[side], 
+        mtr_dev(motor_config::path_ls.begin()[side], 
                 motor_config::attr_ls),
         enabler(side)
     {}
     
-    //motor(device_dir _motor, device_dir _encoder, gpio _enabler);
+    motor(device_dir _m, gpio _e): mtr_dev(_m), enabler(_e)
+    {}
     
     // Set speed as ratio of maximum
     void set_speed(double _val);

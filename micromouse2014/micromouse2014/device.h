@@ -12,21 +12,12 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <strstream>
-#include <vector>
-#include <set>
 #include <map>
 
 //#include <typeinfo>
 //#include <typeindex>
 
-#ifndef _WIN32
 
-#include <termios.h>
-#include <unistd.h> // UNIX standard function definitions
-#include <fcntl.h> // File control definitions
-
-#endif //_WIN32
 
 
 
@@ -64,31 +55,6 @@ public:
                std::initializer_list<const char*>  ls_attr);
     dev& operator[] (std::string _attr);
     dev& operator[] (const char* _attr);
-    
-};
-
-
-/********************    Teletype Style Device        **********************/
-class device_tty
-{
-    // The full path to the device, including its name
-    const
-    std::string tty_path ;// == "/dev/ttyO1"
-    
-    // File handle for the specific tty
-	int     fd;
-protected:
-    device_tty():tty_path(""){ fd=-1; }
-    
-public:
-    
-	device_tty(std::string& _path);
-    
-	template <typename _type>
-    _type   rd_(size_t num);
-    
-    template <typename _type>
-	void	wr_(_type val);
     
 };
 

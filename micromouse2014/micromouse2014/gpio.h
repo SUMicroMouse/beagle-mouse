@@ -43,13 +43,23 @@ struct gpio : device_dir
 type name(){    return (*this)[#name].gt<i>();  }   \
 void name(type val){   (*this)[#name].st(val);  }   \
 
+    void
+    test(){ return;} 
     make_getter_setter(direction ,std::string ,std::string )
     make_getter_setter(value     ,bool        ,int         )
     
 #undef  make_getter_setter
 
-    template<typename... Args> 
-    gpio(Args&&... args):device_dir( args... ){}
+//    template<typename... Args> 
+//    gpio(Args&&... args):device_dir( args... ){}
+    
+    gpio(std::string _base, 
+         std::initializer_list<std::string>  ls_attr):
+    device_dir(_base,ls_attr){}
+    
+    gpio(const char* _base, 
+         std::initializer_list<const char*>  ls_attr):
+    device_dir(_base,ls_attr){}
     
     gpio(int port):
     device_dir(gpio_config::path_ls.begin()[port], 

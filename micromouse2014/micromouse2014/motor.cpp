@@ -15,6 +15,9 @@ using namespace motor_config;
 void 
 motor::set_speed(double _val)
 {
+    _val = (_val > 1? 1:
+            _val < 0? 0:
+            _val);
     duty( _val * motor_config::max_speed );
 }
 
@@ -22,7 +25,7 @@ motor::set_speed(double _val)
 double 
 motor::get_speed()
 {
-    //place holder
+    //place holder; do assume this is the actual body!
     return  double(duty()) / double(motor_config::max_speed) ;
 }
 

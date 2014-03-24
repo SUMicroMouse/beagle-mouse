@@ -40,6 +40,8 @@ device_dir::operator[](const char* _attr)
 {
     return (*this)[ string(_attr) ];
 }
+
+
 /* *******************   Device Attribute Get/Set    ******************** */
 template <class _type>
 void
@@ -54,6 +56,8 @@ dev::st(_type val)
     }
     _f << val;
     _f.close();
+    cout<<"[DBG] "<< dev_path<<" << == "<<val <<endl;
+    return;
 }
 
 template <class _type>
@@ -70,40 +74,8 @@ dev::gt()
     _type val;
     _f >> val;
     _f.close();
+    cout<<"[DBG] "<< dev_path<<" == >> "<<val <<endl;
     return val;
 }
 
-
-/********************    Teletype Style Device        **********************/
-device_tty::device_tty(string& _path):
-tty_path (_path)
-{
-    fd = open (tty_path.c_str(), O_RDWR | O_NOCTTY | O_SYNC | O_NONBLOCK );
-    if(fd == -1){   cerr << "Invalid: "<<_path<<"\n";   }
-}
-
-template <typename  _type>
-_type
-device_tty::rd_(size_t num)
-{
-    char* buf = new char[num+1];
-    ssize_t _len = read( fd, buf, num );
-    _type _ret;
-    if (num<=1){return _ret = *buf;}
-    
-    try{    _ret.insert(_ret.end(),buf,buf+_len );      
-    }catch(...){_ret = *buf;}
-    
-    return _ret;
-}
-
-template <typename _type>
-void
-device_tty::wr_(_type val)
-{
-    strstream _ss;
-    _ss << val;
-    string _s (_ss.str());
-    write(fd,_s.c_str(),_s.length());
-}
 

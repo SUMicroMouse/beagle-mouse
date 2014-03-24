@@ -20,7 +20,7 @@
 #include <map>
 
 #include "packet.h"
-#include "device.h"
+#include "tty.cpp"
 
 //#include "config.h"
 //#include "grid.h"
@@ -37,7 +37,7 @@ namespace lidar_config
     constexpr size_t pkt_index_max  = 22;
     
     /// The full path to the UART terminal the LIDAR is connected to.
-    constexpr char tty_path[]       = "/dev/tty01";
+    static auto tty_path       = "/dev/tty01";
     
     /// The reference degrees for the distance measurements
     constexpr uint degree_north     = 90;
