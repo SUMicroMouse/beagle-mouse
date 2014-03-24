@@ -19,8 +19,11 @@
 
 #include <map>
 
+//#include "packet.cpp"
+//#include "tty.cpp"
+
 #include "packet.h"
-#include "tty.cpp"
+#include "tty.h"
 
 //#include "config.h"
 //#include "grid.h"
@@ -95,18 +98,17 @@ public:
     packet& scan(uint8_t _seek);
     
     /// Addes a new entry to the scan history; returns the most recent
-    std::map<timestamp, _360_scan*>::iterator
-    build_scan();
+    std::map<timestamp, _360_scan*>::
+    iterator build_scan();
     
     /// Erase all but the most recent N scans
     void clr_all_but_last(size_t N);
     
 	/// Returns the scan that is N from most recent
-	std::map<timestamp, _360_scan*>::iterator
-	fetch_last(size_t N);
+	std::map<timestamp, _360_scan*>::
+    iterator fetch_last(size_t N);
 	
-    _360_scan*
-    last_scan();
+    _360_scan* last_scan();
     
 	/** TODO: Scan history interface.
      There will probably need to be more methods for using the scan history.

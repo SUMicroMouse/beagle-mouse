@@ -9,9 +9,8 @@
 #include "nav.h"
 
 
-
-
 using namespace std;
+
 
 // Defualt constructor
 nav::nav(const lidar * lidar_ptr):
@@ -88,7 +87,7 @@ nav::curveleft()
 	left.disable();
 	moveforward();
 	left.enable();
-
+	
 }
 
 void 
@@ -196,14 +195,14 @@ nav::XLR8()
 	double speed = max_speed;
     left.enable();
 	right.enable();
-
+    
 	synchronize(speed);
-
+    
 	do
 	{
 	right.get_speed();
 	left.get_speed();
-	}
+}
 	while(right.get_speed() && left.get_speed() != 0);
 	nav::moveforward();
 
@@ -228,7 +227,7 @@ nav::stop()
 	{
 	left.disable();
 	right.disable();
-	}
+}
 }
 
 void 
@@ -273,7 +272,7 @@ nav::getdistance_forward() // fetches the distance forward
 	
     do 
 	{ 
-        dist = lidar.last_scan()->deg_index.at(lidar_config:: degree_north).second()->eval_dist();
+        dist = view->last_scan()->deg_index.at(lidar_config::degree_north).second()->eval_dist();
 	}
 	while(dist == -1);
     

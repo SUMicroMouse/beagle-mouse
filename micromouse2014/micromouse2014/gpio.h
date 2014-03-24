@@ -13,8 +13,8 @@
 #include <string>
 #include <array>
 
-#include "device.cpp"
-//#include "device.h"
+//#include "device.cpp"//correct
+#include "device.h"
 
 class gpio;
 class encoder;

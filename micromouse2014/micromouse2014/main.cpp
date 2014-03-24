@@ -9,19 +9,19 @@
 //#include "robot.h"
 //#include "device.h"
 
-//#include "gpio.h"
 
-//#include "../test.h"
 
+//#include "lidar.cpp"      // When using lidar
 //#include "motor.cpp"    // MUST BE .cpp DO NOT USE .h
 //#include "gpio.h"     // When using ONLY gpio
 
-//#include "lidar.h"      // When using lidar
+//#include "lidar.h"
+#include "motor.h"
 
 #include <iostream>
 #include <string>
 
-#include "nav.h"
+//#include "nav.cpp"
 
 using namespace std;
 namespace test
@@ -45,12 +45,12 @@ int main(int argc, const char * argv[])
     /* At the very least, the constructor works; needs testing
     lidar _l (string(test::path_ls.begin()[0]) + "t1");
     */
-//    /* Probably works.. needs to be tested on live /dev/tty 
+    /* Probably works.. needs to be tested on live /dev/tty 
     device_tty _t(string(test::path_ls.begin()[0])+"tty");
     _t.wr_("This is a string");
     auto _ret = _t.rd_<string>(4);
     cout<< _ret <<" is a "<<typeid(_ret).name() << endl;
-//    */
+    */
 //    /*
     motor _m (device_dir(test::path_ls.begin()[0] , 
                          motor_config::attr_ls) ,

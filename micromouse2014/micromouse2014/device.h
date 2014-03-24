@@ -6,7 +6,7 @@
 //  Copyright (c) 2014 Lyle Moffitt. All rights reserved.
 //
 
-//#ifndef Test_device_h
+#ifndef Test_device_h
 #define Test_device_h
 
 #include <iostream>
@@ -59,7 +59,7 @@ public:
 };
 
 
+#include "device.cpp"
 
 
-
-//#endif
+#endif

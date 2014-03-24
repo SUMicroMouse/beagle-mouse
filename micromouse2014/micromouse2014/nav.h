@@ -7,8 +7,8 @@
 
 #include "motor.cpp"
 
-#include "lidar.h"
-#include "packet.h"
+#include "lidar.cpp"
+#include "packet.cpp"
 
 #include <iostream>
 
@@ -23,8 +23,6 @@ namespace nav_config
 	const double min_invariance = 0.00000001;
 	const size_t duration = 10000000;
 	
-
-
 }
 //change
 
