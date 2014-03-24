@@ -82,15 +82,22 @@ nav::turn(double angle)
 
 
 void 
-nav::curveleft(float VL ,float speed)
+nav::curveleft()
 {
-	
+	moveforward();
+	left.disable();
+	moveforward();
+	left.enable();
+
 }
 
 void 
-nav::curveright(float VR, float speed)
+nav::curveright()
 {
-	
+	moveforward();
+	right.disable();
+	moveforward();
+	right.enable();
 }
 
 void 
@@ -186,10 +193,11 @@ nav::veerright(float VR, float VL)
 void 
 nav::XLR8()
 {
+	double speed = max_speed;
     left.enable();
 	right.enable();
 
-	synchronize();
+	synchronize(speed);
 
 	do
 	{
