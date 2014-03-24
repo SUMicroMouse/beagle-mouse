@@ -1,18 +1,16 @@
 #include <iostream>
+#include "motor.h"
 
 using namespace std;
 
 class nav
 {
 private:
-
+	motor left; 
+	motor right;
 public:
-    void goForwardOne();
-    
-    void turn(double angle);
-    
 	//breaks the right motor, left motor moves forward 
-	void curveleft(float VR);
+	void curveleft(float VR, float speed);
 	
 	//breaks the left motor, right motor moves forward 
 	void curveright(float VL);
