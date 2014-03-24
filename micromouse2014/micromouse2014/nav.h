@@ -1,11 +1,17 @@
-#include <iostream>
-#include "motor.h"
+//
+//  nav.h
+//
+// Created by Carlton Semple, Lyle Moffitt, & Nick Beni
+// Created at Syracuse University for the 2014 micromouse competition
+//
+
+#include "motor.cpp"
+
 #include "lidar.h"
 #include "packet.h"
 
+#include <iostream>
 
-
-using namespace std;
 
 namespace nav_config
 {
@@ -27,13 +33,14 @@ class nav
 private:
 	motor left; 
 	motor right;
-	lidar &lidar_pointer;
-	timestamp last_distance; //timestamp of last distance 
+    
+    const 
+    lidar* view;
+
 public:
-	
-	nav(lidar &l_pointer):lidar_pointer(l_pointer){} //constructor
-
-
+    // Class constructor for navigation
+    nav(const lidar * lidar_ptr);
+    
 
 	//checks to see if wheels are in the same posistion 
 	 void synchronize(double speed);
@@ -48,13 +55,13 @@ public:
 	void curveleft(float VR, float speed);
 	
 	//breaks the left motor, right motor moves forward 
-	void curveright(float VL);
+	void curveright(float VL, float speed);
 	
 	// turns rover 90 deg to the left (static)
-	void turnleft(float VR, float VL);
+	void turnleft(double angle);
 	
 	// turns rover 90 deg to the right  (static)
-	void turnright(float VL, float VR);
+	void turnright(double angle);
 	
 	//moves the rover forward 
 	void moveforward();
@@ -82,7 +89,7 @@ public:
 	
 	//moves a distance in terms of mm 
 	void movedistancevariable(float VL, float VR);
-
+	
 	void getdistance_forward(); // fetches the distance forward
 	
 };

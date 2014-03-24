@@ -13,14 +13,15 @@
 
 //#include "../test.h"
 
-#include "motor.cpp"    // MUST BE .cpp DO NOT USE .h
+//#include "motor.cpp"    // MUST BE .cpp DO NOT USE .h
 //#include "gpio.h"     // When using ONLY gpio
 
-#include "lidar.h"      // When using lidar
+//#include "lidar.h"      // When using lidar
 
 #include <iostream>
 #include <string>
 
+#include "nav.h"
 
 using namespace std;
 namespace test
