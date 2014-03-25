@@ -475,6 +475,22 @@ void cell::returnSides(int &north, int &south, int &east, int &west, char &sourc
 	}
 }
 
+// return the number of unknown sides
+int cell::numUnknownSides()
+{
+	int count = 0;
+	if (b_north == 0)
+		count++;
+	if (b_south == 0)
+		count++;
+	if (b_east == 0)
+		count++;
+	if (b_west == 0)
+		count++;
+
+	return count;
+}
+
 // operator ==
 bool cell::operator==(cell &oC)
 {
@@ -482,4 +498,49 @@ bool cell::operator==(cell &oC)
 		return true;
 	else
 		return false;
+}
+
+// operator =
+void cell::operator=(cell &c2)
+{
+	row = c2.row;
+	column = c2.row;
+	x_center = c2.x_center;
+	y_center = c2.y_center;
+	goalCell = c2.goalCell;
+	b_north = c2.b_north;
+	b_south = c2.b_south;
+	b_east = c2.b_east;
+	b_west = c2.b_west;
+	north = c2.north;
+	south = c2.south;
+	east = c2.east;
+	west = c2.west;
+	previousCell = c2.previousCell;
+	next = c2.next;
+	movementCost = c2.movementCost;
+	heuristicCost = c2.heuristicCost;
+	sum = c2.sum;
+	sourceDirection = c2.sourceDirection;
+}
+
+// return the next cell with the same sum, if it isn't the previous cell
+// also goes to a goal cell
+cell * cell::nextCell()
+{
+	if ((north->sum == sum) || north->goalCell)
+		if (!(north == previousCell))
+			return north;
+		
+	if ((south->sum == sum) || south->goalCell)
+		if (!(south == previousCell))
+			return south;
+	
+	if ((east->sum == sum) || (east->goalCell))
+		if (!(east == previousCell))
+			return east;
+	
+	if ((west->sum == sum) || west->goalCell)
+		if (!(west == previousCell))
+			return west;
 }

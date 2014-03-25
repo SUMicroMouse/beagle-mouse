@@ -12,6 +12,7 @@
 #include <iostream>
 
 #define cellsize 16
+//#define testing 
 bool deadend = false;
 
 
@@ -20,7 +21,7 @@ bool deadend = false;
 /********** Star ********/
 star::star()
 {
-	
+#ifndef testing
 	maze.direction = "north";
 	maze.compass = 90; // starting position is 90 degrees, which will be "north". 0 degrees is to the left to match up with the lidar
 	maze.shift = 0.0; // default position, so shift is 0 degrees
@@ -48,7 +49,7 @@ star::star()
 	{
 		scan();	headOnDistance = -1; // set headOnDistance to the average of the packets that represent what is directly in front. compensate with compass
 		maze.updateMaze();
-		goForwardOne();
+		//goForwardOne();
 		scan();	headOnDistance2 = -1;
 		maze.updateMaze();
 		rob.PositionChange();
@@ -57,7 +58,7 @@ star::star()
 	}
 
 	
-
+#endif 
 }
 
 bool closeEnough(double angle1, double angle2)
@@ -77,6 +78,7 @@ void polarToCartesian(double radius, double angle, double &x, double &y)
 
 void star::scan()
 {
+#ifndef testing
     using namespace star_config;
 	vision.empty(); // empty the previous vision. new scan
 	vect nums; // used to separate the measurements into degrees, 4 numbers per degree
@@ -97,6 +99,7 @@ void star::scan()
 			}
 		}
 	}
+#endif
 }
 
 
@@ -113,6 +116,7 @@ void star::scan()
 // Then a breadth search from the goal to the current position is performed, updating the heuristic costs
 int star::decide()
 {
+#ifndef testing
 	double moveDistance;
 	cell *currentCell = maze.findCell(maze.xDistance, maze.yDistance);
 
@@ -134,6 +138,10 @@ int star::decide()
 		// get to the middle of the junction, as in inside the junction itself
 		moveDistance = cellsize * difference;
 
+
+
+
+
 		/***** MOVE THIS MUCH *****/
 		for (int i = 0; i < moveDistance; i++)
 			goForwardOne();
@@ -141,6 +149,8 @@ int star::decide()
 		// declare that we are at a junction. inside the junction. Don't scan. Turn first
 		atJunction = true;
 	}
+
+
 
 	
 	if (atJunction == true)
@@ -150,6 +160,9 @@ int star::decide()
 		scan();
 		maze.updateMaze();
     }
+
+#endif
+
 	return 0;
 }
 
@@ -169,12 +182,7 @@ void star::breadthSearch()
 
 
 	/********** CLEAR CELL VALUES ***********/
-
-
-
-
-
-
+	// actually, they'll be overwritten
 
 	/****************************************/
 
@@ -310,8 +318,7 @@ void star::breadthSearch()
 	/********* depth search ***********/
 
 	
-	int unknownSides = 0;
-
+	
 
 
 }
@@ -331,31 +338,14 @@ int star::depthSearch(cell &sender, std::stack<cell*> &tempStack, std::deque<cel
 	if (walls >= 3)
 		return -1;	// dead end
 
-	
 
-
-	/*if (north == 0)
-		unknownSides++;
-	if (south == 0)
-		unknownSides++;
-	if (east == 0)
-		unknownSides++;
-	if (west == 0)
-		unknownSides++;
-
-		*/
-
-	std::stack<cell*> tempStack;
-	int result;
-
-	cell *closestGoalCell = maze.findClosestGoalCell(current->x_center, current->y_center);
+	/*cell *closestGoalCell = maze.findClosestGoalCell(current->x_center, current->y_center);
 	double x = current->x_center - closestGoalCell->x_center;
 	double y = current->y_center - closestGoalCell->y_center;
 	double distance = sqrt((x*x) + (y*y));
-	//if (distance < cellsize) // if they're the same, or close to it...
-	//{
-	//	// this path will be c
-	//}
+*/
+
+	current->previousCell == current; // take care of the previous cell pointer
 
 	double lowestSum;
 	cell *lowestNeighbor; // add the neighbor with the lowest sum to the path
@@ -363,27 +353,29 @@ int star::depthSearch(cell &sender, std::stack<cell*> &tempStack, std::deque<cel
 	/***** container for the possible paths *****/
 	vector<path*> possiblePaths;
 
+	path *chosenPath;
+
 	switch (mode)
 	{
 	case 1:{	// go with the known path
-			   
 			   if (north < 1)
 			   {
 				   if (current->north->returnSum() <= current->returnSum()) // a dead end will have a sum greater than the current cell
 				   {
 					   path *p1 = new path();
 					   cell *c1;
-					   
+					   c1 = current->nextCell();
+					   p1->members.push_back(c1);
+
 					   while (true)
 					   {	// go to the child cells and add cells with the same sum to the path
-						   c1 = nextCellinPath(*current);
+						   c1 = c1->nextCell();
+						   p1->members.push_back(c1);
+						   p1->unknownWalls += c1->numUnknownSides(); // count the unknown sides
+
 						   if (c1->goalCell)
-						   {
-
-						   }
-
+							   break;
 					   }
-
 					   possiblePaths.push_back(p1);
 				   }
 			   }
@@ -392,6 +384,19 @@ int star::depthSearch(cell &sender, std::stack<cell*> &tempStack, std::deque<cel
 				   if (current->south->returnSum() <= current->returnSum()) // a dead end will have a sum greater than the current cell
 				   {
 					   path *p2 = new path();
+					   cell *c2 = current->nextCell();
+					   p2->members.push_back(c2);
+					   
+					   while (true)
+					   {
+						   c2 = c2->nextCell();
+						   p2->members.push_back(c2);
+						   p2->unknownWalls += c2->numUnknownSides();
+
+						   if (c2->goalCell)
+							   break;
+					   }
+
 					   possiblePaths.push_back(p2);
 				   }
 			   }
@@ -400,6 +405,19 @@ int star::depthSearch(cell &sender, std::stack<cell*> &tempStack, std::deque<cel
 				   if (current->east->returnSum() <= current->returnSum()) // a dead end will have a sum greater than the current cell
 				   {
 					   path *p3 = new path();
+					   cell *c3 = current->nextCell();
+					   p3->members.push_back(c3);
+
+					   while (true)
+					   {
+						   c3 = c3->nextCell();
+						   p3->members.push_back(c3);
+						   p3->unknownWalls += c3->numUnknownSides(); // count the unknown sides
+
+						   if (c3->goalCell)
+							   break;
+					   }
+
 					   possiblePaths.push_back(p3);
 				   }
 			   }
@@ -408,106 +426,267 @@ int star::depthSearch(cell &sender, std::stack<cell*> &tempStack, std::deque<cel
 				   if (current->west->returnSum() <= current->returnSum()) // a dead end will have a sum greater than the current cell
 				   {
 					   path *p4 = new path();
+					   cell *c4 = current->nextCell();
+					   p4->members.push_back(c4);
+
+					   while (true)
+					   {
+						   c4 = c4->nextCell();
+						   p4->members.push_back(c4);
+						   p4->unknownWalls += c4->numUnknownSides();
+
+						   if (c4->goalCell)
+							   break;
+					   }
+
 					   possiblePaths.push_back(p4);
 				   }
 			   }
 
+			   // choose the path with the least unknowns. just do walls in general for now
+			   int lowestIndex = 0;
+			   if (possiblePaths[1]->unknownWalls < possiblePaths[0]->unknownWalls)
+				   lowestIndex = 1;
+			   if (possiblePaths[2]->unknownWalls < possiblePaths[1]->unknownWalls)
+				   lowestIndex = 2;
+			   if (possiblePaths[3]->unknownWalls < possiblePaths[2]->unknownWalls)
+				   lowestIndex = 3;
 
+			   chosenPath = possiblePaths[lowestIndex];
 
-			   int confirmedSides = 0;
-			   if (north == -1)
+			   // switch statement
+			   switch (lowestIndex)
 			   {
-				   if (!current->north->goalCell)
-				   {
-					   lowestSum = current->north->returnSum();
-					   lowestNeighbor = current->north;
-					   confirmedSides++;
-				   }
+			   case 0:{
+						  // go north
+						  turn(0);
 			   }
-			   if (south == -1)
-			   {
-				   if (!current->south->goalCell)
-				   {
-					   if (current->south->returnSum() <= lowestSum)
-						   lowestNeighbor = current->south;
-					   confirmedSides++;
-				   }
+				   break;
+			   case 1:{
+						  // go south
+						  turn(1);
 			   }
-			   if (east == -1)
-			   {
-				   if (!current->east->goalCell)
-				   {
-					   if (current->east->returnSum() <= lowestSum)
-						   lowestNeighbor = current->east;
-					   confirmedSides++;
-				   }
+				   break;
+			   case 2:{
+						  // go east
+						  turn(2);
 			   }
-			   if (west == -1)
-			   {
-				   if (!current->west->goalCell)
-				   {
-					   if (current->west->returnSum() <= lowestSum)
-						   lowestNeighbor = current->west;
-					   confirmedSides++;
-				   }
+				   break;
+			   case 3:{
+						  // go west
+						  turn(3);
 			   }
-			   if (mode == 1) // "known" mode needs an ending condition
-			   {
-				   if (confirmedSides == 0)
+				   break;
+			   default:
+				   break;
 			   }
-			   
-			   pathKnown.push_back(lowestNeighbor);
-
-			   // search through this child element
-			   result = depthSearch(current, *current->north, tempStack, pathKnown, pathUnknown, unknownSides, mode);
-
+			   		
 	}	break;
-	case 2:{	// go with the unknown path
+	case 2:{	// go with the most unknown path
 			   if (north < 1)
 			   {
-				   if (!current->north->goalCell)
+				   if (current->north->returnSum() <= current->returnSum()) // a dead end will have a sum greater than the current cell
 				   {
-					   tempStack.push(current->north);
+					   path *p1 = new path();
+					   cell *c1;
+					   c1 = current->nextCell();
+					   p1->members.push_back(c1);
 
-					   // search through this child element
-					   result = depthSearch(current, *current->north, tempStack, pathKnown, pathUnknown, unknownSides, mode);
+					   while (true)
+					   {	// go to the child cells and add cells with the same sum to the path
+						   c1 = c1->nextCell();
+						   p1->members.push_back(c1);
+						   p1->unknownWalls += c1->numUnknownSides(); // count the unknown sides
+
+						   if (c1->goalCell)
+							   break;
+					   }
+					   possiblePaths.push_back(p1);
 				   }
 			   }
 			   if (south < 1)
 			   {
-				   if (!current->south->goalCell)
+				   if (current->south->returnSum() <= current->returnSum()) // a dead end will have a sum greater than the current cell
 				   {
-					   tempStack.push(current->south);
+					   path *p2 = new path();
+					   cell *c2 = current->nextCell();
+					   p2->members.push_back(c2);
 
-					   // search through this child element
-					   result = depthSearch(current, *current->south, tempStack, pathKnown, pathUnknown, unknownSides, mode);
+					   while (true)
+					   {
+						   c2 = c2->nextCell();
+						   p2->members.push_back(c2);
+						   p2->unknownWalls += c2->numUnknownSides();
+
+						   if (c2->goalCell)
+							   break;
+					   }
+
+					   possiblePaths.push_back(p2);
 				   }
 			   }
 			   if (east < 1)
 			   {
-				   if (!current->east->goalCell)
+				   if (current->east->returnSum() <= current->returnSum()) // a dead end will have a sum greater than the current cell
 				   {
-					   tempStack.push(current->east);
+					   path *p3 = new path();
+					   cell *c3 = current->nextCell();
+					   p3->members.push_back(c3);
 
-					   // search through this child element
-					   result = depthSearch(current, *current->east, tempStack, pathKnown, pathUnknown, unknownSides, mode);
+					   while (true)
+					   {
+						   c3 = c3->nextCell();
+						   p3->members.push_back(c3);
+						   p3->unknownWalls += c3->numUnknownSides(); // count the unknown sides
+
+						   if (c3->goalCell)
+							   break;
+					   }
+
+					   possiblePaths.push_back(p3);
 				   }
 			   }
 			   if (west < 1)
 			   {
-				   if (!current->west->goalCell)
+				   if (current->west->returnSum() <= current->returnSum()) // a dead end will have a sum greater than the current cell
 				   {
-					   tempStack.push(current->west);
+					   path *p4 = new path();
+					   cell *c4 = current->nextCell();
+					   p4->members.push_back(c4);
 
-					   // search through this child element
-					   result = depthSearch(current, *current->west, tempStack, pathKnown, pathUnknown, unknownSides, mode);
+					   while (true)
+					   {
+						   c4 = c4->nextCell();
+						   p4->members.push_back(c4);
+						   p4->unknownWalls += c4->numUnknownSides();
+
+						   if (c4->goalCell)
+							   break;
+					   }
+
+					   possiblePaths.push_back(p4);
 				   }
 			   }
+
+			   // choose the path with the least unknowns. just do walls in general for now
+			   int highestIndex = 0;
+			   if (possiblePaths[1]->unknownWalls > possiblePaths[0]->unknownWalls)
+				   highestIndex = 1;
+			   if (possiblePaths[2]->unknownWalls > possiblePaths[1]->unknownWalls)
+				   highestIndex = 2;
+			   if (possiblePaths[3]->unknownWalls > possiblePaths[2]->unknownWalls)
+				   highestIndex = 3;
+
+			   chosenPath = possiblePaths[highestIndex];
+
+			   // switch statement
+			   switch (highestIndex)
+			   {
+			   case 0:{
+						  // go north
+						  turn(0);
+			   }
+				   break;
+			   case 1:{
+						  // go south
+						  turn(1);
+			   }
+				   break;
+			   case 2:{
+						  // go east
+						  turn(2);
+			   }
+				   break;
+			   case 3:{
+						  // go west
+						  turn(3);
+			   }
+				   break;
+			   default:
+				   break;
+			   }
+
 	}
 	default:
 		break;
 	}
 
+}
+
+// turn to a certain side. 0 = north. 1 = south. 2 = east. 3 = west
+void star::turn(int direction)
+{
+	// assuming 90 is the starting direction. 0 is to the left at the beginning
+	if ((maze.compass > 315) && (maze.compass < 45))
+	{ // facing west
+		switch (direction)
+		{
+		case 0:	// turn right
+			break;
+		case 1:	// turn left
+			break;
+		case 2:	// do 180 degree turn
+			break;
+		case 3:	// do nothing
+			break;
+		default:
+			break;
+		}
+	}
+	else if ((maze.compass > 45) && (maze.compass < 135))
+	{ // facing north
+		switch (direction)
+		{
+		case 0:	// do nothing
+			break;
+		case 1:	// do 180 degree turn
+			break;
+		case 2:	// turn right
+			break;
+		case 3:	// turn left
+			break;
+		default:
+			break;
+		}
+	}
+	else if ((maze.compass > 135) && (maze.compass < 225))
+	{ // facing east
+		switch (direction)
+		{
+		case 0:	// turn left
+			break;
+		case 1:	// turn right
+			break;
+		case 2:	// do nothing
+			break;
+		case 3:	// do 180 degree turn
+			break;
+		default:
+			break;
+		}
+	}
+	else if ((maze.compass > 225) && (maze.compass < 315))
+	{	// facing south
+		switch (direction)
+		{
+		case 0:	// do 180 degree turn
+			break;
+		case 1:	// do nothing
+			break;
+		case 2:	// turn right
+			break;
+		case 3:	// turn left
+			break;
+		default:
+			break;
+		}
+	}
+	else if ((maze.compass == 45) || (maze.compass == 135) || (maze.compass == 225) || (maze.compass == 315))
+	{
+		// hmmmm......
+
+		// possibly a turn instruction
+	}
 }
 
 /*(used in depthSearch)
@@ -561,6 +740,7 @@ void star::determineheuristicCost()
 
 
 }
+
 
 
 
