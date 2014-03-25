@@ -59,6 +59,10 @@ public:
 };
 
 
+<<<<<<< Updated upstream
+=======
+#include "device.tcc"
+>>>>>>> Stashed changes
 
 
 
