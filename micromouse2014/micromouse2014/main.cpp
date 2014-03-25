@@ -75,3 +75,31 @@ int main(int argc, const char * argv[])
     return 0;
 }
 
+// #define LIDAR_TESTING
+#ifdef LIDAR_TESTING
+
+#include <iostream>
+#include <map>
+
+#include "lidar.cpp"
+
+using namespace std;
+
+int main(int argc, char ** argv )
+{
+	string str ;
+	for( int i =1; i < argc; ++i){ str.append( string(argv[i]) );	}
+	int index = strtol(str.c_str(),nullptr,10);
+	lidar _l;
+	map<timestamp, _360_scan*>::iterator it;
+	
+	while(true)
+	{
+		_l.build_scan()->deg_index.at(index)->source->print();
+	}
+	
+	return 0;
+}
+
+#endif
+
