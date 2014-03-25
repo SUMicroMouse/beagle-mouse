@@ -84,8 +84,8 @@ public:
 	// probably not needed
 	string direction;
 	double shift;
-	startingRow;
-	startingColumn;
+	int startingRow;
+	int startingColumn;
 
 	
 };

@@ -11,16 +11,18 @@
 
 using namespace std;
 
-grid::grid():
-lat_headers(*new vector<vector<cell*>>(1,vector<cell*>(1, nullptr))),
-long_headers(*new vector<vector<cell*>>(1,vector<cell*>(1, nullptr)))
+grid::grid()
 {
     origin = goal = center = nullptr;
+	for (int i = 0; i < mazeSize; i++)
+	{
+		lat_headers.push_back(NULL);
+		long_headers.push_back(NULL);
+	}
 }
 
 // find the current cell based on the row/column
-cell * 
-grid::getCell(double row, double column)
+cell * grid::getCell(double row, double column)
 {
 	cell *point;
 	

@@ -51,7 +51,7 @@ uint8_t
 lidar::seek()
 {
     uint8_t _c=0;
-//    while( 0xFA != _c ){ _c = _dev.rd_<uint8_t>(1); }
+    //while( 0xFA != _c ){ _c = _dev.rd_<uint8_t>(1); }
     return _c;
 }
 
@@ -61,7 +61,7 @@ lidar::scan(uint8_t _seek)
     using namespace lidar_config;
     vector<uint8_t> _v;// (pkt_index_max,0);
     _v.push_back(_seek);
-//    vector<uint8_t> _c ( _dev.rd_<vector<uint8_t>>(pkt_index_max-1) );
+    //vector<uint8_t> _c ( _dev.rd_<vector<uint8_t>>(pkt_index_max-1) );
     //_v.insert(_v.end(), _c.begin(), _c.end());
     //for( int i =0; i<(pkt_index_max-1) ; ++i ){_v[1+i] = _u[i];}
     return *new packet (_v);

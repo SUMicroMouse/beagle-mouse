@@ -10,7 +10,7 @@
 #define __Test__motor__
 
 #include <iostream>
-#include "device.h"
+//#include "device.h"
 #include "gpio.h"
 //#include "device.cpp"
 

@@ -6,7 +6,7 @@
 //  Copyright (c) 2014 Lyle Moffitt. All rights reserved.
 //
 
-#ifndef __micromouse2014__tty__
+//#ifndef __micromouse2014__tty__
 #define __micromouse2014__tty__
 
 #include <iostream>
@@ -51,9 +51,9 @@ public:
     
 };
 
-#include "tty.cpp"
 
 
 
-#endif /* defined(__micromouse2014__tty__) */
+
+//#endif /* defined(__micromouse2014__tty__) */
 

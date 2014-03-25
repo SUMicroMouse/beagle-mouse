@@ -6,7 +6,7 @@
 //  Copyright (c) 2014 Lyle Moffitt. All rights reserved.
 //
 
-//#include "tty.h"
+#include "tty.h"
 
 using namespace std;
 
@@ -23,7 +23,6 @@ tty_path (_path)
 }
 
 template <typename  _type>
-inline
 _type
 device_tty::rd_(size_t num)
 {
@@ -42,7 +41,6 @@ device_tty::rd_(size_t num)
 }
 
 template <typename  _type>
-inline
 _type
 device_tty::rd_()
 {

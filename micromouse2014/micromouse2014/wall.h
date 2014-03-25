@@ -13,9 +13,8 @@
 
 
 #include <iostream>
-#include <cmath>
 
-
+#include "config.h"
 
 class star;
 

@@ -7,8 +7,8 @@
 
 #include "motor.cpp"
 
-#include "lidar.cpp"
-#include "packet.cpp"
+#include "lidar.h"
+#include "packet.h"
 
 #include <iostream>
 
@@ -23,6 +23,8 @@ namespace nav_config
 	const double min_invariance = 0.00000001;
 	const size_t duration = 10000000;
 	
+
+
 }
 //change
 
@@ -50,10 +52,10 @@ public:
 	void goForwardOne();
 
 	//breaks the right motor, left motor moves forward 
-	void curveleft();
+	void curveleft(float VR, float speed);
 	
 	//breaks the left motor, right motor moves forward 
-	void curveright();
+	void curveright(float VL, float speed);
 	
 	// turns rover 90 deg to the left (static)
 	void turnleft(double angle);
@@ -86,7 +88,7 @@ public:
 	void stop();
 	
 	//moves a distance in terms of mm 
-	void movedistancevariable(int dist);
+	void movedistancevariable(float VL, float VR);
 	
 	int getdistance_forward(); // fetches the distance forward
 	

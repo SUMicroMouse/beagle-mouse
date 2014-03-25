@@ -1,6 +1,6 @@
 
 
-//#include "device.h"
+#include "device.h"
 
 using namespace std;
 
@@ -44,7 +44,6 @@ device_dir::operator[](const char* _attr)
 
 /* *******************   Device Attribute Get/Set    ******************** */
 template <class _type>
-inline
 void
 dev::st(_type val)
 {
@@ -62,7 +61,6 @@ dev::st(_type val)
 }
 
 template <class _type>
-inline
 _type
 dev::gt()
 {

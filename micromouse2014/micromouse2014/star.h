@@ -62,10 +62,16 @@ public:
 
 class path{
 public:
-	path();
+	path() { unknownWalls = 0; }
+	void operator=(path &p2);
 
 	int in_path_walls;
 	int adjacent_walls;
+
+	// making it simple for now
+	int unknownWalls;
+
+	vector<cell*> members;
 };
 
 class star
@@ -110,6 +116,7 @@ public:
 	// determining movementCost & heuristicCost
 	void breadthSearch();
 	int depthSearch(cell &sender, std::stack<cell*> &tempStack, std::deque<cell*> &path, std::deque<cell*> &pathUnknown, int &unknownSides, int mode);
+	void turn(int direction);
 	cell *nextCellinPath(cell &current);
 	void pushChildCellsToDeque(std::deque<cell*> &childCells);
 };

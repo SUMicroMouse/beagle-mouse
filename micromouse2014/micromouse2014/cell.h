@@ -12,6 +12,7 @@
 #include <iostream>
 #include <cmath>
 
+#include "config.h"
 
 class star;
 class grid;
@@ -79,6 +80,7 @@ public:
 	//cell(cell & _adj, direction _dir);
 
 	bool operator==(cell &oC); // important
+	void operator=(cell &c2);
 	
 	void set_adjacent(cell & _adj);
     
@@ -108,12 +110,17 @@ public:
 	void returnSides(int &north, int &south, int &east, int &west);
 	void returnSides(int &north, int &south, int &east, int &west, 
                      char &sourceDirection);
+	int numUnknownSides();
 
 	double returnSum() { return sum; }
 	void figureheuristicCost(double goalX, double goalY);
 
 	// pointer to previous cell. used in depth search to make sure the process doesn't go backward
 	cell * previousCell;
+
+	// pointer to the next cell with the same sum, used in depth search
+	cell * nextCell();
+	cell * next;
 };
 
 
