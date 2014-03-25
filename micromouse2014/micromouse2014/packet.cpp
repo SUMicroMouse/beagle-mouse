@@ -1,8 +1,7 @@
 #include "packet.h"
 
 /* ********************             DATA            ******************** */
-const
-data::data(const packet * _p, std::vector<uint8_t> _d):
+data::data(packet * _p, std::vector<uint8_t> _d):
 distance        (_d[0] | (_d[1]&0x3F)<<8 ),
 strength_warn   (_d[1] & 0x40),
 invalid_data    (_d[1] & 0x80),
@@ -10,7 +9,6 @@ strength        (_d[2] | _d[3]<<8 ),
 source          (_p)
 {}
 
-const
 data::data(data & _d):
 distance        (_d.distance),
 strength_warn   (_d.strength_warn),
@@ -21,7 +19,7 @@ source          (_d.source)
 
 
 void 
-data::print(const uint index) const
+data::print(uint index) const
 {
     using namespace std;
     cout << "\nData "<<index<<":";
@@ -45,12 +43,12 @@ d3(this, { _v[16],_v[17],_v[18],_v[19] }),
 start(_v[0]),
 index(_v[1]),
 chksum(_v[21]<<8 | _v[20]),
-p_time(std::chrono::system_clock::now())
+p_time(std::chrono::system_clock::now().time_since_epoch().count())
 {
     // Calculate the speed
     int16_t b=0,a =( _v[2]<<8 | _v[3] );
     for (uint16_t _u = 0x0001; _u&0xFFFF; _u<<=1){ b= (b<<1) + (_u & a); }
-    speed 	= double(b) / 64.0;
+    speed 	= b; /// 64.0;
     
     // Recalculate the checksum
     std::vector<uint16_t> _c;
@@ -65,11 +63,11 @@ void
 packet::print() const
 {
     using namespace std;
-    auto val = p_time.time_since_epoch().count();
+    auto val = p_time;//.time_since_epoch().count();
     printf("\nConstents of packet #%016llX",val);
-    cout << "\nStart byte : " << start;
-    cout << "\nIndex byte : " << index;
-    cout << "\nSpeed value: " << speed;
+    printf("\nStart byte : %02X", start);
+    printf("\nIndex byte : %02X", index);
+    printf("\nSpeed value: %04X", speed);
     d0.print(0);
     d1.print(1);
     d2.print(2);
@@ -77,17 +75,56 @@ packet::print() const
     cout << "\nChecksum: ";
     if (chkcalc==chksum) cout<<"MATCH";
     else printf("ERR %04X != %04X",chkcalc,chksum);
+    cout<<endl;
+    return;
+}
+
+
+/***********************      SCAN_MAP METHODS    ***********************/
+
+size_t
+_360_scan::add_pkt(packet* _p)
+{
+    using namespace packet_config;
+    
+    if (_p->index == index_min) { begin = _p->p_time; }
+    if (_p->index == index_max) { end = _p->p_time; }
+
+    uint degree = (_p->index - index_min) * data_num;
+    //cout <<"\nAdding degree: "<< degree;
+    deg_index[degree + 0]= &_p->d0 ;
+    deg_index[degree + 1]= &_p->d1 ;
+    deg_index[degree + 2]= &_p->d2 ;
+    deg_index[degree + 3]= &_p->d3 ;
+//    deg_index.emplace( pair<uint,data>(degree + 0, _p.d0) ) ;
+//    deg_index.emplace( pair<uint,data>(degree + 1, _p.d1) ) ;
+//    deg_index.emplace( pair<uint,data>(degree + 2, _p.d2) ) ;
+//    deg_index.emplace( pair<uint,data>(degree + 3, _p.d3) ) ;
+    //cout<< "\nAdding packet #" <<deg_index.size();
+    //_p.print();
+    return deg_index.size();
 }
 
 
 
+void
+_360_scan::print_pkt()
+{
+	//cout << "\nPrinting...";
+    for(auto it = deg_index.begin(); it != deg_index.end();it++)
+    {
+        if( (it->first%4 ==0)  )
+            it->second->source->print();
 
+    }
+}
 
-
-
-
-
-
-
-
-
+void
+_360_scan::print_data()
+{
+	//cout << "\nPrinting...";
+    for(auto it = deg_index.begin(); it != deg_index.end();it++)
+    {
+        it->second->print(it->first%4);
+    }
+}

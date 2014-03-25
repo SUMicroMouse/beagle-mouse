@@ -42,6 +42,7 @@ device_dir::operator[](const char* _attr)
 }
 
 
+<<<<<<< Updated upstream
 /* *******************   Device Attribute Get/Set    ******************** */
 template <class _type>
 void
@@ -78,4 +79,6 @@ dev::gt()
     return val;
 }
 
+=======
+>>>>>>> Stashed changes
 

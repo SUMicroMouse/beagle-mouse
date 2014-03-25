@@ -13,9 +13,14 @@
 #include <vector>
 #include <chrono>
 #include <ctime>
+#include <map>
+
+// #include <typeinfo>
 
 struct data;
 struct packet;
+
+typedef std::chrono::time_point<std::chrono::system_clock>::rep timestamp;
 
 /// Specific hard-coded values for the xv-11 LIDAR packet
 namespace packet_config
@@ -46,11 +51,9 @@ namespace packet_config
 struct data
 {
     /// Preferred constructor
-    const
-    data(const packet * _p, std::vector<uint8_t> _d);
+    data(packet * _p, std::vector<uint8_t> _d);
     
     /// Copy constructor, if necessary
-    const
     data(data & _d);
     
     /// The distance to the point of reflection measured in milimeters.
@@ -80,7 +83,7 @@ struct data
     const packet *      source;
     
     int  eval_dist(){   return (invalid_data?-1:distance); }
-    void print(const uint index) const;
+    void print(uint index) const;
     
  };
 
@@ -102,7 +105,7 @@ struct packet
     packet(std::vector<uint8_t> _v);
     
     /// The time the packet was constructed, as measured by the OS
-    const std::chrono::time_point<std::chrono::system_clock> p_time;
+    const timestamp p_time;
     
     /// The Start-byte (always 0xFA)
     const uint8_t    start;
@@ -114,7 +117,7 @@ struct packet
     const uint8_t    index;
     
     /// The rotational speed of the lidar measured as 64th of RPM 
-    double      speed;
+    uint16_t      speed;
     
     /// The primary data information of the packet.
     const data       d0,d1,d2,d3;
@@ -129,6 +132,28 @@ struct packet
     void print() const;
     
 };
+
+
+
+/** A list of DATA points organized radially by degree {0-359}.
+ */
+struct _360_scan
+{
+    ///Stores pointer to each data sub-packet composing the 360 degrees
+    std::map<uint,const data*> deg_index;
+    
+    ///The times that degree 0 and 359 were entered (respectively)
+    timestamp   begin,end;
+    
+    ///deconstructs the packet and stores it in the map.
+    size_t add_pkt(packet* _p);
+    
+    ///Print out the list. Template defines whether packet or data(default)
+    
+    void print_pkt();
+    void print_data();
+};
+
 
 
 
