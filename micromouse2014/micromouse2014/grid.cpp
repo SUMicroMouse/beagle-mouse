@@ -45,29 +45,22 @@ grid::grid()
 cell * 
 grid::getCell(int _row, int _col)
 {
-	cell *point = ( (_row< _col)?lat_headers[_row]:long_headers[_col]);  
+	cell *point;// = ( (_row< _col)?lat_headers[_row]:long_headers[_col]);  
     if (_row < _col) 
     {
-        cell *point = lat_headers[_col];
+        point = lat_headers[_col];
         for (int i =0; i<_row; ++i) {
-            <#statements#>
+            point = point->east;
+        }
+    }else
+    {
+        point = long_headers[_col];
+        for (int i =0; i<_row; ++i) {
+            point = point->east;
         }
     }
     
-    
-    
-	for (int i = 0; i < mazeSize; i++)
-	{
-		point = lat_headers[i];
-		while (point != nullptr)
-		{
-			if ((point->column == _col) && (point->row == _row))
-				return point;
-            
-			point = point->east;
-		}
-	}
-    return nullptr;
+    return point ;
 }
 
 // create a maze with a coordinates that start in the bottom left
@@ -354,11 +347,12 @@ void grid::markWalls(wall &wallInQuestion, double &staticCoord, double &coordina
     
 }
 
-cell * grid::getPointerToJunction(char &sourceDirection)
+cell * 
+grid::getPointerToJunction(char & sourceDirection)
 {
 	// get the current cell in which the robot is located
 	cell * currentCell = findCell(xDistance, yDistance);
-	cell *cellPoint = currentCell;
+	cell * cellPoint = currentCell;
 
 	//	Check the cells in front for 
 	//	where there's an upcoming junction
