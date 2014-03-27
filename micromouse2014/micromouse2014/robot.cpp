@@ -9,6 +9,14 @@
 #include "robot.h"
 
 
+robot::robot():
+navigator(view),
+algo(view,navigator)
+{
+    
+}
+
+
 
 //called after movement
 void 

@@ -9,6 +9,8 @@
 #ifndef __micromouse2014__cell__
 #define __micromouse2014__cell__
 
+#include "wall.h"
+
 #include <iostream>
 #include <cmath>
 
@@ -27,6 +29,11 @@ class grid;
 
 namespace cell_config 
 {
+    // Max cell width
+    constexpr size_t max_width  = 180;//mm
+    
+    // Max cell length
+    constexpr size_t max_length = 180;//mm
     
     constexpr size_t cellsize = 16.0;
     constexpr size_t mazesize = 16.0;

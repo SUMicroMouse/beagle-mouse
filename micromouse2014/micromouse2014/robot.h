@@ -17,6 +17,15 @@
 #include "star.h"
 #include "nav.h"
 
+namespace robot_config 
+{
+    // Maximum width of the robot
+    constexpr size_t max_width = 250;//mm
+    
+    // Maximum length of the robot
+    constexpr size_t max_length = 250;//mm
+}
+
 
 class robot
 {

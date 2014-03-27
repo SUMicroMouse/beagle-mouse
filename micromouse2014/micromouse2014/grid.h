@@ -21,12 +21,12 @@
 
 namespace grid_config 
 {
-    /// The size of the maze in cells
-    constexpr int MAZE_SIZE = 16;
+    /// The size of the maze in cells    
+	constexpr int mazeSize = 16;
     
-
-	constexpr int mazeSize = MAZE_SIZE;
     constexpr int  startingRow =0, startingColumn=0;
+    
+    constexpr int origin_x =0 , origin_y =0;
     
     double goalX, goalY;
 	
@@ -48,15 +48,16 @@ class grid
 	cell	*	origin;
 	cell	*	goal;
 	cell	*	center;
+    
 public:
 	grid();
 	grid(uint x_dim, uint y_dim);
     
-    cell *getCell(double row, double column);
-    cell *findCell(double x, double y);
-    void addCell(cell &newcell);
-    void createMaze(); // create the linked lists of cells, 16 by 16
-	void markGoalCells();
+    cell *  getCell(int _row, int _col);
+    cell *  findCell(double x, double y);
+    void    addCell(cell &newcell);
+    void    createMaze(); // create the linked lists of cells, 16 by 16
+	void    markGoalCells();
     
     int  updateMaze(_360_scan wall_points);
 	void wallOrienter(wall &wallInQuestion, 
@@ -64,15 +65,18 @@ public:
                       double &x_displacement, 
                       double &y_displacement, 
                       double distanceToWall     );
+    
 	void addBasedOnCompass(wall &wallInQuestion, 
                            std::string wallOrientation, 
                            double &x_displacement, 
                            double &y_displacement, 
                            double distanceToWall    );
+    
 	void markWalls(wall &wallInQuestion, 
                    double &staticCoord, 
                    double &coordinateAlongWall, 
                    std::string &xORy        );
+    
 	cell *getPointerToJunction(char &sourceDirection);
 	cell *findClosestGoalCell(double x, double y);
 	bool closeEnough(double angle1, double angle2);

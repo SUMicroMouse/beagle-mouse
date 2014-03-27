@@ -10,32 +10,33 @@
 #include "wall.h"
 
 using namespace std;
+using namespace grid_config;
 
 grid::grid()
 {
     origin = goal = center = nullptr;
-	for (int i = 0; i < mazeSize; i++)
-	{
-		lat_headers.push_back(NULL);
-		long_headers.push_back(NULL);
-	}
+    lat_headers.resize(mazeSize, nullptr);
+    long_headers.resize(mazeSize, nullptr);
 }
 
 // find the current cell based on the row/column
 cell * 
-grid::getCell(double row, double column)
+grid::getCell(int _row, int _col)
 {
-	cell *point;
-	
-	int r = row;
-	int c = column;
-    
+	cell *point = ( (_row< _col)?lat_headers[_col]:long_headers[_row]);  
+    if (_row < _col) 
+    {
+        cell *point = lat_headers[_col];
+        for (int i =0; i<_row; <#increment#>) {
+            <#statements#>
+        }
+    }
 	for (int i = 0; i < mazeSize; i++)
 	{
 		point = lat_headers[i];
 		while (point != nullptr)
 		{
-			if ((point->column == c) && (point->row == r))
+			if ((point->column == _col) && (point->row == _row))
 				return point;
             
 			point = point->east;

@@ -15,6 +15,16 @@
 #include <iostream>
 #include <cmath>
 
+namespace wall_config
+{
+    // standard thickness of wall
+    constexpr size_t thickness = 12;//mm
+    
+    // maximum variance of measurements
+    constexpr float variance = 0.05;// percent (%)
+}
+
+
 class star;
 
 class wall
