@@ -141,7 +141,7 @@ int star::decide()
 
 		/***** MOVE THIS MUCH *****/
 		for (int i = 0; i < moveDistance; i++)
-			navigator.goForwardOne();
+			na.goForwardOne();
 
 		// declare that we are at a junction. inside the junction. Don't scan. Turn first
 		atJunction = true;

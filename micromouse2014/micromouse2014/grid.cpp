@@ -17,20 +17,45 @@ grid::grid()
     origin = goal = center = nullptr;
     lat_headers.resize(mazeSize, nullptr);
     long_headers.resize(mazeSize, nullptr);
+    int r, c;
+	for (r = 0; r < mazeSize; r++) // create in reverse so that the origin of the coordinates is in the bottom left
+	{
+		for (c = 0; c < mazeSize; c++)
+		{
+			cell *temp = new cell(r, c);
+			addCell(*temp);
+		}
+	}
+    double row1, row2, column1, column2;
+	row1 = floor(mazeSize / 2);
+	row2 = row1 + 1;
+	column1 = floor(mazeSize / 2);
+	column2 = column1 + 1;
+    
+	cell *cellP = getCell(row1, column1);
+    cellP->goalCell = true;
+	cellP = getCell(row1, column2);
+    cellP->goalCell = true;
+	cellP = getCell(row2, column1);
+    cellP->goalCell = true;
+	cellP = getCell(row2, column2);
 }
 
 // find the current cell based on the row/column
 cell * 
 grid::getCell(int _row, int _col)
 {
-	cell *point = ( (_row< _col)?lat_headers[_col]:long_headers[_row]);  
+	cell *point = ( (_row< _col)?lat_headers[_row]:long_headers[_col]);  
     if (_row < _col) 
     {
         cell *point = lat_headers[_col];
-        for (int i =0; i<_row; <#increment#>) {
+        for (int i =0; i<_row; ++i) {
             <#statements#>
         }
     }
+    
+    
+    
 	for (int i = 0; i < mazeSize; i++)
 	{
 		point = lat_headers[i];
@@ -49,37 +74,12 @@ grid::getCell(int _row, int _col)
 void 
 grid::createMaze()
 {
-	lat_headers.resize(mazeSize);
-	long_headers.resize(mazeSize);
-    
-	int r, c;
-	for (r = 0; r < mazeSize; r++) // create in reverse so that the origin of the coordinates is in the bottom left
-	{
-		for (c = 0; c < mazeSize; c++)
-		{
-			cell *temp = new cell(r, c);
-			addCell(*temp);
-		}
-	}
+    //moved to constructor
 }
 
 void grid::markGoalCells()
 {
-	double row1, row2, column1, column2;
-	row1 = floor(mazeSize / 2);
-	row2 = row1 + 1;
-	column1 = floor(mazeSize / 2);
-	column2 = column1 + 1;
-    
-	cell *cellP = getCell(row1, column1);
-    cellP->goalCell = true;
-	cellP = getCell(row1, column2);
-    cellP->goalCell = true;
-	cellP = getCell(row2, column1);
-    cellP->goalCell = true;
-	cellP = getCell(row2, column2);
-    
-    
+    //moved to constructor   
 }
 
 void grid::addCell(cell &newcell) // add in reverse...
@@ -412,5 +412,117 @@ bool grid::closeEnough(double angle1, double angle2)
 		return true;
 	else
 		return false;
+}
+
+
+// take the scan, add walls to the existing map of the maze, and call the decision-making function
+// the return value means
+/*********should turn to see more if the end of a wall is within the last packet*********/
+int 
+grid::updateMaze()
+{
+	// add walls to wall deque. probably should turn in the direction of the longer wall to record the pathway in full
+    
+	// value that says the packets' radii are too far apart, indicating a space
+	double closeEnough = 1;
+    
+	std::vector<packet*>::iterator pI; // iterate through vector of packets
+	pI = vision.begin();
+	std::vector<packet*>::iterator beginner; // is the beginning of the wall
+	beginner = vision.begin();
+	std::vector<packet*>::iterator follower;
+	follower = vision.begin();
+    
+	int i = 0;
+    
+	string wallOrientation;
+	double wallDisplacement_x, wallDisplacement_y, distanceToWall;
+	double previous_value;
+	pI++;
+	// create walls based on the scan
+	while (pI != vision.end())
+	{
+		// create a wall if the difference between the two distances is too large.
+		if (((*pI)->aveRadius - (*follower)->aveRadius) > closeEnough)
+		{
+			
+			int angle = (*follower)->angle - (*beginner)->angle; //angle that encompasses the wall from the viewpoint
+			if (angle < 0)
+				angle = -1 * angle;
+			// length from beginning spot to the last spot that was recorded as part of the same wall
+			double length;
+			// create the wall, orient it, and add it to the maze
+			wall *nWall = new wall((*beginner)->aveRadius, (*follower)->aveRadius, (*beginner)->angle, (*follower)->angle);
+			wallOrienter(*nWall, wallOrientation, wallDisplacement_x, wallDisplacement_y, distanceToWall);
+			addBasedOnCompass(*nWall, wallOrientation, wallDisplacement_x, wallDisplacement_y, distanceToWall);
+            
+			pI++; // the ahead iterator
+			follower++;
+			beginner = follower; // set the beginner to the new wall
+		}
+		else // just increment the two iterators, not the beginner
+		{
+			pI++;
+			follower++;
+		}
+	}
+    
+    
+	// Add to cells the empty boundaries that must exist where it has been determined that there is no wall
+	cell *cellPoint = findCell(xDistance, yDistance);
+    
+	if ((compass > 315) && (compass < 45))
+	{ // facing west
+		do{
+			cellPoint = cellPoint->west;
+            
+			if (cellPoint->gNorth() == 0)
+				cellPoint->sNorth(-1);
+			if (cellPoint->gSouth() == 0)
+				cellPoint->sSouth(-1);
+		} while (cellPoint->gWest() != 1);
+	}
+	else if ((compass > 45) && (compass < 135))
+	{ // default direction	
+		do{
+			cellPoint = cellPoint->north;
+            
+			if (cellPoint->gEast() == 0)
+				cellPoint->sEast(-1);
+			if (cellPoint->gWest() == 0)
+				cellPoint->sWest(-1);
+		} while (cellPoint->gNorth() != 1);
+	}
+	else if ((compass > 135) && (compass < 225))
+	{ // facing east
+		do{
+			cellPoint = cellPoint->east;
+            
+			if (cellPoint->gNorth() == 0)
+				cellPoint->sNorth(-1);
+			if (cellPoint->gSouth() == 0)
+				cellPoint->sSouth(-1);
+		} while (cellPoint->gEast() != 1);
+	}
+	else if ((compass > 225) && (compass < 315))
+	{ // facing south
+		do{
+			cellPoint = cellPoint->south;
+            
+			if (cellPoint->gEast() == 0)
+				cellPoint->sEast(-1);
+			if (cellPoint->gWest() == 0)
+				cellPoint->sWest(-1);
+            
+		} while (cellPoint->gSouth() != 1);
+	}
+	else if ((compass == 45) || (compass == 135) || (compass == 225) || (compass == 315))
+	{
+		// hmmmm......
+	}
+    
+    
+    
+	return 0;
 }
 
