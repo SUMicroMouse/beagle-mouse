@@ -87,6 +87,10 @@ public:
 	double xDistance, yDistance;
 	double goalX, goalY;
 
+	// change the compass while keeping it within 359 degrees. 
+	// -values are left, + are right
+	void adjustCompass(int degrees);
+
 	// probably not needed
     std::string direction;
 	double shift;

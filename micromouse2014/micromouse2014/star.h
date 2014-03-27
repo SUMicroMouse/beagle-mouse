@@ -84,7 +84,7 @@ class star
 {
 	grid maze;	
     
-    lidar   & view;
+    lidar   & lide;
     nav     & navigator;
     _360_scan * vision;
     
@@ -109,6 +109,9 @@ class star
 public:
     star(lidar & the_lidar, nav & the_nav);
 
+	// loop everything
+	void theLoop();
+
 	// starting fresh
 	void scan(); // modifies local grid	
 	
@@ -123,7 +126,7 @@ public:
 
 	// determining movementCost & heuristicCost
 	void breadthSearch();
-	int depthSearch(cell &sender, std::stack<cell*> &tempStack, std::deque<cell*> &path, std::deque<cell*> &pathUnknown, int &unknownSides, int mode);
+	int depthSearch(int mode);
 	void turn(int direction);
 	cell *nextCellinPath(cell &current);
 	void pushChildCellsToDeque(std::deque<cell*> &childCells);

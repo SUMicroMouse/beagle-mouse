@@ -57,6 +57,30 @@ view(the_lidar), navigator(the_nav)
 #endif 
 }
 
+void star::theLoop()
+{
+	std::map<uint, const data*>::iterator dIterate;
+
+	while (true)
+	{
+		//lide.build_scan();
+		//auto deqIterate = lide.scan_hist.begin(); // deque iterator for 360 scan history. points to whole scans. begin is the latest
+		//auto degreeIt = (**deqIterate).begin; // degree iterator
+		////(**deqIterate).deg_index[]; // how to access the individual degree
+		//
+		scan();
+		maze.updateMaze();
+		
+		// move to an upcoming junction, scan & update maze some more
+		decide();
+		// update heuristic values
+		breadthSearch();
+		// decide which path to do
+		depthSearch(1);
+		
+	}
+}
+
 bool closeEnough(double angle1, double angle2)
 {
 	if (abs(angle2 - angle1) <= 1.0)
@@ -74,33 +98,83 @@ void polarToCartesian(double radius, double angle, double &x, double &y)
 
 void star::scan()
 {
-#ifdef testing
+//#ifdef testing
     using namespace star_config;
-	vision = view.build_scan(); // empty the previous vision. new scan
-    
-	vect nums; // used to separate the measurements into degrees, 4 numbers per degree
-	for (int i = 0; i < 1440; i++) // 1440 measurements total
-	{
-		// read in 
-		double fake;
-		double radius;
+	
+	double closeEnough = 1;
 
-		if ((i > 180) && (i < 540)) // between angle 45 and 135. might need to expand in order to scan more at once & create the maze faster
+	auto _360_it = lide.build_scan(); // create new scan
+	auto deqIterate = lide.scan_hist.begin(); // deque iterator for 360 scan history. points to whole scans. begin is the latest
+	//auto deg_it  = (**deqIterate).deg_index.begin(); // degree iterator
+
+	map<uint, const data*>::iterator pI;
+	pI = (**deqIterate).deg_index.begin();
+	map<uint, const data*>::iterator beginner;
+	beginner = (**deqIterate).deg_index.begin();
+	map<uint, const data*>::iterator follower;
+	follower = (**deqIterate).deg_index.begin();
+
+	int i = 0;
+
+	string wallOrientation;
+	double wallDisplacement_x, wallDisplacement_y, distanceToWall;
+	double previous_value;
+	pI++;
+	// create walls based on the scan
+	while (pI != (**deqIterate).deg_index.end())
+	{
+		// create a wall if the difference between the two distances is too large.
+		if (((*pI).second->distance - (*follower).second->distance) > closeEnough)
 		{
-			nums.push_back(fake);
-			if (nums.size() == 4)
-			{
-				packet *pack = 
-				nums.empty();
-				vision.push_back(pack);
-			}
+
+			int angle = (*follower).first - (*beginner).first; //angle that encompasses the wall from the viewpoint
+			if (angle < 0)
+				angle = -1 * angle;
+			// length from beginning spot to the last spot that was recorded as part of the same wall
+			double length;
+			// create the wall, orient it, and add it to the maze
+			wall *nWall = new wall((*beginner).second->distance, (*follower).second->distance, (*beginner).first, (*follower).first);
+			maze.wallOrienter(*nWall, wallOrientation, wallDisplacement_x, wallDisplacement_y, distanceToWall);
+			maze.addBasedOnCompass(*nWall, wallOrientation, wallDisplacement_x, wallDisplacement_y, distanceToWall);
+
+			pI++; // the ahead iterator
+			follower++;
+			beginner = follower; // set the beginner to the new wall
+		}
+		else // just increment the two iterators, not the beginner
+		{
+			pI++;
+			follower++;
 		}
 	}
-#endif
+
+
+
+
+
+
+
+    
+	//vect nums; // used to separate the measurements into degrees, 4 numbers per degree
+	//for (int i = 0; i < 1440; i++) // 1440 measurements total
+	//{
+	//	// read in 
+	//	double fake;
+	//	double radius;
+
+	//	if ((i > 180) && (i < 540)) // between angle 45 and 135. might need to expand in order to scan more at once & create the maze faster
+	//	{
+	//		nums.push_back(fake);
+	//		if (nums.size() == 4)
+	//		{
+	//			packet *pack = 
+	//			nums.empty();
+	//			vision.push_back(pack);
+	//		}
+	//	}
+	//}
+//#endif
 }
-
-
-
 
 
 /*********** movement **********/
@@ -119,29 +193,29 @@ int star::decide()
 
 	/******************* Find the next upcoming junction *************************/
 	char sourceDirection;
-	cell *cellPoint = maze.getPointerToJunction(sourceDirection);
+	cell *cellPoint = maze.getPointerToJunction(sourceDirection); // return sourceDirection
 
-		int rowDifference, columnDifference, difference;
-		// difference is either in columns or rows
-			rowDifference = abs(currentCell->row - cellPoint->row);		columnDifference = abs(currentCell->column - cellPoint->column);
-		if (rowDifference > 0)
-			difference = rowDifference;
-		else if (columnDifference > 0)
-			difference = columnDifference;
+	int rowDifference, columnDifference, difference;
+	// difference is either in columns or rows
+	// difference between current cell location and upcoming junction
+	rowDifference = abs(currentCell->row - cellPoint->row);		
+	columnDifference = abs(currentCell->column - cellPoint->column);
+		
+	if (rowDifference > 0)
+		difference = rowDifference;
+	else if (columnDifference > 0)
+		difference = columnDifference;
 
 	// An upcoming junction has been found; move to it
-	if (cellPoint->declareSidesOpen(sourceDirection))
+	if (cellPoint->declareSidesOpen(sourceDirection)) 
 	{
 		// get to the middle of the junction, as in inside the junction itself
 		moveDistance = cellsize * difference;
 
 
-
-
-
 		/***** MOVE THIS MUCH *****/
 		for (int i = 0; i < moveDistance; i++)
-			na.goForwardOne();
+			navigator.goForwardOne();
 
 		// declare that we are at a junction. inside the junction. Don't scan. Turn first
 		atJunction = true;
@@ -324,7 +398,7 @@ void star::breadthSearch()
 
 // mode 1 = go with the "known" path
 // mode 2 = go with the "unknown" path
-int star::depthSearch(cell &sender, std::stack<cell*> &tempStack, std::deque<cell*> &pathKnown, std::deque<cell*> &pathUnknown, int &unknownSides, int mode)
+int star::depthSearch(int mode)
 {
 	// start at current cell once again
 	cell *current = maze.findCell(maze.xDistance, maze.yDistance);
@@ -622,10 +696,16 @@ void star::turn(int direction)
 		switch (direction)
 		{
 		case 0:	// turn right
+			navigator.turnright(90);
+			maze.compass += 90;
 			break;
 		case 1:	// turn left
+			navigator.turnleft(90);
+			maze.compass -= 90;
 			break;
 		case 2:	// do 180 degree turn
+			navigator.turnaround();
+			maze.compass += 180;
 			break;
 		case 3:	// do nothing
 			break;
@@ -640,10 +720,13 @@ void star::turn(int direction)
 		case 0:	// do nothing
 			break;
 		case 1:	// do 180 degree turn
+			navigator.turnaround();
 			break;
 		case 2:	// turn right
+			navigator.turnright(90);
 			break;
 		case 3:	// turn left
+			navigator.turnleft(90);
 			break;
 		default:
 			break;
@@ -654,12 +737,15 @@ void star::turn(int direction)
 		switch (direction)
 		{
 		case 0:	// turn left
+			navigator.turnleft(90);
 			break;
 		case 1:	// turn right
+			navigator.turnright(90);
 			break;
 		case 2:	// do nothing
 			break;
 		case 3:	// do 180 degree turn
+			navigator.turnaround();
 			break;
 		default:
 			break;
@@ -670,12 +756,15 @@ void star::turn(int direction)
 		switch (direction)
 		{
 		case 0:	// do 180 degree turn
+			navigator.turnaround();
 			break;
 		case 1:	// do nothing
 			break;
 		case 2:	// turn right
+			navigator.turnright(90);
 			break;
 		case 3:	// turn left
+			navigator.turnleft(90);
 			break;
 		default:
 			break;

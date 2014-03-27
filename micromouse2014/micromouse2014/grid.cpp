@@ -403,6 +403,42 @@ cell * grid::getPointerToJunction(char &sourceDirection)
 cell * 
 grid::findClosestGoalCell(double x, double y)
 {
+	int row, column;
+	if ((x >= 0) && (x <= (mazeSize * cellsize * 0.5)))
+	{	
+		if ((y >= 0) && (y <= (mazeSize * cellsize * 0.5)))
+		{
+			// lower left region
+			row = floor(mazeSize / 2) - 1;
+			column = floor(mazeSize / 2) - 1;
+			return getCell(row, column);
+		}
+		else
+		{	// upper left region
+			row = floor(mazeSize / 2);
+			column = floor(mazeSize / 2) - 1;
+			return getCell(row, column);
+		}
+
+	}
+	else if ((x > mazeSize * cellsize * 0.5) && (x <= mazeSize))
+	{	
+		if ((y >= 0) && (y <= (mazeSize * cellsize * 0.5)))
+		{
+			// lower right region
+			row = floor(mazeSize / 2) - 1;
+			column = floor(mazeSize / 2);
+			return getCell(row, column);
+		}
+		else
+		{	// upper right region
+			row = floor(mazeSize / 2);
+			column = floor(mazeSize / 2);
+			return getCell(row, column);
+		}
+	}
+
+
     return nullptr;
 }
 
@@ -419,54 +455,56 @@ bool grid::closeEnough(double angle1, double angle2)
 // the return value means
 /*********should turn to see more if the end of a wall is within the last packet*********/
 int 
-grid::updateMaze()
+grid::updateMaze(_360_scan wall_points)
 {
-	// add walls to wall deque. probably should turn in the direction of the longer wall to record the pathway in full
+	//// add walls to wall deque. probably should turn in the direction of the longer wall to record the pathway in full
+ //   
+	//// value that says the packets' radii are too far apart, indicating a space
+	//double closeEnough = 1;
+ //   
+	//std::vector<packet*>::iterator pI; // iterate through vector of packets
+	//pI = vision.begin();
+	//std::vector<packet*>::iterator beginner; // is the beginning of the wall
+	//beginner = vision.begin();
+	//std::vector<packet*>::iterator follower;
+	//follower = vision.begin();
+ //   
+	//int i = 0;
+ //   
+	//string wallOrientation;
+	//double wallDisplacement_x, wallDisplacement_y, distanceToWall;
+	//double previous_value;
+	//pI++;
+	//// create walls based on the scan
+	//while (pI != vision.end())
+	//{
+	//	// create a wall if the difference between the two distances is too large.
+	//	if (((*pI)->aveRadius - (*follower)->aveRadius) > closeEnough)
+	//	{
+	//		
+	//		int angle = (*follower)->angle - (*beginner)->angle; //angle that encompasses the wall from the viewpoint
+	//		if (angle < 0)
+	//			angle = -1 * angle;
+	//		// length from beginning spot to the last spot that was recorded as part of the same wall
+	//		double length;
+	//		// create the wall, orient it, and add it to the maze
+	//		wall *nWall = new wall((*beginner)->aveRadius, (*follower)->aveRadius, (*beginner)->angle, (*follower)->angle);
+	//		wallOrienter(*nWall, wallOrientation, wallDisplacement_x, wallDisplacement_y, distanceToWall);
+	//		addBasedOnCompass(*nWall, wallOrientation, wallDisplacement_x, wallDisplacement_y, distanceToWall);
+ //           
+	//		pI++; // the ahead iterator
+	//		follower++;
+	//		beginner = follower; // set the beginner to the new wall
+	//	}
+	//	else // just increment the two iterators, not the beginner
+	//	{
+	//		pI++;
+	//		follower++;
+	//	}
+	//}
     
-	// value that says the packets' radii are too far apart, indicating a space
-	double closeEnough = 1;
-    
-	std::vector<packet*>::iterator pI; // iterate through vector of packets
-	pI = vision.begin();
-	std::vector<packet*>::iterator beginner; // is the beginning of the wall
-	beginner = vision.begin();
-	std::vector<packet*>::iterator follower;
-	follower = vision.begin();
-    
-	int i = 0;
-    
-	string wallOrientation;
-	double wallDisplacement_x, wallDisplacement_y, distanceToWall;
-	double previous_value;
-	pI++;
-	// create walls based on the scan
-	while (pI != vision.end())
-	{
-		// create a wall if the difference between the two distances is too large.
-		if (((*pI)->aveRadius - (*follower)->aveRadius) > closeEnough)
-		{
-			
-			int angle = (*follower)->angle - (*beginner)->angle; //angle that encompasses the wall from the viewpoint
-			if (angle < 0)
-				angle = -1 * angle;
-			// length from beginning spot to the last spot that was recorded as part of the same wall
-			double length;
-			// create the wall, orient it, and add it to the maze
-			wall *nWall = new wall((*beginner)->aveRadius, (*follower)->aveRadius, (*beginner)->angle, (*follower)->angle);
-			wallOrienter(*nWall, wallOrientation, wallDisplacement_x, wallDisplacement_y, distanceToWall);
-			addBasedOnCompass(*nWall, wallOrientation, wallDisplacement_x, wallDisplacement_y, distanceToWall);
-            
-			pI++; // the ahead iterator
-			follower++;
-			beginner = follower; // set the beginner to the new wall
-		}
-		else // just increment the two iterators, not the beginner
-		{
-			pI++;
-			follower++;
-		}
-	}
-    
+
+	/**************** THE ABOVE IS IN STAR::SCAN() **************/
     
 	// Add to cells the empty boundaries that must exist where it has been determined that there is no wall
 	cell *cellPoint = findCell(xDistance, yDistance);
@@ -526,3 +564,21 @@ grid::updateMaze()
 	return 0;
 }
 
+// update the compass
+void grid::adjustCompass(int degrees)
+{
+	if (degrees >= 0)
+	{
+		compass += degrees;
+		if (compass > 359)
+			compass -= 359;
+	}
+	else if (degrees < 0)
+	{
+		compass -= degrees;
+		if (compass < 0)
+		{
+			compass += 359;
+		}
+	}
+}
