@@ -39,53 +39,58 @@ private:
     lidar& view;
 
 public:
+    /* ____Primary methods:____ require specific arguments */
     
     // Class constructor for navigation
     nav(lidar & lidar_ptr);
 
-	//makes sure wheels are moving in step at same speed 
+    // moves a distance in terms of mm 
+	void movedistancevariable(size_t mm);
+    
+	// makes sure wheels are moving in step at same speed 
 	 void synchronize(double speed);
 	 
-	// assuming the front middle is 0 degrees
+	// assuming the front middle is 0 degrees; positive == clockwise 
 	void turn(double angle);
 
-	// go forward in a small enough chunk (one cell approx.) so that the distance to the opposing wall can be scanned/updated
+    // move at constant velocity
+    void move(double speed);
+    
+    /** veers the rover to the left based on ratio of speeds
+     Positive:  right is increased relative to left
+     Negative:  left is decreased relative to right
+     */
+	void veerleft(double ratio);
+	
+	/** veers the rover to the right based on ratio of speeds
+     Positive:  left is increased relative to right
+     Negative:  right is decreased relative to left
+     */
+	void veerright(double ratio);
+    
+    
+    /* ____Secondary methods:____ call primaries with constant values */
+    
+	// go forward one unit cell and stop
 	void goForwardOne();
 	
 	// turns rover 90 deg to the left (static)
-	void turnleft(double angle);
+    inline
+	void turnleft(){    turn(-90);  }
 	
 	// turns rover 90 deg to the right  (static)
-	void turnright(double angle);
-	
-	//moves the rover forward 
-	void moveforward();
-	
-	//moves the rover backwards
-	void movebackward();
+    inline
+	void turnright(){   turn(90);   }
 	
 	//spins the rover around 180 deg
-	void turnaround(float VR, float VL);
-	
-	//veers the rover to the left 
-	void veerleft(float VL, float VR);
-	
-	//right motor maintains constant speed; left adjusts with ratio to 
-	void veerright(double ratio);
-	
-	//accelerates the rover forward  
-	void XLR8();
-	
-	//cuts speed down? 
-	void coast();
-	
+    inline
+	void turnaround(){  turn(180);  }
+    
 	//stops motor 
 	void stop();
+
 	
-	//moves a distance in terms of mm 
-	void movedistancevariable(float VL, float VR);
-	
-	int getdistance_forward(); // fetches the distance forward
-	
+
+		
 };
 
