@@ -18,7 +18,7 @@ motor::set_speed(double _val)
     _val = (_val > 1? 1:
             _val < 0? 0:
             _val);
-    duty( _val * motor_config::max_speed );
+    duty( _val * double(motor_config::max_speed) );
 }
 
 

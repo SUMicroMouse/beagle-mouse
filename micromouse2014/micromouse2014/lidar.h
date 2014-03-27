@@ -22,7 +22,7 @@
 //#include "packet.cpp"
 //#include "tty.cpp"
 
-#include "packet.cpp"
+#include "packet.h"
 #include "tty.h"
 
 //#include "config.h"

@@ -13,8 +13,8 @@
 #include <string>
 #include <array>
 
-#include "device.cpp"
-//#include "device.h"
+//#include "device.cpp"
+#include "device.h"
 
 class gpio;
 class encoder;
@@ -25,6 +25,7 @@ namespace gpio_config
     static const auto path_ls =
     {
         "/sys/class/gpio/gpio69/",
+        "/sys/class/gpio/gpio70/",
         "/sys/class/gpio/gpio74/"
     };
 
@@ -43,8 +44,6 @@ struct gpio : device_dir
 type name(){    return (*this)[#name].gt<i>();  }   \
 void name(type val){   (*this)[#name].st(val);  }   \
 
-    void
-    test(){ return;} 
     make_getter_setter(direction ,std::string ,std::string )
     make_getter_setter(value     ,bool        ,int         )
     

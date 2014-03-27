@@ -9,12 +9,10 @@
 #include "nav.h"
 
 
-
-
 using namespace std;
 
 // Defualt constructor
-nav::nav(const lidar * lidar_ptr):
+nav::nav(lidar & lidar_ptr):
 view(lidar_ptr),
 left(motor_config::m_select::LEFT),
 right(motor_config::m_select::RIGHT)

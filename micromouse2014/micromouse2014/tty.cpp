@@ -6,25 +6,25 @@
 //  Copyright (c) 2014 Lyle Moffitt. All rights reserved.
 //
 
-//#include "tty.h"
+#include "tty.h"
 
 using namespace std;
 
 /********************    Teletype Style Device        **********************/
 
 uint8_t * 
-device_tty::sleepy_read(size_t num)
+device_tty::sleepy_read(size_t num_bytes)
 {
-    uint8_t * tmp = new uint8_t[num+1];
-    size_t n_rcvd,ptr=0;
-    while(num > 0)
+    uint8_t * tmp = new uint8_t[num_bytes+1];
+    size_t n_rcvd,tmp_index=0;
+    while(num_bytes > 0)
     {
-        n_rcvd = read( fd, &(tmp[ptr]), num);
+        n_rcvd = read( fd, &(tmp[tmp_index]), num_bytes);
         if (n_rcvd == 0){   
-            usleep(tty_config::pkt_lag * num); 
+            usleep(useconds_t(tty_config::pkt_lag * num_bytes)); 
         }else{  
-            num -= n_rcvd;
-            ptr += n_rcvd;
+            num_bytes -= n_rcvd;
+            tmp_index += n_rcvd;
         }
     }
     return tmp;
@@ -41,37 +41,18 @@ tty_path (_path)
     }
 }
 
-template <typename  _type>
-inline
-_type*
+uint8_t*
 device_tty::rd_(size_t num)
 {
-    _type* _ret = new _type[num+1];
-    size_t _len = read( fd, _ret, num );
-
+    uint8_t* _ret = new uint8_t[num+1];
+    for(size_t len =0; num > len;len += read( fd, &(_ret[len]), (num-len)) ); 
+    
     //cout<<"[DBG] "<< tty_path<<" == >> "<< _ret <<endl;
     return _ret;
 }
 
-template <typename  _type>
-inline
-_type
-device_tty::rd_()
-{
-    _type* buf = new _type[1];
-    read( fd, buf, 1 );
-    
-    //printf("[DBG] %s == >> %02X\n",tty_path.c_str(),buf[0]);
-    return buf[0]; 
-}
+uint8_t
+device_tty::rd_(){ return rd_(1)[0];    }
 
-template <typename _type>
-void
-device_tty::wr_(_type val)
-{
-    strstream _ss;
-    _ss << val;
-    string _s (_ss.str());
-    write(fd,_s.c_str(),_s.length());
-    //cout<<"[DBG] "<< tty_path<<" << == "<<_s <<endl;
-}
+
+

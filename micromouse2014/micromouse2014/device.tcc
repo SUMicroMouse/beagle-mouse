@@ -8,8 +8,10 @@
 
 
 /* *******************   Device Attribute Get/Set    ******************** */
+
+using namespace std;
+
 template <class _type>
-inline
 void
 dev::st(_type val)
 {
@@ -27,7 +29,6 @@ dev::st(_type val)
 }
 
 template <class _type>
-inline
 _type
 dev::gt()
 {

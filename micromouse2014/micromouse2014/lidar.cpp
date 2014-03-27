@@ -10,13 +10,7 @@
 
 using namespace std;
 
-
-
-
 /***********************      LIDAR METHODS    **************************/
-
-
-
 
 
 uint8_t
@@ -25,7 +19,7 @@ lidar::seek()
 	//cout << "\nSeeking...\n";
     uint8_t _c=0;
 	while( 0xFA != _c ){ 
-		_c = _dev.rd_<uint8_t>();
+		_c = _dev.rd_();
 		//usleep(10); 
 		}
 	//cout << "Found!\n";

@@ -25,7 +25,7 @@
 namespace tty_config
 {
 	constexpr size_t BAUD =115200;
-	constexpr size_t pkt_lag = std::micro::den * float(1.0/BAUD);
+	constexpr size_t pkt_lag = std::micro::den / float(BAUD);
 };
 
 
@@ -48,20 +48,24 @@ public:
     {}
     ~device_tty(){ close(fd); }
     
-    uint8_t * sleepy_read(size_t num);
+    uint8_t *   sleepy_read(size_t num_bytes);
+   
+    uint8_t*    rd_(size_t num);
     
-	template <typename _type>
-    _type   rd_();
+    uint8_t     rd_();
     
-    template <typename _type>
-    _type*  rd_(size_t num);
-    
-    template <typename _type>
-	void	wr_(_type val);
+    template <class _type>
+    void        wr_(_type val)
+    {
+        std::strstream _ss;
+        _ss << val;
+        std::string _s (_ss.str());
+        write(fd,_s.c_str(),_s.length());
+        //cout<<"[DBG] "<< tty_path<<" << == "<<_s <<endl;
+    }
     
 };
 
-#include "tty.cpp"
 
 
 

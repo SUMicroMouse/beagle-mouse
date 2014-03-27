@@ -9,54 +9,69 @@
 #ifndef Test_encoder_h
 #define Test_encoder_h
 
-#include "device.cpp"
+#include "tty.h"
+
+#include <deque>
+#include <utility>
 
 class encoder;
+struct measure;
+
 
 namespace encoder_config
-{
-    const std::string base_path[] =
-    {
-        "/sys/devices/ocp.*/48302000.epwmss/48302180.eqep/"
-        "/sys/devices/ocp.*/48304000.epwmss/48304180.eqep/"
-    };
+{    
     static auto path_ls   =
     {
-        "/dev/path/of/the/encoder/for/mtr[0]",
-        "/dev/path/of/the/encoder/for/mtr[1]"
+        "/dev/ttyO2"
     };
+
+    typedef std::chrono::time_point<std::chrono::system_clock>::rep timestamp;
+
+    typedef int16_t position_t;
+    typedef int16_t velocity_t;
+    typedef int16_t xlr8tion_t;
     
-    static auto attr_ls =
-    {
-        "enabled",  // Enable hardware (0/1) = off/on
-        "mode"      // Capture mode (0/1) = Absolute/Relative
-                    //      Absolute - The position is continually incr/decr (max 2^32)
-                    //      Relative - The position is reset after each period
-        "period",   // How often an 'overflow' occurs (nanoseconds) (max 40s)
-                    // How often the process thread wakes (if position is polled)
-        "position"  // 
-    };
+    constexpr size_t hist_max = 100;
+    
+    constexpr size_t msg_size = ( (sizeof(position_t)+sizeof(uint8_t))
+                                 +(sizeof(velocity_t)+sizeof(uint8_t))
+                                 +(sizeof(xlr8tion_t)+sizeof(uint8_t))
+                                 + sizeof(uint8_t)*2
+                                 );
+    
+    constexpr size_t msg_freq_microsec =  250;
+
+    constexpr uint8_t EOE/*End-Of-Encoding*/ = '\0';
+    
+    typedef std::tuple< timestamp, measure*, measure* > snapshot ;
 };
 
-class encoder
+struct measure
 {
-    device_dir pin;
-protected:
-    
-#define make_getter_setter(name)                            \
-bool name(){      return pin[#name].gt(uint());    }        \
-void name(bool value){   pin[#name].st(value);     }        \
+    char side;
+    encoder_config::position_t    _pos;
+    encoder_config::velocity_t    _vel;
+    encoder_config::xlr8tion_t    _accl;
+};
 
-    make_getter_setter(enabled      )
-    make_getter_setter(mode         )
-    make_getter_setter(period       )
-    make_getter_setter(position     )
+struct encoder : device_tty
+{
+    std::deque<encoder_config::snapshot> hist;
     
-#undef  make_getter_setter
+    encoder(): device_tty( encoder_config::path_ls.begin()[0])
+    {}
     
-public:
-    encoder(): pin( encoder_config::base_path[0],encoder_config::attr ){}
+    encoder(const char* _path):device_tty(_path)
+    {}
     
+    inline 
+    encoder_config::snapshot 
+        add_hist(measure* _L, measure* _R);
+    
+    encoder_config::snapshot 
+        update();
+    
+    void loop_update();
 };
 
 

@@ -12,6 +12,8 @@
 #include <iostream>
 //#include "device.h"
 #include "gpio.h"
+#include "encoder.h"
+
 //#include "device.cpp"
 
 

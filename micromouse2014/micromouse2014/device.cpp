@@ -16,6 +16,8 @@ dir_path(*new string(_base))
                          (_atrib, *new dev(dir_path+_atrib)) );
     }
 }
+
+
 device_dir::device_dir(const char* _base, 
                        initializer_list<const char*>  ls_attr):
 dir_path(*new string(_base))
@@ -41,44 +43,4 @@ device_dir::operator[](const char* _attr)
     return (*this)[ string(_attr) ];
 }
 
-
-<<<<<<< Updated upstream
-/* *******************   Device Attribute Get/Set    ******************** */
-template <class _type>
-void
-dev::st(_type val)
-{
-    ofstream _f ;
-    _f.open(dev_path.c_str());
-    if(_f.bad() || !_f.good())
-    {   
-        cerr << "Failed to open: "<<dev_path<<"\n";
-        _f.close(); return ;
-    }
-    _f << val;
-    _f.close();
-    cout<<"[DBG] "<< dev_path<<" << == "<<val <<endl;
-    return;
-}
-
-template <class _type>
-_type
-dev::gt()
-{
-    ifstream _f;
-    _f.open(dev_path.c_str());
-    if(_f.bad() || !_f.good())
-    {   
-        cerr << "Failed to open: "<<dev_path<<"\n";
-        _f.close(); throw exception();
-    }
-    _type val;
-    _f >> val;
-    _f.close();
-    cout<<"[DBG] "<< dev_path<<" == >> "<<val <<endl;
-    return val;
-}
-
-=======
->>>>>>> Stashed changes
 
