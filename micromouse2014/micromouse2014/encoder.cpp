@@ -63,12 +63,7 @@ do{                                                 \
 
 void 
 encoder::loop_update()
-{
-    while (true) 
-    {
-        update();
-        usleep(msg_freq_microsec);
-    }
+{   while(true){  update(); usleep(msg_freq_microsec);   }
 }
 
 

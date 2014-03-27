@@ -9,9 +9,7 @@
 #include "cell.h"
 
 using namespace std;
-
-#define cellsize 16.0
-#define mazesize 16.0
+using namespace cell_config;
 
 cell::cell()
 {
@@ -239,8 +237,9 @@ void cell::markWalls(double x, double y, double sourceX, double sourceY)
 	// remember that the top left is the origin of the grid
 	double topBound = y_center + 0.5 * cellsize;
 	double bottomBound = y_center - 0.5 * cellsize;
-
-	cell * otherCell;
+    
+    //unused
+	//cell * otherCell;
 
 	// check to see if the point is within the four walls
 	if ((x >= leftBound) && (x <= rightBound))
@@ -501,7 +500,8 @@ bool cell::operator==(cell &oC)
 }
 
 // operator =
-void cell::operator=(cell &c2)
+void 
+cell::operator=(cell &c2)
 {
 	row = c2.row;
 	column = c2.row;
@@ -526,7 +526,8 @@ void cell::operator=(cell &c2)
 
 // return the next cell with the same sum, if it isn't the previous cell
 // also goes to a goal cell
-cell * cell::nextCell()
+cell * 
+cell::nextCell()
 {
 	if ((north->sum == sum) || north->goalCell)
 		if (!(north == previousCell))
@@ -543,4 +544,10 @@ cell * cell::nextCell()
 	if ((west->sum == sum) || west->goalCell)
 		if (!(west == previousCell))
 			return west;
+    
+    return nullptr;
 }
+
+
+
+

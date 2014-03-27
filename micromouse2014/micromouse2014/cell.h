@@ -12,7 +12,6 @@
 #include <iostream>
 #include <cmath>
 
-#include "config.h"
 
 class star;
 class grid;
@@ -28,8 +27,12 @@ class grid;
 
 namespace cell_config 
 {
-    /// The length of the cell in inches
-    const int CELL_SIZE =  8;
+    
+    constexpr size_t cellsize = 16.0;
+    constexpr size_t mazesize = 16.0;
+    
+    /// The length of the cell in inches [DEPRECIATED]
+    const int CELL_SIZE =  8; 
     
     // size of cells
 	double lengthwidth;

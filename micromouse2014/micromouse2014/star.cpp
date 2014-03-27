@@ -4,23 +4,19 @@
 //
 //
 
+// This should be the only #include in the .cpp
 #include "star.h"
-#include "cell.h"
-#include "packet.h"
-#include "wall.h"
-#include <math.h>
-#include <iostream>
+
 
 #define cellsize 16
 //#define testing 
-bool deadend = false;
-
-
-
 
 /********** Star ********/
-star::star()
+star::star(lidar & the_lidar, nav & the_nav):
+view(the_lidar), navigator(the_nav)
 {
+    deadend = false;
+    
 #ifndef testing
 	maze.direction = "north";
 	maze.compass = 90; // starting position is 90 degrees, which will be "north". 0 degrees is to the left to match up with the lidar
@@ -78,9 +74,10 @@ void polarToCartesian(double radius, double angle, double &x, double &y)
 
 void star::scan()
 {
-#ifndef testing
+#ifdef testing
     using namespace star_config;
-	vision.empty(); // empty the previous vision. new scan
+	vision = view.build_scan(); // empty the previous vision. new scan
+    
 	vect nums; // used to separate the measurements into degrees, 4 numbers per degree
 	for (int i = 0; i < 1440; i++) // 1440 measurements total
 	{
@@ -144,7 +141,7 @@ int star::decide()
 
 		/***** MOVE THIS MUCH *****/
 		for (int i = 0; i < moveDistance; i++)
-			goForwardOne();
+			navigator.goForwardOne();
 
 		// declare that we are at a junction. inside the junction. Don't scan. Turn first
 		atJunction = true;
@@ -252,7 +249,9 @@ void star::breadthSearch()
 
 	// look at child cells
 	cellP = maze.findClosestGoalCell(cellP->x_center, cellP->y_center);
-	int north, south, east, west;
+    
+	//why is this here?
+    //int north, south, east, west;
 	cellP->returnSides(north, south, east, west);
 
 	countCost = 1;
@@ -345,10 +344,11 @@ int star::depthSearch(cell &sender, std::stack<cell*> &tempStack, std::deque<cel
 	double distance = sqrt((x*x) + (y*y));
 */
 
-	current->previousCell == current; // take care of the previous cell pointer
+	current->previousCell = current; // take care of the previous cell pointer
 
-	double lowestSum;
-	cell *lowestNeighbor; // add the neighbor with the lowest sum to the path
+    //These two vars are unused.
+	//double lowestSum;
+	//cell *lowestNeighbor; // add the neighbor with the lowest sum to the path
 
 	/***** container for the possible paths *****/
 	vector<path*> possiblePaths;

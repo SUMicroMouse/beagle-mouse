@@ -22,7 +22,8 @@ grid::grid()
 }
 
 // find the current cell based on the row/column
-cell * grid::getCell(double row, double column)
+cell * 
+grid::getCell(double row, double column)
 {
 	cell *point;
 	
@@ -40,10 +41,12 @@ cell * grid::getCell(double row, double column)
 			point = point->east;
 		}
 	}
+    return nullptr;
 }
 
 // create a maze with a coordinates that start in the bottom left
-void grid::createMaze()
+void 
+grid::createMaze()
 {
 	lat_headers.resize(mazeSize);
 	long_headers.resize(mazeSize);
@@ -121,7 +124,8 @@ void grid::addCell(cell &newcell) // add in reverse...
 }
 
 // find the current cell based on the coordinates in centimeters
-cell *grid::findCell(double x, double y)
+cell *
+grid::findCell(double x, double y)
 {
 	double rtemp = y / cellsize;
 	double ctemp = x / cellsize;
@@ -142,6 +146,7 @@ cell *grid::findCell(double x, double y)
 			point = point->east;
 		}
 	}
+    return nullptr;
 }
 
 
@@ -394,9 +399,10 @@ cell * grid::getPointerToJunction(char &sourceDirection)
 	return cellPoint;
 }
 
-cell * grid::findClosestGoalCell(double x, double y)
+cell * 
+grid::findClosestGoalCell(double x, double y)
 {
-
+    return nullptr;
 }
 
 bool grid::closeEnough(double angle1, double angle2)

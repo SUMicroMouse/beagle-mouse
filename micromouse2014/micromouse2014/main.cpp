@@ -16,12 +16,14 @@
 //#include "motor.cpp"    // MUST BE .cpp DO NOT USE .h
 //#include "gpio.h"     // When using ONLY gpio
 
-#include "lidar.h"      // When using lidar
+//#include "lidar.h"      // When using lidar
 
-#include "motor.h"
+//#include "motor.h"
 
-#include "nav.h"
+//#include "nav.h"
 //#include "star.h"
+
+#include "robot.h"
 
 #include <iostream>
 #include <string>
@@ -54,7 +56,7 @@ int main(int argc, const char * argv[])
     auto _ret = _t.rd_<string>(4);
     cout<< _ret <<" is a "<<typeid(_ret).name() << endl;
     */
-//    /*
+    /*
     motor _m (device_dir(test::path_ls.begin()[0] , 
                          motor_config::attr_ls) ,
               gpio(test::path_ls.begin()[1] , 
@@ -63,7 +65,7 @@ int main(int argc, const char * argv[])
     _m.duty(4321);
     _m.enable();
 	cout << _m.duty() << endl;
-//    */
+    */
    
     /* Testing just gpio
     gpio dd ( test::path_ls.begin()[0] , gpio_config::attr_ls);
@@ -73,6 +75,7 @@ int main(int argc, const char * argv[])
      
     cout<<ret<<endl;
     */
+    
     
     
     return 0;

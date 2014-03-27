@@ -17,17 +17,19 @@
 
 #include "wall.h"
 #include "cell.h"
+#include "packet.h"
 
 namespace grid_config 
 {
     /// The size of the maze in cells
-    const int MAZE_SIZE = 16;
+    constexpr int MAZE_SIZE = 16;
     
 
-	const int mazeSize;
-	double goalX, goalY;
-	int  startingRow =0, startingColumn=0;
+	constexpr int mazeSize = MAZE_SIZE;
+    constexpr int  startingRow =0, startingColumn=0;
     
+    double goalX, goalY;
+	
 
 }
 
@@ -82,7 +84,7 @@ public:
 	double goalX, goalY;
 
 	// probably not needed
-	string direction;
+    std::string direction;
 	double shift;
 	int startingRow;
 	int startingColumn;

@@ -15,12 +15,14 @@
 #include <deque>
 #include <stack>
 #include <string>
-
+#include <cmath>
 
 #include "grid.h"
 #include "wall.h"
+#include "lidar.h"
+#include "nav.h"
+#include "packet.h"
 
-#include "robot.h"
 
 namespace star_config
 {
@@ -38,6 +40,9 @@ namespace star_config
     
     typedef
     std::string string;   
+    
+    
+    constexpr int num_packets = packet_config::index_range; // 90
 }
 
 
@@ -60,8 +65,9 @@ public:
                     double &returnedFront       ); 
 };
 
-class path{
-public:
+struct path
+{
+
 	path() { unknownWalls = 0; }
 	void operator=(path &p2);
 
@@ -78,28 +84,30 @@ class star
 {
 	grid maze;	
     
-    robot rob;
+    lidar   & view;
+    nav     & navigator;
+    _360_scan * vision;
     
 	int rightTurns;
 	int leftTurns;
+    
 	std::vector<cell *> traversed;
 
     std::vector<cell*> lat_headers; // rows
 	std::vector<cell*> long_headers; // columns
-	
-    _360_scan vision;
-	std::deque<wall*> wallDeq;
     
-#define num_packets packet_config::index_range // 90
+	std::deque<wall*> wallDeq;
+
 
 	double headOnDistance;
 	double headOnDistance2;
 
 	bool atJunction;
+    bool deadend ;
     
     
 public:
-	star();
+    star(lidar & the_lidar, nav & the_nav);
 
 	// starting fresh
 	void scan(); // modifies local grid	

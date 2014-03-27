@@ -48,9 +48,16 @@ namespace encoder_config
 
 struct measure
 {
+    // Which motor this is referencing; 'L'eft -or- 'R'ight
     char side;
+    
+    // Relatave position of wheel in mm; 
     encoder_config::position_t    _pos;
+    
+    // Average velocity of wheel in mm/sec (based on last two positions)
     encoder_config::velocity_t    _vel;
+    
+    // Average acceleration in mm/sec^2 (based on last two velocities)
     encoder_config::xlr8tion_t    _accl;
 };
 
@@ -61,16 +68,19 @@ struct encoder : device_tty
     encoder(): device_tty( encoder_config::path_ls.begin()[0])
     {}
     
-    encoder(const char* _path):device_tty(_path)
+    encoder( const char* _path ):device_tty(_path)
     {}
     
+    // Add provided measurements to the histore deque
     inline 
     encoder_config::snapshot 
         add_hist(measure* _L, measure* _R);
     
+    // Updates the history with most recent measurements from wheels
     encoder_config::snapshot 
         update();
     
+    // Infinite loop of updates
     void loop_update();
 };
 

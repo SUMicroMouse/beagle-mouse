@@ -11,8 +11,10 @@
 
 
 //called after movement
-void star::PositionChange()
+void 
+robot::PositionChange()
 {
+#ifdef testing
 	double distance = abs(headOnDistance - headOnDistance2);
     
 	if ((compass > 315) && (compass < 45))
@@ -37,12 +39,14 @@ void star::PositionChange()
         
 		// possibly a turn instruction
 	}
+#endif
 }
 
 
 cell * 
 robot::getPointerToJunction(char &sourceDirection)
 {
+#ifdef testing
 	// get the current cell in which the robot is located
 	cell * currentCell = findCell(xDistance, yDistance);
 	cell *cellPoint = currentCell;
@@ -83,6 +87,9 @@ robot::getPointerToJunction(char &sourceDirection)
 		// hmmmm......
 		// possibly a turn instruction
 	}
-    
+
 	return cellPoint;
+#else
+    return nullptr;
+#endif
 }

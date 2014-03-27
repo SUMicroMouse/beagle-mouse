@@ -14,13 +14,15 @@
 
 #include "lidar.h"
 #include "motor.h"
-
+#include "star.h"
+#include "nav.h"
 
 
 class robot
 {
-    lidar view;
-    nav navigator;
+    lidar   view;
+    nav     navigator;
+    star    algo;
     
     std::string direction; // direction that mouse is facing
 	double compass;
@@ -31,6 +33,7 @@ public:
     robot();
     
     void PositionChange();
+    cell* getPointerToJunction(char &sourceDirection);
     
 };
 

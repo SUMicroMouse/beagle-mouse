@@ -7,7 +7,7 @@
 //
 
 #include "wall.h"
-#include <math.h>
+
 
 wall::wall(double radius1, double radius2, double angle1, double angle2)
 {
