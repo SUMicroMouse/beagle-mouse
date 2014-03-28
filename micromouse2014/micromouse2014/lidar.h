@@ -61,7 +61,10 @@ class lidar//: protected device_tty
 {
     /// The underlying hardware device connection
     device_tty  _dev;
-
+    
+    /// Temporary scan to hold new data while iterators are used
+    std::deque<_360_scan*> scan_temp;
+    
 protected:
 public: 
     /// A list of previous scans, organized by time taken.
@@ -85,6 +88,11 @@ public:
     /// Addes a new entry to the scan history; returns the most recent
     _360_scan* build_scan();
     
+    /// Get a safe iterator for sequential reads. STOPS
+    std::deque<_360_scan*>::iterator
+        get_scan_iterator();
+    
+    void done_scan_iterator();
     
 	/** TODO: Scan history interface.
      There will probably need to be more methods for using the scan history.
