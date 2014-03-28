@@ -35,6 +35,10 @@ namespace nav_config
     
     constexpr uint unit_per_rot = 45;
     
+	// for straight sleep
+	constexpr size_t sleeptime = 100; // microseconds
+
+	// returns true if they are similar
     static inline
     bool eqish(double a, double b)
     {
@@ -113,9 +117,16 @@ public:
 	void stayStraightLoop();
 	
 	/** the following each return true if they find that the robot isn't going straight**/
-	bool straightAhead(int &leftORright);
-	bool oneSidedApproach();
-	bool twoSidedApproach();
+	void straightAhead(int &leftORright);
+	void oneSidedApproach(int &leftORright);
+	void twoSidedApproach(int &leftORright);
+
+	// solve for max accepted distance for this specific angle
+	void maxAcceptedDistance(int angle, double &acceptedDistance);
+
+	// used for threads
+	int straightLR, oneLR, twoLR;	// -1 means left is closer... 1 means right is closer
+	bool straightVal, oneSideVal, twoSideVal;
 		
 };
 

@@ -137,40 +137,269 @@ nav::stop()
 /* loop the three functions that keep the robot going straight */
 void nav::stayStraightLoop()
 {
-	int leftORright;	// -1 means left is closer... 1 means right is closer
+	using namespace nav_config;
+
+	static double lVeer = 1, rVeer = 1;
+	int leftORright;
+	int counter;
+
 	while (true)
 	{
-		if ((oneSidedApproach() || twoSidedApproach()) && straightAhead(leftORright))
-		{	
-			// fix it
-			switch (leftORright)
-			{
-			case -1:	// nudge left
-				break;
-			case 1:		// nudge right
-				break;
-			default:
-				break;
-			}
+		counter = 0;
+		straightAhead(straightLR);
+		oneSidedApproach(oneLR);
+		twoSidedApproach(twoLR);
+		if (straightVal)
+			counter++;
+		if (oneSideVal)
+			counter++;
+		if (twoSideVal)
+			counter++;
+
+		leftORright = straightLR + oneLR + twoLR; // the decider. will be -1 for left, 0 for nothing, 1 for right
+	
+		switch (leftORright)
+		{
+		case -1:{ 
+					// nudge left
+					rVeer = 1;
+					lVeer += max_invariance;
+					veerleft(lVeer);
+					
+			}break;
+		case 0: // nothing
+			break;
+		case 1:{
+				   // nudge right
+				   lVeer = 1;
+				   rVeer += max_invariance;
+				   veerright(rVeer);
+
+			}break;
+
+		default:
+			break;
 		}
+
+		usleep(sleeptime);
 	}
 }
 
 /* Return true if the function determines that the left center is closer than the right center,
 or if the right center is closer than the left center */
-bool nav::straightAhead(int &leftORright)
+void nav::straightAhead(int &leftORright)
 {
 	using namespace lidar_config;
 
 	// the lidar is called view
 	auto scanPoint = view.scan_hist.front();
 
-	int left = (degree_north - 1 + degree_max) % degree_max;
-	int right = (degree_north + 1 + degree_max) % degree_max;
+	// check two packet averages to the left
+	auto left1 = scanPoint->deg_index.at(offset(degree_north, -1));	// packet to the left of dead center
+	auto left2 = scanPoint->deg_index.at(offset(degree_north, -5));	// packet further to the left of dead center
+	// get the difference between the left two packet averages
+	double differenceLeft = abs(left1->source->avg_dist - left2->source->avg_dist);
 
-	auto p_OfInterest = scanPoint->deg_index.at(degree_north);	// straight ahead
+	// check two packet averages to the right
+	auto right1 = scanPoint->deg_index.at(offset(degree_north, 0));	// packet to the right of dead center
+	auto right2 = scanPoint->deg_index.at(offset(degree_north, 4));	// packet further to the right of dead center
+	// get the difference between the right two packet averages
+	double differenceRight = abs(right1->source->avg_dist - right2->source->avg_dist);
+
+	double averageLeft, averageRight;
+
+	// if the differences are about the same, then all four packets are on the same wall
+	if (nav_config::eqish(differenceLeft, differenceRight))
+	{
+		// compute the averages of the left two and the right two
+		averageLeft = AVG(left1->source->avg_dist, left2->source->avg_dist);
+		averageRight = AVG(right1->source->avg_dist, right2->source->avg_dist);
+
+		// compare the averages
+		if (averageLeft < averageRight) // the left is closer than the right
+		{
+			leftORright = -1; // nudge left
+			straightVal = true;
+		}
+		else if (averageRight < averageLeft) // the right is closer than the left
+		{
+			leftORright = 1; // nudge right
+			straightVal = true;
+		}
+	}
+	// the differences aren't about the same, so only use the middle two package averages
+	else
+	{
+		// compare the averages of the middle two
+		if (left1->source->avg_dist < right1->source->avg_dist) // the left is closer than the right
+		{
+			leftORright = -1; // nudge left
+			straightVal = true;
+		}
+		else if (right1->source->avg_dist < left1->source->avg_dist)
+		{
+			leftORright = 1; // nudge right
+			straightVal = true;
+		}
+	}
+
+	straightVal = false;
+}
+
+// return true if the the robot needs to turn
+// -1 = turn left. 1 = turn right
+void nav::oneSidedApproach(int &leftORright)
+{	// assuming 60 degrees north of the eastern heading is the spot where magic happens
+
+	using namespace lidar_config;
+
+	/* get the latest scans, with the second one being grabbed first. 
+	   even if there's a scan between, they're guaranteed to be in the correct order*/
+	_360_scan * scan3 = view.scan_hist[2];
+	_360_scan * scan2 = view.scan_hist[1];
+	_360_scan * scan1 = view.scan_hist[0];
 	
-	p_OfInterest->
+	/* look at the certain chosen degrees and see if they are readable. 
+	   if they are readable, then you must turn left */
+	// points along the left wall...
+	/* map<uint, const data*>::iterator s1iterator;
+	   map<uint, const data*>::iterator s2iterator;*/
 
-	return false;
+	
+	auto l60_1 = scan1->deg_index.at(offset(degree_east, 60));	// latest
+	auto l60_2 = scan2->deg_index.at(offset(degree_east, 60));	// older
+	auto l60_3 = scan3->deg_index.at(offset(degree_east, 60));	// oldest
+
+
+	if (l60_1->invalid_data)
+	{	// if the latest is invalid, but the one before it wasn't, then go right
+		if ((!l60_2->invalid_data) || (!l60_3->invalid_data))
+		{
+			// nudge right
+			leftORright = 1;
+			oneSideVal = true;
+		}
+	}
+	else if (!l60_2->invalid_data) 
+	{
+		if (l60_1->distance < l60_2->distance) // if the distance is decreasing
+		{
+			if (!l60_3->invalid_data)
+			{
+				if (l60_2->distance < l60_3->distance)
+				{
+					// nudge right
+					leftORright = 1;
+					oneSideVal = true;
+				}
+			}
+			// nudge right
+			leftORright = 1;
+			oneSideVal = true;
+		}
+	}
+	else if(!l60_2->invalid_data) // if the distance is increasing
+	{
+		if (l60_1->distance > l60_2->distance)
+		{
+			if (!l60_3->invalid_data)
+			{
+				if (l60_2->distance > l60_3->distance)
+				{
+					// nudge right
+					leftORright = 1;
+					oneSideVal = true;
+				}
+			}
+			// nudge right
+			leftORright = 1;
+			oneSideVal = true;
+		}
+	}
+
+	oneSideVal = false;
+}
+
+// return true if the robot needs to turn
+// -1 = turn left. 1 = turn right
+void nav::twoSidedApproach(int &leftORright)
+{
+	using namespace lidar_config;
+	using namespace nav_config;
+
+	// Calculate the averages of the sides up to a certain angle offset for each side.
+	// the measurements in a hallway are predictable up to a certain angle, maybe ... degrees north of east/west.
+	// use this to ignore the measurements that are too far off, then do the averages
+
+	/* Measure from 60 degrees above the east/west, to 82 degrees above the east/west. 
+	This goes up to meet the edge of the degrees that are considered in straightAhead() */
+
+
+	// Get the latest scan
+	_360_scan *vScan = view.scan_hist.front();
+
+	// prepare to average the sides
+	double leftCount, rightCount;
+	leftCount = 0;	rightCount = 0;
+
+	// iterate through the deque
+	double acceptedDistance;
+	for (int i = 0; i < 21; i++)
+	{
+		auto leftIterator = vScan->deg_index.at(offset(degree_east, 60 + i));	// left side
+		auto rightIterator = vScan->deg_index.at(offset(degree_west, -60 - i));	// right side
+
+		// solve for max accepted distance for this specific angle
+		maxAcceptedDistance(60 + i, acceptedDistance);
+
+		if (!leftIterator->invalid_data) // only take valid data
+			if (leftIterator->distance <= acceptedDistance)
+			{	// only accept distances that are within the projected range for walls parallel to the robot's path
+				leftCount += leftIterator->distance;
+			}
+		if (!rightIterator->invalid_data) // only take valid data
+			if (rightIterator->distance <= acceptedDistance)
+			{	// only accept distances that are within the projected range for walls parallel to the robot's path
+				rightCount += rightIterator->distance;
+			}
+	}
+
+	// calculate the averages
+	double aveLeft, aveRight;
+	aveLeft = leftCount / 21;
+	aveRight = rightCount / 21;
+
+	// if they aren't similar
+	if (!eqish(aveLeft, aveRight))
+	{
+		if (aveLeft > aveRight)
+		{	// if the left side is generally farther away
+			// nudge left
+			leftORright = -1;
+			twoSideVal = true;
+		}
+		else if (aveRight > aveLeft)
+		{
+			// nudge right
+			leftORright = 1;
+			twoSideVal = true;
+		}
+	}
+
+	twoSideVal = false;
+}
+
+// take the absolute value of the angle... it's the same for both sides, so just use 60+i
+void nav::maxAcceptedDistance(int angle /*angle B*/, double &acceptedDistance /*side a*/)
+{
+	double horizontalDistance = 80.0; // 8 centimeters. side c
+	double rightAngle = 90.0; // angle A
+	double finalAngle = 180 - rightAngle - angle; // angle C
+
+	
+	// solving for side a
+	// law of sines . a/sinA = c/sinC
+	acceptedDistance = (horizontalDistance * sin(rightAngle)) / sin(finalAngle); // side a
+	
+	acceptedDistance += 5.0; // account for... it makes more sense this way
 }
