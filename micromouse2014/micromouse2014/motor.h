@@ -88,10 +88,10 @@ public:
     double get_speed();
     
     // Turn the motor on ; apply voltage 
-    void enable();
+    void forward();
     
     // Turn the motor off; cost
-    void disable();
+    void backward();
     
     // Check to see if the motor is enabled (true) or disabled
     bool chk_en();

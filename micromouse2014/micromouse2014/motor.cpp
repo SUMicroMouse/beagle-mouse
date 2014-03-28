@@ -30,14 +30,14 @@ motor::get_speed()
 }
 
 void 
-motor::enable()
+motor::forward()
 {
     enabler.direction("out");
     enabler.value("1");
 }
 
 void 
-motor::disable()
+motor::backward()
 {
     enabler.direction("out");
     enabler.value("0");
@@ -47,7 +47,9 @@ bool
 motor::chk_en()
 {
     enabler.direction("in");
-    return enabler.value();
+    auto _ret = enabler.value();
+    enabler.direction("out");
+    return _ret;
 }
 
 

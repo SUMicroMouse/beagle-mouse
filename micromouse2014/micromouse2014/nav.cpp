@@ -33,7 +33,9 @@ nav::synchronize(double speed) // should go in go forward
 {
     using namespace encoder_config;
     using namespace nav_config;
+    
     snapshot * state = enc.hist.front();
+    
     auto v_L = abs(get<1>(*state)->_vel);
     auto v_R = abs(get<2>(*state)->_vel);
     auto v_avg = AVG(v_L , v_R);
@@ -42,24 +44,17 @@ nav::synchronize(double speed) // should go in go forward
     auto s_R = right.get_speed();
     auto s_avg = AVG(s_L , s_R);
     
-    uint8_t sw_t = 0;
-    sw_t |=  (eqish(v_avg,speed)    ? 0x01:0);
-    sw_t |=  (speed < 0             ? 0x02:0);
-    
-    if ( eqish(v_avg,speed) )
-    {  
+    if(eqish(v_avg,speed)    ? 0x01:0){
         left.set_speed (s_avg);
         right.set_speed(s_avg);
-        return true;
+        return true;  
     }
-    if (v_L<v_R && v_avg < speed){
-        left.set_speed (s_L+max_invariance);
-        right.set_speed(s_R-max_invariance);
-        return true;
-    }else{
-        left.set_speed (s_L-max_invariance);
-        right.set_speed(s_R+max_invariance);
-    }
+    
+    if(v_R < v_avg  ? 0x10:0){ right.set_speed(s_R+max_invariance);    }
+    if(v_R > v_avg  ? 0x20:0){ right.set_speed(s_R-max_invariance);    }
+    if(v_L < v_avg  ? 0x40:0){ left.set_speed (s_L+max_invariance);    }
+    if(v_L > v_avg  ? 0x80:0){ left.set_speed (s_L-max_invariance);    }
+    return false;
 }
 
 
@@ -68,35 +63,17 @@ nav::synchronize(double speed) // should go in go forward
 void 
 nav::turn(double angle)
 {
-	double middle; // just here temporarily
-	double degrees = middle - angle;
-	double compass;
-	if (degrees > 0) // turn left
-	{
-		if (ceil(degrees) == 0) //  go straight
-		{
-            
-		}
-		else
-		{
-			// turn left, degrees per second
-            
-			compass += degrees;
-		}			
-	}
-	else if (degrees < 0) // turn right
-	{
-		if (floor(degrees) == 0) // go straight
-		{
-            
-		}
-		else
-		{
-			// turn right, degrees per second
-            
-			compass += degrees;
-		}
-	}
+    using namespace encoder_config;
+    using namespace nav_config;
+    
+    snapshot * state = enc.hist.front();
+    
+    auto p_L = abs(get<1>(*state)->_pos);
+    auto p_R = abs(get<2>(*state)->_pos);
+    auto p_avg = AVG(p_L , p_R);
+    
+    
+    
 }
 
 void

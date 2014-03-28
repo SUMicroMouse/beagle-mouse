@@ -43,14 +43,14 @@ namespace lidar_config
     static auto tty_path       = "/dev/ttyO1";
     
     /// The reference degrees for the distance measurements
-    constexpr int degree_north     = 0;
-    constexpr int degree_south     = 180;
-    constexpr int degree_east      = 90;
-    constexpr int degree_west      = 270;
+    constexpr int degree_north      = 0;
+    constexpr int degree_south      = 180;
+    constexpr int degree_east       = 90;
+    constexpr int degree_west       = 270;
     
-    constexpr int degree_max       = 360;
+    constexpr int degree_max        = 360;
     
-    constexpr size_t hist_max 		= 300;// 5 scans/sec * 60 sec
+    constexpr size_t hist_max       = 300;// 5 scans/sec * 60 sec
     
     static inline
     int offset(int cardinal, int change){

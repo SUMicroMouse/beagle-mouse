@@ -58,10 +58,11 @@ p_time(std::chrono::system_clock::now().time_since_epoch().count())
     chkcalc = 0x7FFF & ((chk32 & 0x00007FFF) + (chk32 >> 15));
     
     int num=0,sum=0;
-    sum+=(d0.invalid_data?d0.distance,num++:0);
-    sum+=(d1.invalid_data?d1.distance,num++:0);
-    sum+=(d2.invalid_data?d2.distance,num++:0);
-    sum+=(d3.invalid_data?d3.distance,num++:0);
+    if(d0.invalid_data){ sum+=d0.distance; num++; }
+    if(d1.invalid_data){ sum+=d1.distance; num++; }
+    if(d2.invalid_data){ sum+=d2.distance; num++; }
+    if(d3.invalid_data){ sum+=d3.distance; num++; }
+
     avg_dist = double(sum)/double(num);
 }
 

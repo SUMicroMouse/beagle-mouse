@@ -24,12 +24,16 @@
 namespace nav_config
 {
 	constexpr double max_speed = 1; 
-	constexpr double min_speed = 0.5;
-	constexpr double min_negspeed = 0.5;
-	constexpr double max_negspeed = 0;
+	constexpr double min_speed = 0;
+	constexpr double min_negspeed = 0;
+	constexpr double max_negspeed = 1;
 	constexpr double max_invariance = 0.0001;
 	constexpr double min_invariance = 0.00000001;
 	constexpr size_t duration = 10000000;
+    
+    constexpr uint wheel_diameter = 42;//mm
+    
+    constexpr uint unit_per_rot = 45;
     
     static inline
     bool eqish(double a, double b)
@@ -37,6 +41,8 @@ namespace nav_config
         return (abs(DIV(a,b))-1<=(0+min_invariance) &&
                 abs(DIV(a,b))-1<=(0-min_invariance) ? true:false); 
     }
+    
+    
 
 }
 //change
