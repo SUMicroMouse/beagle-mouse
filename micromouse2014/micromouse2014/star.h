@@ -105,6 +105,11 @@ class star
 	bool atJunction;
     bool deadend ;
     
+    std::string direction; // direction that mouse is facing
+	double compass;
+    double xDistance, yDistance; // the current position of the robot
+	double shift; // represents the difference between the current compass heading and the default, which is 90 degrees
+
     
 public:
     star(lidar & the_lidar, nav & the_nav);
@@ -124,7 +129,6 @@ public:
 	void determineMovementCost(cell &ce);
 	void determineheuristicCost();
 	
-	
 
 	// determining movementCost & heuristicCost
 	void breadthSearch();
@@ -132,6 +136,11 @@ public:
 	void turn(int direction);
 	cell *nextCellinPath(cell &current);
 	void pushChildCellsToDeque(std::deque<cell*> &childCells);
+    
+    
+    void PositionChange();
+    cell* getPointerToJunction(char &sourceDirection);
+    
 };
 
 #endif /* defined(__micromouse2014__star__) */

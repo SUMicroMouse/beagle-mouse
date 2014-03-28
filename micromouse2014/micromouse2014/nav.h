@@ -110,7 +110,7 @@ public:
 	void turnaround(){  turn(180);  }
     
 	//stops motor 
-	void stop();
+	void stop(){ move(0); }
 
 
 	// keep the robot facing straight - in parallel with the walls along the sides of it

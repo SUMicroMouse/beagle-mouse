@@ -85,20 +85,14 @@ nav::move(double speed)
 void 
 nav::veerleft(double ratio)
 {
-    moveforward();
-	left.disable();
-	XLR8();
-	left.enable();
+
 }
 
 
 void 
 nav::veerright(double ratio)
 {
-    moveforward();
-	right.disable();
-	XLR8();
-	right.enable();
+
 }
 
 
@@ -106,32 +100,9 @@ nav::veerright(double ratio)
 void 
 nav::goForwardOne()
 {
-    double val; // give a specifc amount 
-                //left motor 
-                // right motor both need to advance so both are going in the same direction
-	left.enable();
-	right.enable();
-    
-    left.set_speed();
-    right.set_speed();
-    
-    
-    left.get_speed();
-    right.get_speed();
-    
-    synchronize();
+
 }
 
-
-void 
-nav::stop()
-{
-	while(left.chk_en() || right.chk_en() == 1)
-	{
-	left.disable();
-	right.disable();
-	}
-}
 
 
 /* loop the three functions that keep the robot going straight */

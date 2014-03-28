@@ -13,7 +13,7 @@
 
 /********** Star ********/
 star::star(lidar & the_lidar, nav & the_nav):
-view(the_lidar), navigator(the_nav)
+lide(the_lidar), navigator(the_nav)
 {
     deadend = false;
     
@@ -63,7 +63,7 @@ void star::theLoop()
 
 	while (true)
 	{
-		//lide.build_scan();
+		lide.build_scan();
 		//auto deqIterate = lide.scan_hist.begin(); // deque iterator for 360 scan history. points to whole scans. begin is the latest
 		//auto degreeIt = (**deqIterate).begin; // degree iterator
 		////(**deqIterate).deg_index[]; // how to access the individual degree
@@ -799,11 +799,11 @@ void star::turn(int direction)
 		switch (direction)
 		{
 		case 0:	// turn right
-			navigator.turnright(90);
+			navigator.turnright();
 			maze.compass += 90;
 			break;
 		case 1:	// turn left
-			navigator.turnleft(90);
+			navigator.turnleft();
 			maze.compass -= 90;
 			break;
 		case 2:	// do 180 degree turn
@@ -826,10 +826,10 @@ void star::turn(int direction)
 			navigator.turnaround();
 			break;
 		case 2:	// turn right
-			navigator.turnright(90);
+			navigator.turnright();
 			break;
 		case 3:	// turn left
-			navigator.turnleft(90);
+			navigator.turnleft();
 			break;
 		default:
 			break;
@@ -840,10 +840,10 @@ void star::turn(int direction)
 		switch (direction)
 		{
 		case 0:	// turn left
-			navigator.turnleft(90);
+			navigator.turnleft();
 			break;
 		case 1:	// turn right
-			navigator.turnright(90);
+			navigator.turnright();
 			break;
 		case 2:	// do nothing
 			break;
@@ -864,10 +864,10 @@ void star::turn(int direction)
 		case 1:	// do nothing
 			break;
 		case 2:	// turn right
-			navigator.turnright(90);
+			navigator.turnright();
 			break;
 		case 3:	// turn left
-			navigator.turnleft(90);
+			navigator.turnleft();
 			break;
 		default:
 			break;
@@ -933,6 +933,85 @@ void star::determineheuristicCost()
 
 }
 
+//called after movement
+void 
+star::PositionChange()
+{
+#ifdef testing
+	double distance = abs(headOnDistance - headOnDistance2);
+    
+	if ((compass > 315) && (compass < 45))
+	{ // facing left
+		xDistance -= distance;
+	}
+	else if ((compass > 45) && (compass < 135))
+	{ // default direction
+		yDistance += distance;
+	}
+	else if ((compass > 135) && (compass < 225))
+	{ // facing right
+		xDistance += distance;
+	}
+	else if ((compass > 225) && (compass < 315))
+	{ // facing south
+		yDistance -= distance;
+	}
+	else if ((compass == 45) || (compass == 135) || (compass == 225) || (compass == 315))
+	{
+		// hmmmm......
+        
+		// possibly a turn instruction
+	}
+#endif
+}
 
+
+cell * 
+star::getPointerToJunction(char &sourceDirection)
+{
+	// get the current cell in which the robot is located
+	cell * currentCell = maze.findCell(xDistance, yDistance);
+	cell *cellPoint = currentCell;
+    
+	//	Check the cells in front for 
+	//	where there's an upcoming junction
+	//
+	if ((compass > 315) && (compass < 45))
+	{ // facing west
+		do{
+			cellPoint = cellPoint->west;
+		} while (cellPoint->declareSidesOpen('e') == false);
+		sourceDirection = 'e';
+	}
+	else if ((compass > 45) && (compass < 135))
+	{ // default direction	
+		do{
+			cellPoint = cellPoint->north;
+		} while (cellPoint->declareSidesOpen('s') == false);
+		sourceDirection = 's';
+	}
+	else if ((compass > 135) && (compass < 225))
+	{ // facing east
+		do{
+			cellPoint = cellPoint->east;
+		} while (cellPoint->declareSidesOpen('w') == false);
+		sourceDirection = 'w';
+	}
+	else if ((compass > 225) && (compass < 315))
+	{ // facing south
+		do{
+			cellPoint = cellPoint->south;
+		} while (cellPoint->declareSidesOpen('n') == false);
+		sourceDirection = 'n';
+	}
+	else if ((compass == 45) || (compass == 135) || (compass == 225) || (compass == 315))
+	{
+		// hmmmm......
+		// possibly a turn instruction
+	}
+    
+	return cellPoint;
+
+}
 
 
