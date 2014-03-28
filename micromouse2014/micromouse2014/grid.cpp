@@ -32,6 +32,7 @@ grid::grid()
 	column1 = floor(mazeSize / 2);
 	column2 = column1 + 1;
     
+	/* mark the goal cells */
 	cell *cellP = getCell(row1, column1);
     cellP->goalCell = true;
 	cellP = getCell(row1, column2);
@@ -39,6 +40,7 @@ grid::grid()
 	cellP = getCell(row2, column1);
     cellP->goalCell = true;
 	cellP = getCell(row2, column2);
+	cellP->goalCell = true;
 }
 
 // find the current cell based on the row/column
@@ -164,7 +166,7 @@ void grid::wallOrienter(wall &wallInQuestion, string &orientation, double &x_dis
         
 		// area = (1/2) * base * height
 		// height = (2*area)/base . base will be wallinquestion.length. distanceToWall will be height
-		distanceToWall = (2 * area) / wallInQuestion.length;
+	//UNUSED: distanceToWall = (2 * area) / wallInQuestion.length;
 		x_displacement = 0;
 		y_displacement = 0;
 	}

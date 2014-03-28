@@ -114,6 +114,8 @@ public:
 
 	// starting fresh
 	void scan(); // modifies local grid	
+		//bool newWalleXists(); // determine whether there's a new wall or not
+	void directionOfMeasurementChanges(uint difference, int &direction); // called by scan();
 	
 		//void opposingWall();
 

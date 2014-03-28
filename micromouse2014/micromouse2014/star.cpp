@@ -77,7 +77,6 @@ void star::theLoop()
 		breadthSearch();
 		// decide which path to do
 		depthSearch(1);
-		
 	}
 }
 
@@ -101,6 +100,7 @@ void star::scan()
 //#ifdef testing
     using namespace star_config;
 	
+	// subject to change
 	double closeEnough = 1;
 
 	auto _360_it = lide.build_scan(); // create new scan
@@ -115,17 +115,30 @@ void star::scan()
 	follower = (**deqIterate).deg_index.begin();
 
 	int i = 0;
-
 	string wallOrientation;
 	double wallDisplacement_x, wallDisplacement_y, distanceToWall;
 	double previous_value;
+	
+
+	// pI is the ahead iterator. follower is right behind it. beginner is the one that 
+	// is at the beginning of the current wall
 	pI++;
-	// create walls based on the scan
+	uint difference;
+	int direction; // 1 = increasing distances, -1 = decreasing distances
+	int initialDirection;
+
+	// check direction for the first time, using initialDirection
+	difference = (*pI).second->distance - (*follower).second->distance; // the difference between the follower's distance and the ahead distance 
+	directionOfMeasurementChanges(difference, initialDirection);
+
 	while (pI != (**deqIterate).deg_index.end())
 	{
-		// create a wall if the difference between the two distances is too large.
-		if (((*pI).second->distance - (*follower).second->distance) > closeEnough)
-		{
+		// check direction
+		difference = (*pI).second->distance - (*follower).second->distance; // the difference between the follower's distance and the ahead distance 
+		directionOfMeasurementChanges(difference, direction);
+
+		if ((direction != initialDirection) || (abs((*pI).second->distance - (*follower).second->distance) > closeEnough))
+		{	// create a new wall if the direction of change in measurement switches, or if the difference in measurements is greater than closeEnough
 
 			int angle = (*follower).first - (*beginner).first; //angle that encompasses the wall from the viewpoint
 			if (angle < 0)
@@ -141,27 +154,43 @@ void star::scan()
 			follower++;
 			beginner = follower; // set the beginner to the new wall
 		}
-		else // just increment the two iterators, not the beginner
-		{
-			pI++;
+		else
 			follower++;
-		}
+			pI++;
 	}
 
+	//// create walls based on the scan
+	//while (pI != (**deqIterate).deg_index.end())
+	//{
+	//	// create a wall if the difference between the two distances is too large.
+	//	if (((*pI).second->distance - (*follower).second->distance) > closeEnough)
+	//	{
+	//		int angle = (*follower).first - (*beginner).first; //angle that encompasses the wall from the viewpoint
+	//		if (angle < 0)
+	//			angle = -1 * angle;
+	//		// length from beginning spot to the last spot that was recorded as part of the same wall
+	//		double length;
+	//		// create the wall, orient it, and add it to the maze
+	//		wall *nWall = new wall((*beginner).second->distance, (*follower).second->distance, (*beginner).first, (*follower).first);
+	//		maze.wallOrienter(*nWall, wallOrientation, wallDisplacement_x, wallDisplacement_y, distanceToWall);
+	//		maze.addBasedOnCompass(*nWall, wallOrientation, wallDisplacement_x, wallDisplacement_y, distanceToWall);
+	//		pI++; // the ahead iterator
+	//		follower++;
+	//		beginner = follower; // set the beginner to the new wall
+	//	}
+	//	else // just increment the two iterators, not the beginner
+	//	{
+	//		pI++;
+	//		follower++;
+	//	}
+	//}
 
-
-
-
-
-
-    
 	//vect nums; // used to separate the measurements into degrees, 4 numbers per degree
 	//for (int i = 0; i < 1440; i++) // 1440 measurements total
 	//{
 	//	// read in 
 	//	double fake;
 	//	double radius;
-
 	//	if ((i > 180) && (i < 540)) // between angle 45 and 135. might need to expand in order to scan more at once & create the maze faster
 	//	{
 	//		nums.push_back(fake);
@@ -175,6 +204,80 @@ void star::scan()
 	//}
 //#endif
 }
+
+
+/* return true if there's a new wall. 
+This is determined by iterating through the 360 degrees and 
+seeing where the "derivative" changes sign. aka, increasing vs. decreasing*/
+/*bool star::newWalleXists()
+{
+	auto _360_it = lide.build_scan(); // create new scan
+	auto deqIterate = lide.scan_hist.begin(); // deque iterator for 360 scan history. points to whole scans. begin is the latest
+	//auto deg_it  = (**deqIterate).deg_index.begin(); // degree iterator
+
+	// prepare to iterate through the latest scan
+	map<uint, const data*>::iterator pI;
+	pI = (**deqIterate).deg_index.begin();
+	map<uint, const data*>::iterator beginner;
+	beginner = (**deqIterate).deg_index.begin();
+	map<uint, const data*>::iterator follower;
+	follower = (**deqIterate).deg_index.begin();
+
+	// pI is the ahead iterator. follower is right behind it. beginner is the one that 
+	// is at the beginning of the current wall
+	pI++;
+
+	// this deque will hold the last 5, and as soon as it notices that the values are no longer increasing/decreasing, it declares a new wall
+	//std::deque<uint> checker;
+
+	uint difference;
+	int direction; // 1 = increasing distances, -1 = decreasing distances
+	int initialDirection;
+
+	// check direction for the first time, using initialDirection
+	difference = (*pI).second->distance - (*follower).second->distance; // the difference between the follower's distance and the ahead distance 
+	directionOfMeasurementChanges(difference, initialDirection);
+
+	while (pI != (**deqIterate).deg_index.end())
+	{
+		// check direction
+		difference = (*pI).second->distance - (*follower).second->distance; // the difference between the follower's distance and the ahead distance 
+		directionOfMeasurementChanges(difference, direction);
+
+		if (direction != initialDirection)
+		{
+			return true;
+		}
+		
+		follower++;
+		pI++;
+	}
+
+	return false;
+}*/
+
+// says whether the direction of measurement differences is increasing/decreasing.
+// called by scan()
+void star::directionOfMeasurementChanges(uint difference, int &direction)
+{
+	if (difference > 0)
+	{	// the distances are increasing
+		direction = 1;
+	}
+	else if (difference < 0)
+	{	// the distances are decreasing
+		direction = -1;
+	}
+	else
+	{	// the distances are the same
+		direction = 0; // not likely to happen, but must include for the sake of including
+	}
+}
+
+
+
+
+
 
 
 /*********** movement **********/
