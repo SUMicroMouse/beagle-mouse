@@ -128,6 +128,9 @@ struct packet
     /// A checksum calculated from the received information.
     uint16_t    chkcalc;// == chksum (?)
     
+    /// Average distance of the good distance measures.
+    
+    double     avg_dist;
     
     void print() const;
     

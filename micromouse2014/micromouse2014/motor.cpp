@@ -29,13 +29,6 @@ motor::get_speed()
     return  double(duty()) / double(motor_config::max_speed) ;
 }
 
-
-size_t 
-motor::get_angular_position()
-{
-    return 1;
-}
-
 void 
 motor::enable()
 {

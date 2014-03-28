@@ -28,30 +28,38 @@ nav::movedistancevariable(size_t mm)
 }
 
 
-void 
+bool 
 nav::synchronize(double speed) // should go in go forward
 {
+    using namespace encoder_config;
+    using namespace nav_config;
+    snapshot * state = enc.hist.front();
+    auto v_L = abs(get<1>(*state)->_vel);
+    auto v_R = abs(get<2>(*state)->_vel);
+    auto v_avg = AVG(v_L , v_R);
     
-	double goal_speed_L = speed;
-	double goal_speed_R = speed;
+    auto s_L = left.get_speed();
+    auto s_R = right.get_speed();
+    auto s_avg = AVG(s_L , s_R);
     
-	if(left.chk_en() = false || right.enable() == false)
-	{
-		left.enable();
-		right.enable();
-	}
+    uint8_t sw_t = 0;
+    sw_t |=  (eqish(v_avg,speed)    ? 0x01:0);
+    sw_t |=  (speed < 0             ? 0x02:0);
     
-	double avg_speed = (left.get_speed() + right.get_speed())/2.0;
-    
-	if(goal_speed_L < goal_speed_R)
-	{	goal_speed_L = max_invariance + goal_speed_L;}
-    
-	else(goal_speed_R < goal_speed_L)
-	{goal_speed_R = max_invariance + goal_speed_R;}
-    
-	else(goal_speed_R == goal_speed_L)
-    {goal_speed_L = avg_speed;
-		goal_speed_R = avg.speed;}
+    if ( eqish(v_avg,speed) )
+    {  
+        left.set_speed (s_avg);
+        right.set_speed(s_avg);
+        return true;
+    }
+    if (v_L<v_R && v_avg < speed){
+        left.set_speed (s_L+max_invariance);
+        right.set_speed(s_R-max_invariance);
+        return true;
+    }else{
+        left.set_speed (s_L-max_invariance);
+        right.set_speed(s_R+max_invariance);
+    }
 }
 
 
@@ -98,7 +106,7 @@ nav::move(double speed)
 }
 
 void 
-nav::veerleft(float VR, float VL)
+nav::veerleft(double ratio)
 {
     moveforward();
 	left.disable();
@@ -108,7 +116,7 @@ nav::veerleft(float VR, float VL)
 
 
 void 
-nav::veerright(float VR, float VL)
+nav::veerright(double ratio)
 {
     moveforward();
 	right.disable();

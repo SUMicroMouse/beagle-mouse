@@ -11,22 +11,22 @@
 using namespace std;
 using namespace encoder_config;
 
-encoder_config::snapshot 
+encoder_config::snapshot* 
 encoder::add_hist(measure *_L, measure *_R)
 {
     auto _t = std::chrono::system_clock::now().time_since_epoch().count();
-    hist.push_front(tuple<timestamp,measure*, measure*>(_t, _L, _R));
+    hist.push_front(new tuple<timestamp,measure*, measure*>(_t, _L, _R));
 
     if (hist.size() > hist_max){   hist.pop_back();    }
     return hist.front();
 }
 
-snapshot
+snapshot*
 encoder::update()
 {
-#define FAIL_CHK                                    \
+#define PTR_CHK(_ptr)                               \
 do{                                                 \
-    if(m_ptr == nullptr)                            \
+    if(_ptr == nullptr)                             \
     {                                               \
         cerr << "\nTranslation failure!"<<endl;     \
         throw exception();                          \
@@ -34,9 +34,8 @@ do{                                                 \
                                                     \
 }while(0)
 
-    uint8_t *msg = new uint8_t[msg_size];
-    msg = (*this).sleepy_read(msg_size);
-    measure *left, *right, *m_ptr=nullptr;
+    uint8_t *msg = (*this).sleepy_read(msg_size);
+    measure *left=nullptr, *right=nullptr, *m_ptr=nullptr;
     for (size_t i=0; i<msg_size; ++i) 
     {
         switch (msg[i]) 
@@ -44,21 +43,23 @@ do{                                                 \
             case 'L': m_ptr = left  = new measure(); break;
             case 'R': m_ptr = right = new measure(); break;
             case 'P': 
-                ++i; FAIL_CHK;  m_ptr->_pos = * (position_t*)msg; 
+                ++i; PTR_CHK(m_ptr);  m_ptr->_pos = * (position_t*)msg; 
                 i += sizeof(position_t); break;
             case 'V': 
-                ++i; FAIL_CHK;  m_ptr->_vel = * (velocity_t*)msg; 
+                ++i; PTR_CHK(m_ptr);  m_ptr->_vel = * (velocity_t*)msg; 
                 i += sizeof(velocity_t); break;
             case 'A': 
-                ++i; FAIL_CHK;  m_ptr->_accl = * (xlr8tion_t*)msg; 
+                ++i; PTR_CHK(m_ptr);  m_ptr->_accl = * (xlr8tion_t*)msg; 
                 i += sizeof(xlr8tion_t); break;
                 
-            case EOE:  return add_hist(left, right);
+            case EOE:
+                PTR_CHK(left); PTR_CHK(right);
+                return add_hist(left, right);
         }
     }
     delete msg;
 #undef FAIL_CHK
-    return snapshot(NULL,nullptr,nullptr);
+    return new snapshot(NULL,nullptr,nullptr);
 }
 
 void 

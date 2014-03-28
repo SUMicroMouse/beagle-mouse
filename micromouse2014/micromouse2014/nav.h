@@ -5,6 +5,10 @@
 // Created at Syracuse University for the 2014 micromouse competition
 //
 
+#ifndef _micromouse__nav_
+#define _micromouse__nav_
+
+
 #include "motor.h"
 #include "encoder.h"
 
@@ -12,7 +16,10 @@
 #include "packet.h"
 
 #include <iostream>
+#include <tuple>
 
+#define DIV(a,b) ( b==0 ? a : double(a)/double(b) )
+#define AVG(a,b) ( 0.5 * double(a) + 0.5 * double(b) )
 
 namespace nav_config
 {
@@ -23,7 +30,13 @@ namespace nav_config
 	constexpr double max_invariance = 0.0001;
 	constexpr double min_invariance = 0.00000001;
 	constexpr size_t duration = 10000000;
-
+    
+    static 
+    bool eqish(double a, double b)
+    {
+        return (abs(DIV(a,b))-1<=(0+min_invariance) &&
+                abs(DIV(a,b))-1<=(0-min_invariance) ? true:false); 
+    }
 
 }
 //change
@@ -48,7 +61,7 @@ public:
 	void movedistancevariable(size_t mm);
     
 	// makes sure wheels are moving in step at same speed 
-	 void synchronize(double speed);
+    bool synchronize(double speed);
 	 
 	// assuming the front middle is 0 degrees; positive == clockwise 
 	void turn(double angle);
@@ -89,8 +102,13 @@ public:
 	//stops motor 
 	void stop();
 
-	
 
 		
 };
+
+
+
+
+
+#endif //_micromouse__nav_
 

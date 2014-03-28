@@ -43,13 +43,19 @@ namespace lidar_config
     static auto tty_path       = "/dev/ttyO1";
     
     /// The reference degrees for the distance measurements
-    constexpr uint degree_north     = 90;
-    constexpr uint degree_south     = 270;
-    constexpr uint degree_east      = 0;
-    constexpr uint degree_west      = 180;
+    constexpr int degree_north     = 0;
+    constexpr int degree_south     = 180;
+    constexpr int degree_east      = 90;
+    constexpr int degree_west      = 270;
+    
+    constexpr int degree_max       = 360;
     
     constexpr size_t hist_max 		= 300;// 5 scans/sec * 60 sec
     
+    static inline
+    int offset(int cardinal, int change){
+        return ( cardinal + change + degree_max ) % degree_max;
+    }
   
 }
 
@@ -92,6 +98,7 @@ public:
     std::deque<_360_scan*>::iterator
         get_scan_iterator();
     
+    /// Update scan_hist with temp data
     void done_scan_iterator();
     
 	/** TODO: Scan history interface.

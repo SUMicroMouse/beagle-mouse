@@ -61,27 +61,42 @@ struct measure
     encoder_config::xlr8tion_t    _accl;
 };
 
-struct encoder : device_tty
+class encoder : device_tty
 {
-    std::deque<encoder_config::snapshot> hist;
+    /// Add provided measurements to the history deque
+    inline 
+    encoder_config::snapshot* 
+        add_hist(measure* _L, measure* _R);
     
+    /// Temporart data storage; holds last N snapshots
+    std::deque<encoder_config::snapshot*> temp_hist;
+public:
+    
+    /// Primary data storage; holds last N snapshots
+    std::deque<encoder_config::snapshot*> hist;
+    
+    /// Defualt constructor; relies on config path
     encoder(): device_tty( encoder_config::path_ls.begin()[0])
     {}
     
+    /// Explicit constructor; requires provision of dev path  
     encoder( const char* _path ):device_tty(_path)
     {}
-    
-    // Add provided measurements to the histore deque
-    inline 
-    encoder_config::snapshot 
-        add_hist(measure* _L, measure* _R);
-    
-    // Updates the history with most recent measurements from wheels
-    encoder_config::snapshot 
+ 
+    /// Updates the history with most recent measurements from wheels
+    encoder_config::snapshot* 
         update();
     
-    // Infinite loop of updates
+    /// Infinite loop of updates
     void loop_update();
+    
+    /// Get a safe iterator for sequential reads. STOPS
+    std::deque<encoder_config::snapshot*>::iterator
+        get_hist_iterator();
+    
+    /// Update scan_hist with temp data
+    void done_scan_iterator();
+    
 };
 
 
