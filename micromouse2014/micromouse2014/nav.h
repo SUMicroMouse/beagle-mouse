@@ -31,7 +31,7 @@ namespace nav_config
 	constexpr double min_invariance = 0.00000001;
 	constexpr size_t duration = 10000000;
     
-    static 
+    static inline
     bool eqish(double a, double b)
     {
         return (abs(DIV(a,b))-1<=(0+min_invariance) &&
