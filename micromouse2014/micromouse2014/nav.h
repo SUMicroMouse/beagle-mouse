@@ -103,6 +103,13 @@ public:
 	void stop();
 
 
+	// keep the robot facing straight - in parallel with the walls along the sides of it
+	void stayStraightLoop();
+	
+	/** the following each return true if they find that the robot isn't going straight**/
+	bool straightAhead(int &leftORright);
+	bool oneSidedApproach();
+	bool twoSidedApproach();
 		
 };
 

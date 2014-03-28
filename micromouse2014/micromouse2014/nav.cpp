@@ -157,7 +157,43 @@ nav::stop()
 }
 
 
+/* loop the three functions that keep the robot going straight */
+void nav::stayStraightLoop()
+{
+	int leftORright;	// -1 means left is closer... 1 means right is closer
+	while (true)
+	{
+		if ((oneSidedApproach() || twoSidedApproach()) && straightAhead(leftORright))
+		{	
+			// fix it
+			switch (leftORright)
+			{
+			case -1:	// nudge left
+				break;
+			case 1:		// nudge right
+				break;
+			default:
+				break;
+			}
+		}
+	}
+}
 
+/* Return true if the function determines that the left center is closer than the right center,
+or if the right center is closer than the left center */
+bool nav::straightAhead(int &leftORright)
+{
+	using namespace lidar_config;
 
+	// the lidar is called view
+	auto scanPoint = view.scan_hist.front();
 
+	int left = (degree_north - 1 + degree_max) % degree_max;
+	int right = (degree_north + 1 + degree_max) % degree_max;
 
+	auto p_OfInterest = scanPoint->deg_index.at(degree_north);	// straight ahead
+	
+	p_OfInterest->
+
+	return false;
+}

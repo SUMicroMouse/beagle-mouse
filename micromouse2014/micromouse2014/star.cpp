@@ -41,17 +41,17 @@ view(the_lidar), navigator(the_nav)
 
 
 	// scan and update the maze
-	while (true)
-	{
-		scan();	headOnDistance = -1; // set headOnDistance to the average of the packets that represent what is directly in front. compensate with compass
-		maze.updateMaze();
-		//goForwardOne();
-		scan();	headOnDistance2 = -1;
-		maze.updateMaze();
-		rob.PositionChange();
+	//while (true)
+	//{
+	//	scan();	headOnDistance = -1; // set headOnDistance to the average of the packets that represent what is directly in front. compensate with compass
+	//	maze.updateMaze();
+	//	//goForwardOne();
+	//	scan();	headOnDistance2 = -1;
+	//	maze.updateMaze();
+	//	rob.PositionChange();
 
-		decide(); // decide will check current spot, choose to go forward, left, right, blah blah
-	}
+	//	decide(); // decide will check current spot, choose to go forward, left, right, blah blah
+	//}
 
 	
 #endif 
