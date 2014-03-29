@@ -26,7 +26,7 @@ namespace tty_config
 {
 	constexpr size_t BAUD =115200;
 	constexpr size_t pkt_lag = std::micro::den / float(BAUD);
-};
+}
 
 
 /********************    Teletype Style Device        **********************/

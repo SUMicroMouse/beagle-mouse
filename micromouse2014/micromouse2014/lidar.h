@@ -57,7 +57,7 @@ namespace lidar_config
         return ( cardinal + change + degree_max ) % degree_max;
     }
   
-}
+};
 
 
 

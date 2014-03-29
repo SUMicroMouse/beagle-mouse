@@ -18,10 +18,10 @@
 #include <cmath>
 
 #include "grid.h"
-#include "wall.h"
+//#include "wall.h"
 #include "lidar.h"
 #include "nav.h"
-#include "packet.h"
+//#include "packet.h"
 
 
 namespace star_config

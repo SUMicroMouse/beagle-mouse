@@ -15,7 +15,7 @@
 
 
 
-#include "wall.h"
+//#include "wall.h"
 #include "cell.h"
 #include "packet.h"
 
@@ -28,7 +28,7 @@ namespace grid_config
     
     constexpr int origin_x =0 , origin_y =0;
     
-    double goalX, goalY;
+    //double goalX, goalY;
 	
 
 }

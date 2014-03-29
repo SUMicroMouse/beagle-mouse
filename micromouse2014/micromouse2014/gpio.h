@@ -22,14 +22,14 @@ class encoder;
 namespace gpio_config
 {
     //static const char* 
-    static const auto path_ls =
+    static auto path_ls =
     {
         "/sys/class/gpio/gpio69/",
         "/sys/class/gpio/gpio70/",
         "/sys/class/gpio/gpio74/"
     };
 
-    static const auto attr_ls =
+    static auto attr_ls =
     {
         "direction",    // 'in' -or- 'out'
         "value"         // '1'  -or- '0'

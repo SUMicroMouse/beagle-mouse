@@ -26,14 +26,14 @@ typedef std::chrono::time_point<std::chrono::system_clock>::rep timestamp;
 namespace packet_config
 {
     /// The smallest valid value for packet.index
-    constexpr uint index_min     = 0xA0;
+    constexpr uint index_min        = 0xA0;
     /// The largest valid value for packet.index
-    constexpr uint index_max     = 0xF9;
+    constexpr uint index_max        = 0xF9;
     /// The number of packets created in a rotation
-    constexpr uint index_range   = 90;
+    constexpr uint index_range      = 90;
     /// The number of data points in a single packet
-    constexpr uint data_num = 4;
-}
+    constexpr uint data_num         = 4;
+};
 
 /** The 4-Byte packet sub-component with primary data.
  

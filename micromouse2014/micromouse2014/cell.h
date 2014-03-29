@@ -42,8 +42,8 @@ namespace cell_config
     const int CELL_SIZE =  8; 
     
     // size of cells
-	double lengthwidth;
-	double threshold;	// distance at which it's determined the side walls aren't there
+	//double lengthwidth;
+	//double threshold;	// distance at which it's determined the side walls aren't there
 }
 
 class cell

@@ -7,7 +7,7 @@
 //
 
 #include "grid.h"
-#include "wall.h"
+
 
 using namespace std;
 using namespace grid_config;

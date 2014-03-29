@@ -12,10 +12,9 @@
 #include <iostream>
 
 
-#include "lidar.h"
-#include "motor.h"
+//#include "lidar.h"
 #include "star.h"
-#include "nav.h"
+//#include "nav.h"
 
 namespace robot_config 
 {

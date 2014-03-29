@@ -27,9 +27,9 @@ namespace encoder_config
 
     typedef std::chrono::time_point<std::chrono::system_clock>::rep timestamp;
 
-    typedef int16_t position_t;
-    typedef int16_t velocity_t;
-    typedef int16_t xlr8tion_t;
+    typedef int32_t position_t;
+    typedef float   velocity_t;
+    typedef float   xlr8tion_t;
     
     constexpr size_t hist_max = 100;
     
