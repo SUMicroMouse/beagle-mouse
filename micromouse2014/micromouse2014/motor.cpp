@@ -32,14 +32,16 @@ motor::get_speed()
 void 
 motor::forward()
 {
-    enabler.direction("out");
+    if( !chk_en() ){    return;     }
+//    enabler.direction("out");
     enabler.value("1");
 }
 
 void 
 motor::backward()
 {
-    enabler.direction("out");
+    if( chk_en() ){     return;     }
+//    enabler.direction("out");
     enabler.value("0");
 }
 

@@ -20,23 +20,32 @@
 
 #define DIV(a,b) ( b==0 ? a : double(a)/double(b) )
 #define AVG(a,b) ( 0.5 * double(a) + 0.5 * double(b) )
+class star;
+class nav;
 
 namespace nav_config
 {
-	constexpr double max_speed = 1; 
-	constexpr double min_speed = 0;
-	constexpr double min_negspeed = 0;
-	constexpr double max_negspeed = 1;
+    constexpr double PI = 3.14159265359;
+    
+	constexpr double max_speed      = 1; 
+	constexpr double min_speed      = 0;
+	constexpr double min_negspeed   = 0;
+	constexpr double max_negspeed   = 1;
 	constexpr double max_invariance = 0.0001;
 	constexpr double min_invariance = 0.00000001;
-	constexpr size_t duration = 10000000;
+	constexpr size_t duration       = 10000000;
     
-    constexpr uint wheel_diameter = 42;//mm
+    //Wheels
+    constexpr uint wheel_diameter   = 42;//mm
+    constexpr uint unit_per_rot     = 45;
+    constexpr uint wheel_base       = 80;//mm
     
-    constexpr uint unit_per_rot = 45;
+    constexpr double std_move_speed = 0.5;
+    
+    constexpr uint cell_size        = 180;//mm
     
 	// for straight sleep
-	constexpr size_t sleeptime = 100; // microseconds
+	constexpr size_t sleeptime      = 100; // microseconds
 
 	// returns true if they are similar
     static inline
@@ -45,14 +54,13 @@ namespace nav_config
         return (abs(DIV(a,b))-1<=(0+min_invariance) &&
                 abs(DIV(a,b))-1<=(0-min_invariance) ? true:false); 
     }
-    
-    
 
 }
 //change
 
 class nav
 {
+    friend star;
 private:
 	motor left; 
 	motor right;
@@ -61,6 +69,14 @@ private:
     
     lidar& view;
 
+protected:
+    inline //-1 is invalid
+    int dist_at(uint degree)
+    {
+        auto it = view.scan_hist.front()->deg_index.at(degree);
+        return (it->invalid_data?-1:it->distance);
+    }
+    
 public:
     /* ____Primary methods:____ require specific arguments */
     
@@ -68,7 +84,7 @@ public:
     nav(lidar & lidar_ptr);
 
     // moves a distance in terms of mm 
-	void movedistancevariable(size_t mm);
+	void movedistancevariable(int mm);
     
 	// makes sure wheels are moving in step at same speed 
     bool synchronize(double speed);

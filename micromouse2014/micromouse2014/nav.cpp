@@ -22,9 +22,40 @@ right(motor_config::m_select::RIGHT)
 
 
 void 
-nav::movedistancevariable(size_t mm)
+nav::movedistancevariable(int mm)
 {
+    using namespace encoder_config;
+    using namespace nav_config;
     
+    stop(); // begin from stopped position
+    if (mm==0) {    return;     }
+    
+    snapshot *_t, *_t0 = enc.hist.front();
+//    int _l , _l0 = dist_at(lidar_config::degree_north);
+    auto goal = (mm * DIV((PI*wheel_diameter),unit_per_rot));
+    
+#define avg_diff                                        \
+    AVG(( get<1>(*_t)->_pos - get<1>(*_t0)->_pos ),     \
+        ( get<2>(*_t)->_pos - get<2>(*_t0)->_pos ))
+    
+    move( std_move_speed*(mm>0?1:   mm<0?-1  :0) );
+    
+    double _d = 1;
+    while ( !eqish(_d, 0) ) 
+    {
+        _t = enc.hist.front();
+//        _l = dist_at(lidar_config::degree_north);
+        _d = DIV( avg_diff , goal );
+        
+        move(_d);
+        synchronize(_d);
+        
+        _t = enc.hist.front();
+    }
+             
+    stop(); // end at stopped position
+             
+#undef avg_diff
 }
 
 
@@ -66,33 +97,91 @@ nav::turn(double angle)
     using namespace encoder_config;
     using namespace nav_config;
     
-    snapshot * state = enc.hist.front();
+    stop(); // begin from stopped position
     
-    auto p_L = abs(get<1>(*state)->_pos);
-    auto p_R = abs(get<2>(*state)->_pos);
-    auto p_avg = AVG(p_L , p_R);
+    //handle edge cases
+    if( eqish(angle,0) ){  return;  }
+    angle = (angle>360?360:    angle<-360?-360:    angle);
     
+    snapshot *_t, *_t0 = enc.hist.front();
+    //    int _l , _l0 = dist_at(lidar_config::degree_north);
     
+    auto goal = ((angle * double(PI*wheel_base)) * 
+                 DIV((PI*wheel_diameter),unit_per_rot));
     
+#define _diff( _n_ ) ( get< _n_ >(*_t)->_pos - get< _n_ >(*_t0)->_pos )
+
+    if (angle > 0) 
+    {
+        left.forward();
+        right.backward();
+        left.set_speed(std_move_speed);
+        right.set_speed(std_move_speed);
+    }else{
+        right.forward();
+        left.backward();
+        right.set_speed(std_move_speed);
+        left.set_speed(std_move_speed);
+    }
+    
+    double _d1 = 1 , _d2 = 1;
+    while ( !eqish(_d1, 0) && !eqish(_d2, 0) ) 
+    {
+        _t = enc.hist.front();
+        //        _l = dist_at(lidar_config::degree_north);
+        _d1 = DIV( _diff( 1 ) , goal );
+        _d2 = DIV( _diff( 2 ) , goal );
+        
+        if (angle > 0) 
+        {
+            left.forward();
+            right.backward();
+            left.set_speed(std_move_speed);
+            right.set_speed(std_move_speed);
+        }else{
+            right.forward();
+            left.backward();
+            right.set_speed(std_move_speed);
+            left.set_speed(std_move_speed);
+        }
+        
+        synchronize( 0 - AVG(_d1,_d2) );
+    }
+    
+    stop(); // end at stopped position
+    
+#undef _diff
 }
 
 void
 nav::move(double speed)
 {
-    
+    if (speed>0) {
+        left.forward();
+        right.forward();
+    }else{
+        left.backward();
+        right.backward();
+    }
+    left.set_speed(speed);
+    right.set_speed(speed);
 }
 
 void 
 nav::veerleft(double ratio)
 {
-
+    if(abs(ratio)==0 ){ return;     }
+    if(abs(ratio)>1  ){ right.set_speed(left.get_speed()*ratio);    }
+    if(abs(ratio)<1  ){ left.set_speed(right.get_speed()*ratio);    }
 }
 
 
 void 
 nav::veerright(double ratio)
 {
-
+    if(abs(ratio)==0 ){ return;     }
+    if(abs(ratio)>1  ){ left.set_speed(right.get_speed()*ratio);    }
+    if(abs(ratio)<1  ){ right.set_speed(left.get_speed()*ratio);    }
 }
 
 
@@ -100,7 +189,7 @@ nav::veerright(double ratio)
 void 
 nav::goForwardOne()
 {
-
+    movedistancevariable(nav_config::cell_size);
 }
 
 
