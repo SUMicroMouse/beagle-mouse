@@ -531,19 +531,31 @@ cell::nextCell()
 {
 	if ((north->sum == sum) || north->goalCell)
 		if (!(north == previousCell))
+        {
+            north->previousCell = this;
 			return north;
+        }
 		
 	if ((south->sum == sum) || south->goalCell)
 		if (!(south == previousCell))
+        {
+            south->previousCell = this;
 			return south;
+        }
 	
 	if ((east->sum == sum) || (east->goalCell))
 		if (!(east == previousCell))
+        {
+            east->previousCell = this;
 			return east;
+        }
 	
 	if ((west->sum == sum) || west->goalCell)
 		if (!(west == previousCell))
+        {
+            west->previousCell = this;
 			return west;
+        }
     
     return nullptr;
 }

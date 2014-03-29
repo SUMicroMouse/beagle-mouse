@@ -451,7 +451,7 @@ bool grid::closeEnough(double angle1, double angle2)
 // the return value means
 /*********should turn to see more if the end of a wall is within the last packet*********/
 int 
-grid::updateMaze(_360_scan wall_points)
+grid::updateMaze()
 {
 	//// add walls to wall deque. probably should turn in the direction of the longer wall to record the pathway in full
  //   

@@ -501,7 +501,7 @@ void star::breadthSearch()
 
 // mode 1 = go with the "known" path
 // mode 2 = go with the "unknown" path
-int star::depthSearch(int mode)
+void star::depthSearch(int mode)
 {
 	// start at current cell once again
 	cell *current = maze.findCell(maze.xDistance, maze.yDistance);
@@ -512,7 +512,7 @@ int star::depthSearch(int mode)
 	current->returnSides(north, south, east, west);
 	int walls = north + south + east + west;
 	if (walls >= 3)
-		return -1;	// dead end
+		return;	// dead end
 
 
 	/*cell *closestGoalCell = maze.findClosestGoalCell(current->x_center, current->y_center);
@@ -541,7 +541,7 @@ int star::depthSearch(int mode)
 				   {
 					   path *p1 = new path();
 					   cell *c1;
-					   c1 = current->nextCell();
+					   c1 = current->nextCell(); // move to next cell and mark its previouscell as this current one
 					   p1->members.push_back(c1);
 
 					   while (true)
@@ -887,31 +887,34 @@ exclude the previous cell
 */
 cell *star::nextCellinPath(cell &current)
 {
+    cell *chosen;
 	int north, south, east, west;
+    current.returnSides(north,south,east,west);
 
 	if ((north < 1) && (current.north != current.previousCell))
 	{
 		if ((current.north->returnSum() == current.returnSum()) || (current.north->goalCell))
-			return current.north;
+			chosen = current.north;
 
 		if (current.north->goalCell)
-			return current.north;
+			chosen = current.north;
 	}
 	if ((south < 1) && (current.south != current.previousCell))
 	{
 		if ((current.south->returnSum() == current.returnSum()) || (current.south->goalCell))
-			return current.south;
+			chosen = current.south;
 	}
 	if ((east < 1) && (current.east != current.previousCell))
 	{
 		if ((current.east->returnSum() == current.returnSum()) || (current.east->goalCell))
-			return current.east;
+			chosen = current.east;
 	}
 	if ((west < 1) && (current.west != current.previousCell))
 	{
 		if ((current.west->returnSum() == current.returnSum()) || (current.west->goalCell))
-			return current.west;
+			chosen = current.west;
 	}
+    return chosen;
 }
 
 void star::determineMovementCost(cell &ce)

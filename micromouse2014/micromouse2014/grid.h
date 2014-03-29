@@ -59,7 +59,7 @@ public:
     void    createMaze(); // create the linked lists of cells, 16 by 16
 	void    markGoalCells();
     
-    int  updateMaze(_360_scan wall_points);
+    int  updateMaze();
 	void wallOrienter(wall &wallInQuestion, 
                       std::string &orientation, 
                       double &x_displacement, 
