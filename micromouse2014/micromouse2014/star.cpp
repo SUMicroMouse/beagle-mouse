@@ -25,6 +25,8 @@ lide(the_lidar), navigator(the_nav)
 	maze.startingRow = 0;
 	maze.startingColumn = 0;
 	atJunction = false;
+	maze.xDistance = cellsize * 0.5;
+	maze.yDistance = cellsize * 0.5;
 
 
 	// The goal cell's attributes, assuming the goal is always the center
