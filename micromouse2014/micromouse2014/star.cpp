@@ -35,25 +35,7 @@ lide(the_lidar), navigator(the_nav)
 	leftTurns = 0;
 
 	// create the maze
-	maze.createMaze();
-
-	/********* Give the cells their heuristicCost, the estimated cost to the goal ******/
-
-
-	// scan and update the maze
-	//while (true)
-	//{
-	//	scan();	headOnDistance = -1; // set headOnDistance to the average of the packets that represent what is directly in front. compensate with compass
-	//	maze.updateMaze();
-	//	//goForwardOne();
-	//	scan();	headOnDistance2 = -1;
-	//	maze.updateMaze();
-	//	rob.PositionChange();
-
-	//	decide(); // decide will check current spot, choose to go forward, left, right, blah blah
-	//}
-
-	
+	maze.createMaze();	
 #endif 
 }
 
@@ -328,12 +310,18 @@ int star::decide()
 		{
 			// move backward to make up the difference
 			navigator.movedistancevariable(-correctedDistance);
+			
+			// update position
+			PositionChange(-correctedDistance);
 		}
 		// go forward just a bit
 		else
 		{
 			// move forward to make up the difference
 			navigator.movedistancevariable(correctedDistance);
+
+			// update position
+			PositionChange(correctedDistance);
 		}
 
 		// declare that we are at a junction. inside the junction. Don't scan. Turn first
@@ -470,7 +458,8 @@ void star::breadthSearch()
 	// WORKING from the goal to the current position
 
 	// look at child cells
-	cellP = maze.findClosestGoalCell(cellP->x_center, cellP->y_center);
+	double xxxx = cellP->x_center, yyyy = cellP->y_center;
+	cellP = maze.findClosestGoalCell(xxxx, yyyy);
     
 	//why is this here?
     //int north, south, east, west;
@@ -530,18 +519,6 @@ void star::breadthSearch()
 		countCost++;
 	} while ((i < ((maze.mazeSize*maze.mazeSize) - 4)));	// do every cell except the current cell
 
-
-
-
-
-
-
-	/********* depth search ***********/
-
-	
-	
-
-
 }
 
 // mode 1 = go with the "known" path
@@ -556,21 +533,14 @@ void star::depthSearch(int mode)
 	// check for dead end. if it's a dead end, return
 	current->returnSides(north, south, east, west);
 	int walls = north + south + east + west;
-	if (walls >= 3)
-		return;	// dead end
-
-
-	/*cell *closestGoalCell = maze.findClosestGoalCell(current->x_center, current->y_center);
-	double x = current->x_center - closestGoalCell->x_center;
-	double y = current->y_center - closestGoalCell->y_center;
-	double distance = sqrt((x*x) + (y*y));
-*/
+	/*//if (walls >= 3)
+	//{
+	//	// turn around
+	//	turn()
+	//	return;	// dead end
+	//}*/
 
 	current->previousCell = current; // take care of the previous cell pointer
-
-    //These two vars are unused.
-	//double lowestSum;
-	//cell *lowestNeighbor; // add the neighbor with the lowest sum to the path
 
 	/***** container for the possible paths *****/
 	vector<path*> possiblePaths;
@@ -667,13 +637,12 @@ void star::depthSearch(int mode)
 
 			   // choose the path with the least unknowns. just do walls in general for now
 			   int lowestIndex = 0;
-			   if (possiblePaths[1]->unknownWalls < possiblePaths[0]->unknownWalls)
-				   lowestIndex = 1;
-			   if (possiblePaths[2]->unknownWalls < possiblePaths[1]->unknownWalls)
-				   lowestIndex = 2;
-			   if (possiblePaths[3]->unknownWalls < possiblePaths[2]->unknownWalls)
-				   lowestIndex = 3;
-
+			   for (int q = 0; q < possiblePaths.size(); q++)
+			   {
+				   if (possiblePaths[q]->unknownWalls < possiblePaths[lowestIndex]->unknownWalls)
+					   lowestIndex = q;
+			   }
+			   // choose the path
 			   chosenPath = possiblePaths[lowestIndex];
 
 			   // switch statement
@@ -790,15 +759,14 @@ void star::depthSearch(int mode)
 				   }
 			   }
 
-			   // choose the path with the least unknowns. just do walls in general for now
+			   // choose the path with the most unknowns. just do walls in general for now
 			   int highestIndex = 0;
-			   if (possiblePaths[1]->unknownWalls > possiblePaths[0]->unknownWalls)
-				   highestIndex = 1;
-			   if (possiblePaths[2]->unknownWalls > possiblePaths[1]->unknownWalls)
-				   highestIndex = 2;
-			   if (possiblePaths[3]->unknownWalls > possiblePaths[2]->unknownWalls)
-				   highestIndex = 3;
-
+			   for (int h = 0; h < possiblePaths.size(); h++)
+			   {
+				   if (possiblePaths[h]->unknownWalls > possiblePaths[highestIndex]->unknownWalls)
+					   highestIndex = h;
+			   }
+			   // choose path
 			   chosenPath = possiblePaths[highestIndex];
 
 			   // switch statement
