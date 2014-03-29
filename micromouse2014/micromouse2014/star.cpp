@@ -8,7 +8,7 @@
 #include "star.h"
 
 
-#define cellsize 16
+#define cellsize 18
 //#define testing 
 
 /********** Star ********/
@@ -43,6 +43,7 @@ void star::theLoop()
 {
 	std::map<uint, const data*>::iterator dIterate;
 
+	cell *current;
 	while (true)
 	{
 		lide.build_scan();
@@ -59,6 +60,10 @@ void star::theLoop()
 		breadthSearch();
 		// decide which path to do
 		depthSearch(1);
+
+		current = maze.findCell(maze.xDistance, maze.yDistance);
+		if (current->goalCell)
+			break;
 	}
 }
 
@@ -89,12 +94,18 @@ void star::scan()
 	auto deqIterate = lide.scan_hist.begin(); // deque iterator for 360 scan history. points to whole scans. begin is the latest
 	//auto deg_it  = (**deqIterate).deg_index.begin(); // degree iterator
 
-	map<uint, const data*>::iterator pI;
-	pI = (**deqIterate).deg_index.begin();
 	map<uint, const data*>::iterator beginner;
 	beginner = (**deqIterate).deg_index.begin();
+	while (beginner->second->invalid_data)
+	{
+		beginner++;
+	}
+
+	map<uint, const data*>::iterator pI;
+	pI = beginner;
+	
 	map<uint, const data*>::iterator follower;
-	follower = (**deqIterate).deg_index.begin();
+	follower = beginner;
 
 	int i = 0;
 	string wallOrientation;
@@ -106,39 +117,60 @@ void star::scan()
 	// is at the beginning of the current wall
 	pI++;
 	uint difference;
-	int direction; // 1 = increasing distances, -1 = decreasing distances
+	int direction = 0; // 1 = increasing distances, -1 = decreasing distances
 	int initialDirection;
 
+// prepare to go forward anyway
+	int countSuccess;
+
 	// check direction for the first time, using initialDirection
-	difference = (*pI).second->distance - (*follower).second->distance; // the difference between the follower's distance and the ahead distance 
+	if (!(*pI).second->invalid_data && !(*follower).second->invalid_data)
+		difference = (*pI).second->distance - (*follower).second->distance; // the difference between the follower's distance and the ahead distance 
 	directionOfMeasurementChanges(difference, initialDirection);
+
+
+	while ((*pI).second->invalid_data || (*follower).second->invalid_data)
+	{
+		pI++;
+		follower++;
+	}
 
 	while (pI != (**deqIterate).deg_index.end())
 	{
 		// check direction
-		difference = (*pI).second->distance - (*follower).second->distance; // the difference between the follower's distance and the ahead distance 
-		directionOfMeasurementChanges(difference, direction);
+		if (!(*pI).second->invalid_data && !(*follower).second->invalid_data)
+		{
+			difference = (*pI).second->distance - (*follower).second->distance; // the difference between the follower's distance and the ahead distance 
+			directionOfMeasurementChanges(difference, direction);
 
-		if ((direction != initialDirection) || (abs((*pI).second->distance - (*follower).second->distance) > closeEnough))
-		{	// create a new wall if the direction of change in measurement switches, or if the difference in measurements is greater than closeEnough
+			if ((direction != initialDirection) || (abs((*pI).second->distance - (*follower).second->distance) > closeEnough))
+			{	// create a new wall if the direction of change in measurement switches, or if the difference in measurements is greater than closeEnough
 
-			int angle = (*follower).first - (*beginner).first; //angle that encompasses the wall from the viewpoint
-			if (angle < 0)
-				angle = -1 * angle;
-			// length from beginning spot to the last spot that was recorded as part of the same wall
-			double length;
-			// create the wall, orient it, and add it to the maze
-			wall *nWall = new wall((*beginner).second->distance, (*follower).second->distance, (*beginner).first, (*follower).first);
-			maze.wallOrienter(*nWall, wallOrientation, wallDisplacement_x, wallDisplacement_y, distanceToWall);
-			maze.addBasedOnCompass(*nWall, wallOrientation, wallDisplacement_x, wallDisplacement_y, distanceToWall);
+				int angle = (*follower).first - (*beginner).first; //angle that encompasses the wall from the viewpoint
+				if (angle < 0)
+					angle = -1 * angle;
+				// length from beginning spot to the last spot that was recorded as part of the same wall
+				double length;
+				// create the wall, orient it, and add it to the maze
+				wall *nWall = new wall((*beginner).second->distance, (*follower).second->distance, (*beginner).first, (*follower).first);
+				maze.wallOrienter(*nWall, wallOrientation, wallDisplacement_x, wallDisplacement_y, distanceToWall);
+				maze.addBasedOnCompass(*nWall, wallOrientation, wallDisplacement_x, wallDisplacement_y, distanceToWall);
 
-			pI++; // the ahead iterator
-			follower++;
-			beginner = follower; // set the beginner to the new wall
+				pI++; // the ahead iterator
+				follower++;
+				beginner = follower; // set the beginner to the new wall
+			}
+			else
+			{
+				follower++;
+				pI++;
+			}
 		}
 		else
+		{
 			follower++;
 			pI++;
+		}
 	}
 
 
@@ -277,12 +309,6 @@ int star::decide()
 
 		// update the position after checking the real change in distance
 
-		using namespace nav_config;
-		do{
-			navigator.synchronize(1);
-			usleep(sleeptime);
-		} while (!navigator.synchronize(1));
-
 /**************************
 
 	SLEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEP
@@ -327,6 +353,15 @@ int star::decide()
 		// declare that we are at a junction. inside the junction. Don't scan. Turn first
 		atJunction = true;
 	}
+	else
+	{
+		// just go forward
+		auto scannnn = lide.scan_hist.front();
+		auto frontpack = scannnn->deg_index.at(degree_north);
+		moveDistance = frontpack->distance - 0.5 * nav_config::cell_size;
+		navigator.movedistancevariable(moveDistance);
+		PositionChange(moveDistance);
+	}
 
 	// update the maze again so that when breadth & depth searches are called, they have more information
 	if (atJunction == true)
@@ -336,6 +371,11 @@ int star::decide()
 		scan();
 		maze.updateMaze();
     }
+	else
+	{
+		scan();
+		maze.updateMaze();
+	}
 
 #endif
 	return 0;
