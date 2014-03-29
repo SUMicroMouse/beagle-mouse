@@ -366,13 +366,11 @@ void cell::figureheuristicCost(double goalX, double goalY)
 	heuristicCost = distance; // centimeters give a high number...
 }
 
-// return true if any sides other than the source side are open
+// return true if two sides other than the source side are open
 bool cell::declareSidesOpen(char sourceSide)
 {
 	/********** IF TWO ADDITIONAL SIDES ARE OPEN, NOT JUST ONE **********/
-	//
-		//
-		//
+
 	int count = 0;
 
 	switch (sourceSide)

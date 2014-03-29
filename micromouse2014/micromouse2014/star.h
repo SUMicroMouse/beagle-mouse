@@ -107,7 +107,7 @@ class star
     
     std::string direction; // direction that mouse is facing
 	double compass;
-    double xDistance, yDistance; // the current position of the robot
+    // moved to grid class: double xDistance, yDistance; // the current position of the robot
 	double shift; // represents the difference between the current compass heading and the default, which is 90 degrees
 
     
@@ -138,7 +138,7 @@ public:
 	void pushChildCellsToDeque(std::deque<cell*> &childCells);
     
     
-    void PositionChange();
+    void PositionChange(double displacement_Actual);
     cell* getPointerToJunction(char &sourceDirection);
     
 };
