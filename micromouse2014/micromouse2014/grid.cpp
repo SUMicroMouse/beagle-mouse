@@ -14,6 +14,7 @@ using namespace grid_config;
 
 grid::grid()
 {
+	cellsize = 180.0;
     origin = goal = center = nullptr;
     lat_headers.resize(mazeSize, nullptr);
     long_headers.resize(mazeSize, nullptr);

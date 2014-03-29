@@ -35,8 +35,8 @@ namespace cell_config
     // Max cell length
     constexpr size_t max_length = 180;//mm
     
-    constexpr size_t cellsize = 16.0;
-    constexpr size_t mazesize = 16.0;
+    constexpr size_t cellsize = 180.0;
+    constexpr size_t mazesize = 180.0;
     
     /// The length of the cell in inches [DEPRECIATED]
     const int CELL_SIZE =  8; 
