@@ -8,7 +8,7 @@
 #include "star.h"
 
 
-#define cellsize 18
+#define cellsize 180.0
 //#define testing 
 
 /********** Star ********/
