@@ -101,7 +101,7 @@ void star::scan()
     using namespace star_config;
 	
 	// subject to change
-	double closeEnough = 1;
+	double closeEnough = 1;	// in millimeters
 
 	auto _360_it = lide.build_scan(); // create new scan
 	auto deqIterate = lide.scan_hist.begin(); // deque iterator for 360 scan history. points to whole scans. begin is the latest
@@ -800,15 +800,15 @@ void star::turn(int direction)
 		{
 		case 0:	// turn right
 			navigator.turnright();
-			maze.compass += 90;
+			maze.adjustCompass(90);
 			break;
 		case 1:	// turn left
 			navigator.turnleft();
-			maze.compass -= 90;
+			maze.adjustCompass(-90);
 			break;
 		case 2:	// do 180 degree turn
 			navigator.turnaround();
-			maze.compass += 180;
+			maze.adjustCompass(180);
 			break;
 		case 3:	// do nothing
 			break;
@@ -824,12 +824,15 @@ void star::turn(int direction)
 			break;
 		case 1:	// do 180 degree turn
 			navigator.turnaround();
+			maze.adjustCompass(180);
 			break;
 		case 2:	// turn right
 			navigator.turnright();
+			maze.adjustCompass(90);
 			break;
 		case 3:	// turn left
 			navigator.turnleft();
+			maze.adjustCompass(-90);
 			break;
 		default:
 			break;
@@ -841,14 +844,17 @@ void star::turn(int direction)
 		{
 		case 0:	// turn left
 			navigator.turnleft();
+			maze.adjustCompass(-90);
 			break;
 		case 1:	// turn right
 			navigator.turnright();
+			maze.adjustCompass(90);
 			break;
 		case 2:	// do nothing
 			break;
 		case 3:	// do 180 degree turn
 			navigator.turnaround();
+			maze.adjustCompass(180);
 			break;
 		default:
 			break;
@@ -860,14 +866,17 @@ void star::turn(int direction)
 		{
 		case 0:	// do 180 degree turn
 			navigator.turnaround();
+			maze.adjustCompass(180);
 			break;
 		case 1:	// do nothing
 			break;
 		case 2:	// turn right
 			navigator.turnright();
+			maze.adjustCompass(90);
 			break;
 		case 3:	// turn left
 			navigator.turnleft();
+			maze.adjustCompass(-90);
 			break;
 		default:
 			break;
