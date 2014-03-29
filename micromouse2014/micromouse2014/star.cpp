@@ -159,49 +159,7 @@ void star::scan()
 			pI++;
 	}
 
-	//// create walls based on the scan
-	//while (pI != (**deqIterate).deg_index.end())
-	//{
-	//	// create a wall if the difference between the two distances is too large.
-	//	if (((*pI).second->distance - (*follower).second->distance) > closeEnough)
-	//	{
-	//		int angle = (*follower).first - (*beginner).first; //angle that encompasses the wall from the viewpoint
-	//		if (angle < 0)
-	//			angle = -1 * angle;
-	//		// length from beginning spot to the last spot that was recorded as part of the same wall
-	//		double length;
-	//		// create the wall, orient it, and add it to the maze
-	//		wall *nWall = new wall((*beginner).second->distance, (*follower).second->distance, (*beginner).first, (*follower).first);
-	//		maze.wallOrienter(*nWall, wallOrientation, wallDisplacement_x, wallDisplacement_y, distanceToWall);
-	//		maze.addBasedOnCompass(*nWall, wallOrientation, wallDisplacement_x, wallDisplacement_y, distanceToWall);
-	//		pI++; // the ahead iterator
-	//		follower++;
-	//		beginner = follower; // set the beginner to the new wall
-	//	}
-	//	else // just increment the two iterators, not the beginner
-	//	{
-	//		pI++;
-	//		follower++;
-	//	}
-	//}
 
-	//vect nums; // used to separate the measurements into degrees, 4 numbers per degree
-	//for (int i = 0; i < 1440; i++) // 1440 measurements total
-	//{
-	//	// read in 
-	//	double fake;
-	//	double radius;
-	//	if ((i > 180) && (i < 540)) // between angle 45 and 135. might need to expand in order to scan more at once & create the maze faster
-	//	{
-	//		nums.push_back(fake);
-	//		if (nums.size() == 4)
-	//		{
-	//			packet *pack = 
-	//			nums.empty();
-	//			vision.push_back(pack);
-	//		}
-	//	}
-	//}
 //#endif
 }
 
@@ -291,42 +249,98 @@ void star::directionOfMeasurementChanges(uint difference, int &direction)
 int star::decide()
 {
 #ifndef testing
-	double moveDistance;
+	using namespace lidar_config;
+
+	uint16_t moveDistance, xDifference, yDifference;
 	cell *currentCell = maze.findCell(maze.xDistance, maze.yDistance);
 
 	/******************* Find the next upcoming junction *************************/
 	char sourceDirection;
 	cell *cellPoint = maze.getPointerToJunction(sourceDirection); // return sourceDirection
 
-	int rowDifference, columnDifference, difference;
-	// difference is either in columns or rows
-	// difference between current cell location and upcoming junction
-	rowDifference = abs(currentCell->row - cellPoint->row);		
-	columnDifference = abs(currentCell->column - cellPoint->column);
-		
-	if (rowDifference > 0)
-		difference = rowDifference;
-	else if (columnDifference > 0)
-		difference = columnDifference;
+
+	// Figure out how far the robot must move to get to the center of the upcoming junction
+	xDifference = abs(cellPoint->x_center - maze.xDistance);
+	yDifference = abs(cellPoint->y_center - maze.yDistance);
+
+
+	// choose which difference to use; x or y
+	switch (sourceDirection)
+	{
+	case 'n':	// use the y since the robot is facing in that orientation
+	case 's':
+		moveDistance = yDifference;
+		break;
+	case 'e': // use the x since the robot is oriented that way
+	case 'w':
+		moveDistance = xDifference;
+		break;
+	default:
+		break;
+	}
+
 
 	// An upcoming junction has been found; move to it
 	if (cellPoint->declareSidesOpen(sourceDirection)) 
 	{
-		// get to the middle of the junction, as in inside the junction itself
-		moveDistance = cellsize * difference;
-
+		// latest 360 scan
+		auto scanInitial = lide.scan_hist.front();
+		
+		// check the distance of the wall in front, before moving
+		auto pack1 = scanInitial->deg_index.at(degree_north);
+		uint16_t distance1 = pack1->distance;
 
 		/***** MOVE THIS MUCH *****/
-		for (int i = 0; i < moveDistance; i++)
-			navigator.goForwardOne();
+		navigator.movedistancevariable(moveDistance);
+
+		// update the position after checking the real change in distance
+
+		using namespace nav_config;
+		do{
+			navigator.synchronize(1);
+			usleep(sleeptime);
+		} while (!navigator.synchronize(1));
+
+/**************************
+
+	SLEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEP
+
+**************************************************/
+
+		// scan again. the difference between the scanned distances for the front 
+		//	should be equal to the calculated moveDistance.
+		auto scanSecond = lide.scan_hist.front();	// second scan
+		auto pack2 = scanSecond->deg_index.at(degree_north);
+		uint16_t distance2 = pack2->distance;
+
+		// get the difference between the two distances; cast them to int,
+		// so that the result can be signed rather than unsigned
+		int displacement_actual = int(distance1) - int(distance2);
+
+		// updating the position accordingly
+		PositionChange(displacement_actual);
+
+		// fine tune the distance
+		int correctedDistance = abs(displacement_actual - int(moveDistance));
+
+		// go backward just a bit
+		if (displacement_actual > int(moveDistance))
+		{
+			// move backward to make up the difference
+			navigator.movedistancevariable(-correctedDistance);
+		}
+		// go forward just a bit
+		else
+		{
+			// move forward to make up the difference
+			navigator.movedistancevariable(correctedDistance);
+		}
 
 		// declare that we are at a junction. inside the junction. Don't scan. Turn first
 		atJunction = true;
 	}
 
-
-
-	
+	// update the maze again so that when breadth & depth searches are called, they have more information
 	if (atJunction == true)
 	{
 		// no need to turn, just check latest scan to see and update the grid even MORE
@@ -336,8 +350,39 @@ int star::decide()
     }
 
 #endif
-
 	return 0;
+}
+
+// called after movement, with actual measurements from lidar. 
+// the value is going to positive because this is when the robot is moving forward, 
+// thus the initial measurement - the second measurement is going to be positive
+void star::PositionChange(double displacement_Actual)
+{
+	double distance = displacement_Actual;
+
+	if ((compass > 315) && (compass < 45))
+	{ // facing left
+		maze.xDistance -= distance;
+	}
+	else if ((compass > 45) && (compass < 135))
+	{ // default direction
+		maze.yDistance += distance;
+	}
+	else if ((compass > 135) && (compass < 225))
+	{ // facing right
+		maze.xDistance += distance;
+	}
+	else if ((compass > 225) && (compass < 315))
+	{ // facing south
+		maze.yDistance -= distance;
+	}
+	else if ((compass == 45) || (compass == 135) || (compass == 225) || (compass == 315))
+	{
+		// hmmmm......
+
+		// possibly a turn instruction
+	}
+
 }
 
 void star::pushChildCellsToDeque(std::deque<cell*> &childCells)
@@ -945,44 +990,14 @@ void star::determineheuristicCost()
 
 }
 
-//called after movement
-void 
-star::PositionChange()
-{
-#ifdef testing
-	double distance = abs(headOnDistance - headOnDistance2);
-    
-	if ((compass > 315) && (compass < 45))
-	{ // facing left
-		xDistance -= distance;
-	}
-	else if ((compass > 45) && (compass < 135))
-	{ // default direction
-		yDistance += distance;
-	}
-	else if ((compass > 135) && (compass < 225))
-	{ // facing right
-		xDistance += distance;
-	}
-	else if ((compass > 225) && (compass < 315))
-	{ // facing south
-		yDistance -= distance;
-	}
-	else if ((compass == 45) || (compass == 135) || (compass == 225) || (compass == 315))
-	{
-		// hmmmm......
-        
-		// possibly a turn instruction
-	}
-#endif
-}
+
 
 
 cell * 
 star::getPointerToJunction(char &sourceDirection)
 {
 	// get the current cell in which the robot is located
-	cell * currentCell = maze.findCell(xDistance, yDistance);
+	cell * currentCell = maze.findCell(maze.xDistance, maze.yDistance);
 	cell *cellPoint = currentCell;
     
 	//	Check the cells in front for 
