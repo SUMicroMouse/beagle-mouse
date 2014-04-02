@@ -24,7 +24,8 @@ gpio_ls=(       \
 # 2 pins are used for Motor Left/Right Enable
         69 74   \
 # The rest are used for control buttons
-        73 72 66 75 71 70)
+#        73 72 66 75 71 70
+)
 
 for pin in ${gpio_ls[@]}; do
         echo $pin > $GPIO/export
@@ -33,10 +34,11 @@ done
 ######################             LIDAR           ############################
 # Setup the TeleTYpe device (/dev/ttyO1) 
 echo BB-UART1 > $SLOTS
-stty -F /dev/ttyO1 -raw
+stty -F /dev/ttyO1 115200  raw   time 1   min 0
 
 ######################          MICROPROCESSOR          ########################
 # Terminal to handle communication with HCS12 for the wheel encoders
 echo BB-UART2 > $SLOTS
-stty -F /dev/ttyO1 -brkint -icrnl -imaxbel -opost \
--onlcr -isig -icanon -iexten -echo -echoe -echok -echoctl -echoke -raw
+stty -F /dev/ttyO1 115200 raw 						\
+-brkint -icrnl -imaxbel -opost 						\
+-onlcr -isig -icanon -iexten -echo -echoe -echok -echoctl -echoke
