@@ -13,6 +13,7 @@
 
 #include <deque>
 #include <utility>
+#include <thread>
 
 class encoder;
 struct measure;
@@ -70,6 +71,12 @@ class encoder : device_tty
     
     /// Temporart data storage; holds last N snapshots
     std::deque<encoder_config::snapshot*> temp_hist;
+    
+protected:
+    bool done;
+    
+     std::mutex safety;
+    
 public:
     
     /// Primary data storage; holds last N snapshots
@@ -77,7 +84,7 @@ public:
     
     /// Defualt constructor; relies on config path
     encoder(): device_tty( encoder_config::path_ls.begin()[0])
-    {}
+    {done = false;}
     
     /// Explicit constructor; requires provision of dev path  
     encoder( const char* _path ):device_tty(_path)
@@ -88,7 +95,13 @@ public:
         update();
     
     /// Infinite loop of updates
-    void loop_update();
+    void loop();
+    
+    std::thread start_thread()
+    { 
+        std::cout<<"\nEncoder started!"<<std::endl;
+        return std::thread(&encoder::loop,&(*this)); 
+    }
     
     /// Get a safe iterator for sequential reads. STOPS
     std::deque<encoder_config::snapshot*>::iterator

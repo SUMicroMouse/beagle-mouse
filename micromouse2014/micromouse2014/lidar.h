@@ -17,7 +17,10 @@
 #include <cmath>
 #include <deque>
 #include <map>
+#include <thread>
 #include <unistd.h>
+
+//#include <boost/thread>
 
 //#include "packet.cpp"
 //#include "tty.cpp"
@@ -71,18 +74,27 @@ class lidar//: protected device_tty
     /// Temporary scan to hold new data while iterators are used
     std::deque<_360_scan*> scan_temp;
     
-protected:
+protected: 
+    
+    
+    bool done;
+    
+    std::mutex safety;
+
+    
 public: 
     /// A list of previous scans, organized by time taken.
     std::deque<_360_scan*> scan_hist;
     
   
     /// Defualt constructor relys on namespace constants.
-    lidar() : _dev( lidar_config::tty_path ){}
+    lidar() : _dev( lidar_config::tty_path )
+    { done = false; }
     
 
     /// Explicit constructor requires that UART terminal path be provided. 
-	lidar(std::string _path) : _dev( _path ){}
+	lidar(std::string _path) : _dev( _path )
+    { done = false; }
     
     /// Scans incoming data up to the start ( "0xFA" ) and returns that.
 	uint8_t seek();
@@ -100,6 +112,16 @@ public:
     
     /// Update scan_hist with temp data
     void done_scan_iterator();
+    
+    
+    void loop();
+    
+    std::thread  start_thread()
+    { 
+        std::cout<<"\nLIDAR started!"<<std::endl;
+        return  std::thread( & lidar::loop,&(*this)) ; 
+    }
+    
     
 	/** TODO: Scan history interface.
      There will probably need to be more methods for using the scan history.

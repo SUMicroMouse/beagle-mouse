@@ -12,8 +12,9 @@
 using namespace std;
 
 // Defualt constructor
-nav::nav(lidar & lidar_ptr):
+nav::nav(lidar & lidar_ptr, encoder & encoder_ptr):
 view(lidar_ptr),
+enc(encoder_ptr),
 left(motor_config::m_select::LEFT),
 right(motor_config::m_select::RIGHT)
 {
@@ -228,7 +229,7 @@ void nav::stayStraightLoop()
 					
 			}break;
 		case 0: // nothing
-			break;
+			return;
 		case 1:{
 				   // nudge right
 				   lVeer = 1;

@@ -62,12 +62,12 @@ class nav
 {
     friend star;
 private:
-	motor left; 
-	motor right;
+	motor   left; 
+	motor   right;
     
-    encoder enc;
+    encoder& enc;
     
-    lidar& view;
+    lidar&  view;
 
 protected:
     inline //-1 is invalid
@@ -81,7 +81,7 @@ public:
     /* ____Primary methods:____ require specific arguments */
     
     // Class constructor for navigation
-    nav(lidar & lidar_ptr);
+    nav(lidar & lidar_ptr, encoder & encoder_ptr);
 
     // moves a distance in terms of mm 
 	void movedistancevariable(int mm);
@@ -131,9 +131,10 @@ public:
 
 	// keep the robot facing straight - in parallel with the walls along the sides of it
 	void stayStraightLoop();
+    
 	
 	/** the following each return true if they find that the robot isn't going straight**/
-	void straightAhead(int &leftORright);
+	void straightAhead(   int &leftORright);
 	void oneSidedApproach(int &leftORright);
 	void twoSidedApproach(int &leftORright);
 

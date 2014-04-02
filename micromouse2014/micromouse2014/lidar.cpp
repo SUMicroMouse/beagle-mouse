@@ -48,3 +48,12 @@ lidar::build_scan()
     return  _l;
 
 }
+
+void
+lidar::loop()
+{
+    while( !done ){     build_scan();  }
+}
+
+
+

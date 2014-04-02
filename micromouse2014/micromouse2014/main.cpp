@@ -29,6 +29,8 @@
 #include <string>
 
 using namespace std;
+
+/*
 namespace test
 {
     static auto path_ls = 
@@ -43,10 +45,12 @@ namespace test
         "t2"
     };
 }
-
+*/
 
 int main(int argc, const char * argv[])
 {   
+    robot rob;
+    
     /* At the very least, the constructor works; needs testing
     lidar _l (string(test::path_ls.begin()[0]) + "t1");
     */

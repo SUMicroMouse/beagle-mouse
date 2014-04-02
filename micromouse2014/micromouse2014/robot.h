@@ -10,6 +10,7 @@
 #define __micromouse2014__robot__
 
 #include <iostream>
+#include <thread>
 
 
 //#include "lidar.h"
@@ -26,16 +27,15 @@ namespace robot_config
 }
 
 
-class robot
+struct robot
 {
     lidar   view;
+    encoder enc;
     nav     navigator;
     star    algo;
     
-
-public:
-    robot();
     
+    robot();    
 };
 
 

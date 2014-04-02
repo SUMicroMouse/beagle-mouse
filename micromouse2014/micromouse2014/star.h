@@ -116,6 +116,12 @@ public:
 
 	// loop everything
 	void theLoop();
+    
+    std::thread  start_thread()
+    { 
+        std::cout<<"\nStar started!"<<std::endl;
+        return std::thread(&star::theLoop,&(*this)); 
+    }
 
 	// starting fresh
 	void scan(); // modifies local grid	
