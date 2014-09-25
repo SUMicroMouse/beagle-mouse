@@ -26,11 +26,8 @@ This README would normally document whatever steps are necessary to get your app
 ### Who do I talk to? ###
 
 * Repo owner or admin
-<<<<<<< HEAD
 * Other community or team contact
 * hi i am danush . I like micro mouse because i like robotics.
-=======
-* Other community or team contact
 
 ### WOOOO MICROMOUSE
->>>>>>> 35a19a0... Added some changes to the README
+
