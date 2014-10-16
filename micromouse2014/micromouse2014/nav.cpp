@@ -7,9 +7,18 @@
 
 
 #include "nav.h"
-
+#include "macros.h"
+#include <cmath>
 
 using namespace std;
+
+bool
+nav_config::eqish(double a, double b)
+{
+    return (ABS(DIV(a,b))-1<=(0+min_invariance) &&
+            ABS(DIV(a,b))-1<=(0-min_invariance) ? true:false); 
+}
+
 
 // Defualt constructor
 nav::nav(lidar & lidar_ptr, encoder & encoder_ptr):
@@ -68,8 +77,8 @@ nav::synchronize(double speed) // should go in go forward
     
     snapshot * state = enc.hist.front();
     
-    auto v_L = abs(get<1>(*state)->_vel);
-    auto v_R = abs(get<2>(*state)->_vel);
+    auto v_L = ABS(get<1>(*state)->_vel);
+    auto v_R = ABS(get<2>(*state)->_vel);
     auto v_avg = AVG(v_L , v_R);
     
     auto s_L = left.get_speed();
@@ -171,18 +180,18 @@ nav::move(double speed)
 void 
 nav::veerleft(double ratio)
 {
-    if(abs(ratio)==0 ){ return;     }
-    if(abs(ratio)>1  ){ right.set_speed(left.get_speed()*ratio);    }
-    if(abs(ratio)<1  ){ left.set_speed(right.get_speed()*ratio);    }
+    if(ABS(ratio)==0 ){ return;     }
+    if(ABS(ratio)>1  ){ right.set_speed(left.get_speed()*ratio);    }
+    if(ABS(ratio)<1  ){ left.set_speed(right.get_speed()*ratio);    }
 }
 
 
 void 
 nav::veerright(double ratio)
 {
-    if(abs(ratio)==0 ){ return;     }
-    if(abs(ratio)>1  ){ left.set_speed(right.get_speed()*ratio);    }
-    if(abs(ratio)<1  ){ right.set_speed(left.get_speed()*ratio);    }
+    if(ABS(ratio)==0 ){ return;     }
+    if(ABS(ratio)>1  ){ left.set_speed(right.get_speed()*ratio);    }
+    if(ABS(ratio)<1  ){ right.set_speed(left.get_speed()*ratio);    }
 }
 
 
@@ -256,16 +265,16 @@ void nav::straightAhead(int &leftORright)
 	auto scanPoint = view.scan_hist.front();
 
 	// check two packet averages to the left
-	auto left1 = scanPoint->deg_index.at(offset(degree_north, -1));	// packet to the left of dead center
-	auto left2 = scanPoint->deg_index.at(offset(degree_north, -5));	// packet further to the left of dead center
+	auto left1 = scanPoint->at(offset(degree_north, -1));	// packet to the left of dead center
+	auto left2 = scanPoint->at(offset(degree_north, -5));	// packet further to the left of dead center
 	// get the difference between the left two packet averages
-	double differenceLeft = abs(left1->source->avg_dist - left2->source->avg_dist);
+	double differenceLeft = ABS(left1->source->avg_dist - left2->source->avg_dist);
 
 	// check two packet averages to the right
-	auto right1 = scanPoint->deg_index.at(offset(degree_north, 0));	// packet to the right of dead center
-	auto right2 = scanPoint->deg_index.at(offset(degree_north, 4));	// packet further to the right of dead center
+	auto right1 = scanPoint->at(offset(degree_north, 0));	// packet to the right of dead center
+	auto right2 = scanPoint->at(offset(degree_north, 4));	// packet further to the right of dead center
 	// get the difference between the right two packet averages
-	double differenceRight = abs(right1->source->avg_dist - right2->source->avg_dist);
+	double differenceRight = ABS(right1->source->avg_dist - right2->source->avg_dist);
 
 	double averageLeft, averageRight;
 
@@ -327,9 +336,9 @@ void nav::oneSidedApproach(int &leftORright)
 	   map<uint, const data*>::iterator s2iterator;*/
 
 	
-	auto l60_1 = scan1->deg_index.at(offset(degree_east, 60));	// latest
-	auto l60_2 = scan2->deg_index.at(offset(degree_east, 60));	// older
-	auto l60_3 = scan3->deg_index.at(offset(degree_east, 60));	// oldest
+	auto l60_1 = scan1->at(offset(degree_east, 60));	// latest
+	auto l60_2 = scan2->at(offset(degree_east, 60));	// older
+	auto l60_3 = scan3->at(offset(degree_east, 60));	// oldest
 
 
 	if (l60_1->invalid_data)
@@ -407,8 +416,8 @@ void nav::twoSidedApproach(int &leftORright)
 	double acceptedDistance;
 	for (int i = 0; i < 21; i++)
 	{
-		auto leftIterator = vScan->deg_index.at(offset(degree_east, 60 + i));	// left side
-		auto rightIterator = vScan->deg_index.at(offset(degree_west, -60 - i));	// right side
+		auto leftIterator = vScan->at(offset(degree_east, 60 + i));	// left side
+		auto rightIterator = vScan->at(offset(degree_west, -60 - i));	// right side
 
 		// solve for max accepted distance for this specific angle
 		maxAcceptedDistance(60 + i, acceptedDistance);
@@ -457,7 +466,6 @@ void nav::maxAcceptedDistance(int angle /*angle B*/, double &acceptedDistance /*
 	double rightAngle = 90.0; // angle A
 	double finalAngle = 180 - rightAngle - angle; // angle C
 
-	
 	// solving for side a
 	// law of sines . a/sinA = c/sinC
 	acceptedDistance = (horizontalDistance * sin(rightAngle)) / sin(finalAngle); // side a

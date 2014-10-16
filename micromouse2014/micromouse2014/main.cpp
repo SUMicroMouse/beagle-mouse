@@ -105,7 +105,7 @@ int main(int argc, char ** argv )
 	
 	while(true)
 	{
-		_l.build_scan()->deg_index.at(index)->source->print();
+		_l.build_scan()->at(index)->source->print();
 	}
 	
 	return 0;

@@ -7,6 +7,7 @@
 //
 
 #include "grid.h"
+#include <cmath>
 
 
 using namespace std;
@@ -17,31 +18,26 @@ grid::grid()
 	cellsize = 180.0;
     origin = goal = center = nullptr;
     lat_headers.resize(mazeSize, nullptr);
-    long_headers.resize(mazeSize, nullptr);
-    int r, c;
-	for (r = 0; r < mazeSize; r++) // create in reverse so that the origin of the coordinates is in the bottom left
+    long_headers.resize(mazeSize, nullptr);    
+	for (int r = 0; r < mazeSize; r++) // create in reverse so that the origin of the coordinates is in the bottom left
 	{
-		for (c = 0; c < mazeSize; c++)
+		for (int c = 0; c < mazeSize; ++c)
 		{
 			cell *temp = new cell(r, c);
 			addCell(*temp);
 		}
 	}
-    double row1, row2, column1, column2;
-	row1 = floor(mazeSize / 2);
-	row2 = row1 + 1;
-	column1 = floor(mazeSize / 2);
-	column2 = column1 + 1;
+    int 
+        row1 = floor(mazeSize / 2),
+        row2 = row1 + 1,
+        column1 = floor(mazeSize / 2),
+        column2 = column1 + 1;
     
 	/* mark the goal cells */
-	cell *cellP = getCell(row1, column1);
-    cellP->goalCell = true;
-	cellP = getCell(row1, column2);
-    cellP->goalCell = true;
-	cellP = getCell(row2, column1);
-    cellP->goalCell = true;
-	cellP = getCell(row2, column2);
-	cellP->goalCell = true;
+    getCell(row1, column1)->goalCell = true;
+    getCell(row1, column2)->goalCell = true;
+    getCell(row2, column1)->goalCell = true;
+	getCell(row2, column2)->goalCell = true;
 }
 
 // find the current cell based on the row/column
@@ -49,23 +45,28 @@ cell *
 grid::getCell(int _row, int _col)
 {
 	cell *point;// = ( (_row< _col)?lat_headers[_row]:long_headers[_col]);  
+    
+    assert(_row>=0 && _row<lat_headers.size() && "Argument out of range.");
+    assert(_col>=0 && _col<long_headers.size() && "Argument out of range.");
+    
+    assert(lat_headers[_row]!=nullptr   && "Argument invalid.");
+    assert(long_headers[_col]!=nullptr  && "Argument invalid.");
+    
     if (_row < _col) 
     {
-        point = lat_headers[_col];
-        for (int i =0; i<_row; ++i) {
-            point = point->east;
+        point = lat_headers[_row];
+        for (int i =0; i<_col; ++i) {   point = point->_cells['e'];
         }
     }else
     {
         point = long_headers[_col];
-        for (int i =0; i<_row; ++i) {
-            point = point->east;
+        for (int i =0; i<_row; ++i) {   point = point->_cells['n'];
         }
     }
     
     return point ;
 }
-
+#ifdef UNUSED
 // create a maze with a coordinates that start in the bottom left
 void 
 grid::createMaze()
@@ -77,79 +78,57 @@ void grid::markGoalCells()
 {
     //moved to constructor   
 }
-
+#endif
 void grid::addCell(cell &newcell) // add in reverse...
 {
 	cell *adder;
-	adder = lat_headers[mazeSize - (newcell.row + 1)]; // reverse
-	if (adder != NULL)
-	{
-		while (adder->east != NULL)
-		{
-			adder = adder->east;
-			if (adder->east == NULL)
-				break;
-		}
-		if (adder->east == NULL)
-		{
-			newcell.west = adder;
-			adder->east = &newcell;
-		}
+	adder = lat_headers[newcell.row]; // reverse
+	if (adder != nullptr)
+    {   
+        assert(newcell.row>0 && "Mismatch on row count.");
+		for (; adder->_cells['e'] != nullptr; adder = adder->_cells['e'])
+        {}
+        newcell._cells['w']     = adder;
+        adder->_cells['e']      = &newcell;
 	}
-	else
-		lat_headers[mazeSize - (newcell.row + 1)] = &newcell;
+    else
+    {   assert(newcell.row==0 && "Mismatch on row init.");
+		lat_headers[newcell.row] = &newcell;
+    }
     
 	// link it to the column
 	cell *linker;
 	linker = long_headers[newcell.column];
-	if (linker != NULL)
-	{
-		while (linker->south != NULL)
-		{
-			linker = linker->south;
-			if (linker->south == NULL)
-				break;
-		}
-		if (linker->south == NULL)
-		{
-			newcell.north = linker;
-			linker->south = &newcell;
-		}
+	if (linker != nullptr)
+	{   
+        assert(newcell.column>0 && "Mismatch on column count.");
+		for(; linker->_cells['s'] != nullptr; linker = linker->_cells['s'])
+        {}
+        newcell._cells['n']     = linker;
+        linker->_cells['s']     = &newcell;
 	}
 	else
+    {   assert(newcell.column==0 && "Mismatch on column init.");
 		long_headers[newcell.column] = &newcell;
+    }
 }
 
 // find the current cell based on the coordinates in centimeters
 cell *
 grid::findCell(double x, double y)
 {
-	double rtemp = y / cellsize;
-	double ctemp = x / cellsize;
+	int row = floor(y / cellsize);
+	int column = floor(x / cellsize);
     
-	int row = floor(rtemp);
-	int column = floor(ctemp);
-    
-	cell *point;
-    
-	for (int i = 0; i < mazeSize; i++)
-	{
-		point = lat_headers[i];
-		while (point != nullptr)
-		{
-			if ((point->column == column) && (point->row == row))
-				return point;
-            
-			point = point->east;
-		}
-	}
-    return nullptr;
+    return getCell(row, column);
 }
 
 
 // get the wall's orientation relative to the robot's field of vision
 // called by updateMaze
-void grid::wallOrienter(wall &wallInQuestion, string &orientation, double &x_displacement, double &y_displacement, double distanceToWall)
+void grid::wallOrienter(wall &wallInQuestion, string &orientation, 
+                        double &x_displacement, double &y_displacement, 
+                        double distanceToWall                           )
 {
 	// only five possibilities
 	double angle;
@@ -160,13 +139,20 @@ void grid::wallOrienter(wall &wallInQuestion, string &orientation, double &x_dis
 		// get triangle height to see how far away it is
         
 		//triangle perimeter
-		double perimeter = wallInQuestion.radiusLeft + wallInQuestion.length + wallInQuestion.radiusRight;
+		double perimeter = (  wallInQuestion.radiusLeft 
+                            + wallInQuestion.length 
+                            + wallInQuestion.radiusRight );
         
 		// Heron's formula for area
-		double area = sqrt(perimeter * (perimeter - wallInQuestion.radiusLeft) * (perimeter - wallInQuestion.length) * (perimeter - wallInQuestion.radiusRight));
+		double area = sqrt(  perimeter 
+                           * (perimeter - wallInQuestion.radiusLeft) 
+                           * (perimeter - wallInQuestion.length) 
+                           * (perimeter - wallInQuestion.radiusRight)  );
         
 		// area = (1/2) * base * height
-		// height = (2*area)/base . base will be wallinquestion.length. distanceToWall will be height
+		// height = (2*area)/base . 
+        // base = wallinquestion.length. 
+        // height = distanceToWall
 	//UNUSED: distanceToWall = (2 * area) / wallInQuestion.length;
 		x_displacement = 0;
 		y_displacement = 0;
@@ -176,7 +162,8 @@ void grid::wallOrienter(wall &wallInQuestion, string &orientation, double &x_dis
 		// assuming 90 degrees is directly in the middle
 		if (wallInQuestion.a1 > 90.0)
 		{
-			// the wall is perpendicular to the robot's plane of vision (parallel with the 90 degree line)
+			// the wall is perpendicular to the robot's plane of 
+            // vision (parallel with the 90 degree line)
 			orientation = "perpendicularRight";
 			
 			angle = 180 - wallInQuestion.a2;
@@ -185,11 +172,13 @@ void grid::wallOrienter(wall &wallInQuestion, string &orientation, double &x_dis
 		}
 		else
 		{
-			// the wall is parallel to the robot's plane of vision (parallel with the 0 degree line)
+			// the wall is parallel to the robot's plane of 
+            // vision (parallel with the 0 degree line)
 			orientation = "parallelLeft";
             
 			angle = wallInQuestion.a2; // rightVectorAngle.
-			x_displacement = -cos(angle) * wallInQuestion.radiusRight; // x_displacement left is negative. right is positive
+            // x_displacement left is negative. right is positive
+			x_displacement = -cos(angle) * wallInQuestion.radiusRight; 
 			y_displacement = sin(angle) * wallInQuestion.radiusRight;
 		}
 	}
@@ -202,7 +191,8 @@ void grid::wallOrienter(wall &wallInQuestion, string &orientation, double &x_dis
 			orientation = "perpendicularLeft";
             
 			angle = wallInQuestion.a1;
-			x_displacement = -cos(angle) * wallInQuestion.radiusLeft; // x_displacement left is negative. right is positive
+            // x_displacement left is negative. right is positive
+			x_displacement = -cos(angle) * wallInQuestion.radiusLeft;
 			y_displacement = sin(angle) * wallInQuestion.radiusLeft;
 		}
 		else
@@ -220,7 +210,9 @@ void grid::wallOrienter(wall &wallInQuestion, string &orientation, double &x_dis
 
 // take the info of the wall from wallOrienter and add it to the map of the maze
 // (calls markWalls)
-void grid::addBasedOnCompass(wall &wallInQuestion, string wallOrientation, double &x_displacement, double &y_displacement, double distanceToWall)
+void grid::addBasedOnCompass(wall &wallInQuestion, string wallOrientation, 
+                             double &x_displacement, double &y_displacement, 
+                             double distanceToWall                          )
 {
 	double x_wall, y_wall;
 	string xx = "x";
@@ -230,12 +222,18 @@ void grid::addBasedOnCompass(wall &wallInQuestion, string wallOrientation, doubl
 	if ((compass > 315) && (compass < 45))
 	{ // facing left
       // these are currently the starting coordinates for the wall
-		x_wall = xDistance - y_displacement; // positive y displacement will be negative x
-		y_wall = yDistance + x_displacement; // positive x is to the right, which will end up being positive y
+      // positive y displacement will be negative x
+        x_wall = xDistance - y_displacement; 	
+        // positive x is to the right, which will end up being positive y
+        y_wall = yDistance + x_displacement;         
         
-		if ((wallOrientation == "perpendicularRight") || (wallOrientation == "perpendicularLeft")){
-			// subtract half the wall's length from the position of the robot to get to the center of the wall
-			x_wall -= wallInQuestion.length / 2; // dividing by 2 gets the middle of the wall, which will lead to accurately marking which wall it is
+		if ( (wallOrientation == "perpendicularRight") || 
+             (wallOrientation == "perpendicularLeft")  ){
+			// subtract half the wall's length from the position of the 
+            // robot to get to the center of the wall
+            // dividing by 2 gets the middle of the wall, which will lead 
+            // to accurately marking which wall it is
+			x_wall -= wallInQuestion.length / 2; 
 			markWalls(wallInQuestion, y_wall, x_wall, xx);
 		}
 		else if (wallOrientation == "parallelLeft"){
@@ -252,7 +250,8 @@ void grid::addBasedOnCompass(wall &wallInQuestion, string wallOrientation, doubl
 		x_wall = xDistance + x_displacement;
 		y_wall = yDistance + y_displacement;
         
-		if ((wallOrientation == "perpendicularRight") || (wallOrientation == "perpendicularLeft")){
+		if ( (wallOrientation == "perpendicularRight") || 
+             (wallOrientation == "perpendicularLeft")  ){
 			y_wall += wallInQuestion.length / 2; // now the coordinates point to the wall's midpoint
 			markWalls(wallInQuestion, x_wall, y_wall, yy);
 		}
@@ -267,10 +266,13 @@ void grid::addBasedOnCompass(wall &wallInQuestion, string wallOrientation, doubl
 	}
 	else if ((compass > 135) && (compass < 225))
 	{ // facing right
-		x_wall = xDistance + y_displacement; // positive y will equal positve x
-		y_wall = yDistance - x_displacement; // positive x is to the right, which will equal negative y
+        // positive y will equal positve x
+		x_wall = xDistance + y_displacement; 
+        // positive x is to the right, which will equal negative y
+		y_wall = yDistance - x_displacement; 
         
-		if ((wallOrientation == "perpendicularRight") || (wallOrientation == "perpendicularLeft")){
+		if ( (wallOrientation == "perpendicularRight") || 
+             (wallOrientation == "perpendicularLeft")  ){
 			x_wall += wallInQuestion.length / 2;
 			markWalls(wallInQuestion, y_wall, x_wall, xx);
 		}
@@ -288,7 +290,8 @@ void grid::addBasedOnCompass(wall &wallInQuestion, string wallOrientation, doubl
 		x_wall = xDistance - x_displacement; // reversed
 		y_wall = yDistance - y_displacement; // reversed
         
-		if ((wallOrientation == "perpendicularRight") || (wallOrientation == "perpendicularLeft")){
+		if ( (wallOrientation == "perpendicularRight") ||
+             (wallOrientation == "perpendicularLeft")  ){
 			y_wall -= wallInQuestion.length / 2;
 			markWalls(wallInQuestion, x_wall, y_wall, yy);
 		}
@@ -301,8 +304,8 @@ void grid::addBasedOnCompass(wall &wallInQuestion, string wallOrientation, doubl
 			markWalls(wallInQuestion, y_wall, x_wall, xx);
 		}
 	}
-	else if ((compass == 45) || (compass == 135) || (compass == 225) || (compass == 315))
-	{
+	else if ( (compass == 45)  || (compass == 135)  ||
+              (compass == 225) || (compass == 315)  ){
 		// hmmmm......
         
 		// possibly a turn instruction
@@ -315,11 +318,17 @@ void grid::addBasedOnCompass(wall &wallInQuestion, string wallOrientation, doubl
 // coordinateAlongWall: the coordinate along the wall is the one on which all the test points are based
 // xORy: x means x corresponds to the coordinateAlongWall. y means y corresponds to the coordinateAlongWall
 // - called by addBasedOnCompass
-void grid::markWalls(wall &wallInQuestion, double &staticCoord, double &coordinateAlongWall, string &xORy) 
+void grid::markWalls(wall       & wallInQuestion        , 
+                     double     & staticCoord           , 
+                     double     & coordinateAlongWall   , 
+                     string     & xORy                  ) 
 {
 	//************* UPDATE **********************
-	// The string is actually not needed. When this function is called in "addBasedOnCompass", the x and y coordinates are switched depending on the situation
-	// ******* Actually, it is needed due to how the cell->markWalls function is not written to compensate for those changes. xORy is needed
+	// The string is actually not needed. When this function is called in 
+    // "addBasedOnCompass", the x and y coordinates are switched depending 
+    // on the situation
+	// ******* Actually, it is needed due to how the cell->markWalls function 
+    // is not written to compensate for those changes. xORy is needed
     
 	// mark the wall based on the coordinates x_wall & y_wall .
 	cell *cellIt;
@@ -343,7 +352,7 @@ void grid::markWalls(wall &wallInQuestion, double &staticCoord, double &coordina
 				marker += 0.5; // .5 centimeters should be specific enough
 			}
 			// move to the next cell
-			cellIt = cellIt->east;
+			cellIt = cellIt->_cells['e'];
 		}
 	}
     
@@ -360,40 +369,37 @@ grid::getPointerToJunction(char & sourceDirection)
 	//	Check the cells in front for 
 	//	where there's an upcoming junction
 	//
+    char moveTwo;
 	if ((compass > 315) && (compass < 45))
 	{ // facing west
-		do{
-			cellPoint = cellPoint->west;
-		} while (cellPoint->declareSidesOpen('e') == false);
+        moveTwo         = 'w';
 		sourceDirection = 'e';
 	}
 	else if ((compass > 45) && (compass < 135))
 	{ // default direction	
-		do{
-			cellPoint = cellPoint->north;
-		} while (cellPoint->declareSidesOpen('s') == false);
+        moveTwo         = 'n';
 		sourceDirection = 's';
 	}
 	else if ((compass > 135) && (compass < 225))
 	{ // facing east
-		do{
-			cellPoint = cellPoint->east;
-		} while (cellPoint->declareSidesOpen('w') == false);
+        moveTwo         = 'e';
 		sourceDirection = 'w';
 	}
 	else if ((compass > 225) && (compass < 315))
 	{ // facing south
-		do{
-			cellPoint = cellPoint->south;
-		} while (cellPoint->declareSidesOpen('n') == false);
+        moveTwo         = 's';
 		sourceDirection = 'n';
 	}
-	else if ((compass == 45) || (compass == 135) || (compass == 225) || (compass == 315))
+	else if ((compass == 45)  || (compass == 135) || 
+             (compass == 225) || (compass == 315)  )
 	{
 		// hmmmm......
 		// possibly a turn instruction
 	}
-
+    
+    do{
+        cellPoint = cellPoint->_cells[moveTwo];
+    } while (cellPoint->declareSidesOpen(sourceDirection) == false);
 	return cellPoint;
 }
 
@@ -448,58 +454,13 @@ bool grid::closeEnough(double angle1, double angle2)
 }
 
 
-// take the scan, add walls to the existing map of the maze, and call the decision-making function
+// take the scan, add walls to the existing map of the maze, and call the 
+// decision-making function
 // the return value means
 /*********should turn to see more if the end of a wall is within the last packet*********/
 int 
 grid::updateMaze()
 {
-	//// add walls to wall deque. probably should turn in the direction of the longer wall to record the pathway in full
- //   
-	//// value that says the packets' radii are too far apart, indicating a space
-	//double closeEnough = 1;
- //   
-	//std::vector<packet*>::iterator pI; // iterate through vector of packets
-	//pI = vision.begin();
-	//std::vector<packet*>::iterator beginner; // is the beginning of the wall
-	//beginner = vision.begin();
-	//std::vector<packet*>::iterator follower;
-	//follower = vision.begin();
- //   
-	//int i = 0;
- //   
-	//string wallOrientation;
-	//double wallDisplacement_x, wallDisplacement_y, distanceToWall;
-	//double previous_value;
-	//pI++;
-	//// create walls based on the scan
-	//while (pI != vision.end())
-	//{
-	//	// create a wall if the difference between the two distances is too large.
-	//	if (((*pI)->aveRadius - (*follower)->aveRadius) > closeEnough)
-	//	{
-	//		
-	//		int angle = (*follower)->angle - (*beginner)->angle; //angle that encompasses the wall from the viewpoint
-	//		if (angle < 0)
-	//			angle = -1 * angle;
-	//		// length from beginning spot to the last spot that was recorded as part of the same wall
-	//		double length;
-	//		// create the wall, orient it, and add it to the maze
-	//		wall *nWall = new wall((*beginner)->aveRadius, (*follower)->aveRadius, (*beginner)->angle, (*follower)->angle);
-	//		wallOrienter(*nWall, wallOrientation, wallDisplacement_x, wallDisplacement_y, distanceToWall);
-	//		addBasedOnCompass(*nWall, wallOrientation, wallDisplacement_x, wallDisplacement_y, distanceToWall);
- //           
-	//		pI++; // the ahead iterator
-	//		follower++;
-	//		beginner = follower; // set the beginner to the new wall
-	//	}
-	//	else // just increment the two iterators, not the beginner
-	//	{
-	//		pI++;
-	//		follower++;
-	//	}
-	//}
-    
 
 	/**************** THE ABOVE IS IN STAR::SCAN() **************/
     
@@ -551,7 +512,8 @@ grid::updateMaze()
             
 		} while (cellPoint->gSouth() != 1);
 	}
-	else if ((compass == 45) || (compass == 135) || (compass == 225) || (compass == 315))
+	else if ((compass == 45)  || (compass == 135) || 
+             (compass == 225) || (compass == 315)  )
 	{
 		// hmmmm......
 	}

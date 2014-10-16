@@ -12,8 +12,7 @@
 #define micromouse_wall_h
 
 
-#include <iostream>
-#include <cmath>
+#include <cstddef>
 
 namespace wall_config
 {
@@ -25,12 +24,9 @@ namespace wall_config
 }
 
 
-class star;
-
-class wall
+struct wall
 {
-    friend star;
-public:
+
 	double length;
 	double viewAngle; // angle between the two vectors
 	double leftAngle;
@@ -49,7 +45,6 @@ public:
     double perpendicularDistance;
     double parallelDistance;
     
-public:
 	wall() { length = 0; }
 	wall(double difference) { length = difference; }
 	wall(double radius1, double radius2, double angle1, double angle2);

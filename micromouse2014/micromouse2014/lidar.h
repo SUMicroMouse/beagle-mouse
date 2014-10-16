@@ -10,11 +10,7 @@
 #define __micromouse2014__lidar__
 
 #include <iostream>
-#include <bitset>
-#include <fstream>
-#include <vector>
 #include <string>
-#include <cmath>
 #include <deque>
 #include <map>
 #include <thread>
@@ -43,7 +39,7 @@ namespace lidar_config
     constexpr size_t pkt_index_max  = 22;
     
     /// The full path to the UART terminal the LIDAR is connected to.
-    static auto tty_path       = "/dev/ttyO1";
+    static auto tty_path            = "/dev/ttyO1";
     
     /// The reference degrees for the distance measurements
     constexpr int degree_north      = 0;
@@ -55,11 +51,10 @@ namespace lidar_config
     
     constexpr size_t hist_max       = 300;// 5 scans/sec * 60 sec
     
-    static inline
-    int offset(int cardinal, int change){
+    constexpr int offset(int cardinal, int change)
+    {
         return ( cardinal + change + degree_max ) % degree_max;
     }
-  
 };
 
 
@@ -69,58 +64,51 @@ namespace lidar_config
 class lidar//: protected device_tty
 {
     /// The underlying hardware device connection
-    device_tty  _dev;
+    device_tty                  _dev;
     
     /// Temporary scan to hold new data while iterators are used
-    std::deque<_360_scan*> scan_temp;
+    std::deque<_360_scan*>      scan_temp;
     
 protected: 
     
     
-    bool done;
+    bool                        done;
     
-    std::mutex safety;
+    std::mutex                  safety;
 
     
 public: 
     /// A list of previous scans, organized by time taken.
-    std::deque<_360_scan*> scan_hist;
+    std::deque<_360_scan*>      scan_hist;
     
   
     /// Defualt constructor relys on namespace constants.
-    lidar() : _dev( lidar_config::tty_path )
-    { done = false; }
+    lidar();
     
 
     /// Explicit constructor requires that UART terminal path be provided. 
-	lidar(std::string _path) : _dev( _path )
-    { done = false; }
+	lidar(std::string _path);
     
     /// Scans incoming data up to the start ( "0xFA" ) and returns that.
-	uint8_t seek();
+	uint8_t                                 seek();
     
     /// Scans in a NEW packet starting from 0xFA
-    packet* scan(){return scan(seek());}
-    packet* scan(uint8_t _seek);
+    inline packet*                          scan();
+    packet*                                 scan(uint8_t _seek);
     
     /// Addes a new entry to the scan history; returns the most recent
-    _360_scan* build_scan();
+    _360_scan*                              build_scan();
     
     /// Get a safe iterator for sequential reads. STOPS
-    std::deque<_360_scan*>::iterator
-        get_scan_iterator();
+    std::deque<_360_scan*>::iterator        get_scan_iterator();
     
     /// Update scan_hist with temp data
-    void done_scan_iterator();
+    void                                    done_scan_iterator();
     
     
-    void loop();
+    void                                    loop();
     
-    std::thread  start_thread()
-    { 
-        std::cout<<"\nLIDAR started!"<<std::endl;
-        return  std::thread( & lidar::loop,&(*this)) ; 
-    }
+    std::thread                             start_thread();
     
     
 	/** TODO: Scan history interface.

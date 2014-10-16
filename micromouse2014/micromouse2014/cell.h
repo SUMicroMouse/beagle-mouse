@@ -11,32 +11,25 @@
 
 #include "wall.h"
 
-#include <iostream>
-#include <cmath>
+#include "cardinal.h"
 
+#include <cstddef>
+#include <string>
 
 class star;
 class grid;
-
-//enum direction
-//{
-//	NORTH,
-//	SOUTH,
-//	EAST,
-//	WEST
-//};
 
 
 namespace cell_config 
 {
     // Max cell width
-    constexpr size_t max_width  = 180;//mm
+    constexpr double max_width  = 180;//mm
     
     // Max cell length
-    constexpr size_t max_length = 180;//mm
+    constexpr double max_length = 180;//mm
     
-    constexpr size_t cellsize = 180.0;
-    constexpr size_t mazesize = 180.0;
+    constexpr double cellsize = 180.0;
+    constexpr double mazesize = 180.0;
     
     /// The length of the cell in inches [DEPRECIATED]
     const int CELL_SIZE =  8; 
@@ -54,11 +47,12 @@ class cell
 	int row; // lat
 	int column; // long
 
-	cell *	north;
-	cell *	south;
-	cell *	east;
-	cell *	west;
-
+//	cell *	north;
+//	cell *	south;
+//	cell *	east;
+//	cell *	west;
+//    
+    rose<cell*>     _cells;
     
 	int checked; // 1 = checked. 2 = has multiple paths...
 	bool deadend;
@@ -70,7 +64,9 @@ class cell
 
 	// boundaries, confirmed/uncomfirmed
 	// 0 = unknown. -1 = confirmed, no wall. 1 = wall confirmed present
-	int	b_north, b_south, b_east, b_west;
+//	int	b_north, b_south, b_east, b_west;
+    
+    rose<int>       _bounds;
 
 	bool start_node; // for cells that have multiple options for different paths
 	bool state; // used to determine if the path is open or closed (already tried or not)
@@ -94,41 +90,49 @@ public:
 	
 	void set_adjacent(cell & _adj);
     
-	void sNorth(int g){ b_north = g;    }
-	void sSouth(int g){ b_south = g;    }
-	void sEast(int g){  b_east = g;     }
-	void sWest(int g){  b_west = g;     }
-
-	int gNorth(){   return b_north;     }
-	int gSouth(){   return b_south;     }
-	int gEast(){    return b_east;      }
-	int gWest(){    return b_west;      }
-
+//	void sNorth(int g){ b_north = g;    }
+//	void sSouth(int g){ b_south = g;    }
+//	void sEast(int g){  b_east = g;     }
+//	void sWest(int g){  b_west = g;     }
+//
+//	int gNorth(){   return b_north;     }
+//	int gSouth(){   return b_south;     }
+//	int gEast(){    return b_east;      }
+//	int gWest(){    return b_west;      }
+//
+#ifdef UNUSED
+    /// upon revisiting a cell, "close" the direction that you're coming from
 	void markSourceDirection(std::string direction);
+    /// returns the values of left, front, right depending on the direction
 	void checkVirtualSides(int & left, 
                            int & right, 
                            int & front, 
                            std::string direction);
+#endif
 	void markWalls(double x, double y, double sourceX, double sourceY);
-	void wallMark(int side, int mode);
+	
+    /// mark the wall and go to the neighboring cell and mark its corresponding wall
+    /// mode: 1 = mark. -1 = unmark/empty
+    /// side: one of {n,e,s,w}
+    void wallMark(char side, int mode);
 	void declareSideEmpty(double sourceX, double sourceY);
 
-	// return true if more than the source side is open
+	/// return true if more than the source side is open
 	bool declareSidesOpen(char sourceSide);
 
-	// return a value of 1 for closed sides, -1 for open
-	void returnSides(int &north, int &south, int &east, int &west);
-	void returnSides(int &north, int &south, int &east, int &west, 
-                     char &sourceDirection);
+	/// return a value of 1 for closed sides, -1 for open
+	rose<int> returnSides(char sourceDirection = 0);
 	int numUnknownSides();
 
 	double returnSum() { return sum; }
+    
+    /// figure out the heuristicCost, which is simply based on the distance to the Goal.
 	void figureheuristicCost(double goalX, double goalY);
 
-	// pointer to previous cell. used in depth search to make sure the process doesn't go backward
+	/// pointer to previous cell. used in depth search to make sure the process doesn't go backward
 	cell * previousCell;
 
-	// pointer to the next cell with the same sum, used in depth search
+	/// pointer to the next cell with the same sum, used in depth search
 	cell * nextCell();
 	cell * next;
 };

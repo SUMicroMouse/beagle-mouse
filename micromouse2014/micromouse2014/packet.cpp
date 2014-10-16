@@ -1,22 +1,25 @@
+//
+//  packet.cpp
+//  micromouse
+//
+//  Created by Lyle Moffitt on 3/7/14.
+//  Copyright (c) 2014 Lyle Moffitt. All rights reserved.
+//
+
+
 #include "packet.h"
+#include <iostream>
+#include "macros.h"
+using namespace  packet_config;
 
 /* ********************             DATA            ******************** */
-data::data(packet * _p, std::vector<uint8_t> _d):
+data::data(const packet * _p, const uint8_t _d[data_len]):
 distance        (_d[0] | (_d[1]&0x3F)<<8 ),
 strength_warn   (_d[1] & 0x40),
 invalid_data    (_d[1] & 0x80),
 strength        (_d[2] | _d[3]<<8 ),
 source          (_p)
 {}
-
-data::data(data & _d):
-distance        (_d.distance),
-strength_warn   (_d.strength_warn),
-invalid_data    (_d.invalid_data),
-strength        (_d.strength),
-source          (_d.source)
-{}
-
 
 void 
 data::print(uint index) const
@@ -35,35 +38,38 @@ data::print(uint index) const
 
 /* ******************               PACKET            ****************** */
 
-packet::packet(std::vector<uint8_t> _v):
-d0(this, { _v[ 4],_v[ 5],_v[ 6],_v[ 7] }),
-d1(this, { _v[ 8],_v[ 9],_v[10],_v[11] }),
-d2(this, { _v[12],_v[13],_v[14],_v[15] }),
-d3(this, { _v[16],_v[17],_v[18],_v[19] }),
+
+
+packet::packet(const uint8_t _v[packet_len]):
+p_time(std::chrono::system_clock::now().time_since_epoch().count()),
 start(_v[0]),
 index(_v[1]),
-chksum(_v[21]<<8 | _v[20]),
-p_time(std::chrono::system_clock::now().time_since_epoch().count())
-{
-    // Calculate the speed
-    int16_t b=0,a =( _v[2]<<8 | _v[3] );
+speed([](int16_t a)
+{   int16_t b=0;
     for (uint16_t _u = 0x0001; _u&0xFFFF; _u<<=1){ b= (b<<1) + (_u & a); }
-    speed 	= b; /// 64.0;
+    return b;
+}( _v[2]<<8 | _v[3] )),
+d0(this, &_v[ 4]),
+d1(this, &_v[ 8]),
+d2(this, &_v[12]),
+d3(this, &_v[16]),
+chksum(_v[21]<<8 | _v[20]),
+chkcalc([&_v](){
+    uint16_t chk_tab[10]; int32_t chk32=0;
+    for (int i =0; i< 10 ; ++i){ chk_tab[i]=( _v[2*i] | _v[2*i+1]<<8 ); }
+    for (auto &i: chk_tab){ chk32 = (chk32<<1) + i; }
+    return ( 0x7FFF & ((chk32 & 0x00007FFF) + (chk32 >> 15)) );
     
-    // Recalculate the checksum
-    std::vector<uint16_t> _c;
-    for (int i =0; i< 10 ; ++i){ _c.push_back( _v[2*i] | _v[2*i+1]<<8 ); }
-    int32_t chk32=0;
-    for (auto it=_c.begin(); it != _c.end(); chk32 = (chk32<<1) + *it++);
-    chkcalc = 0x7FFF & ((chk32 & 0x00007FFF) + (chk32 >> 15));
-    
+}()),
+avg_dist([&](){
     int num=0,sum=0;
-    if(d0.invalid_data){ sum+=d0.distance; num++; }
-    if(d1.invalid_data){ sum+=d1.distance; num++; }
-    if(d2.invalid_data){ sum+=d2.distance; num++; }
-    if(d3.invalid_data){ sum+=d3.distance; num++; }
-
-    avg_dist = double(sum)/double(num);
+    if(!d0.invalid_data){ sum+=d0.distance; num++; }
+    if(!d1.invalid_data){ sum+=d1.distance; num++; }
+    if(!d2.invalid_data){ sum+=d2.distance; num++; }
+    if(!d3.invalid_data){ sum+=d3.distance; num++; }
+    return double (DIV(sum, num));
+}())
+{
 }
 
 
@@ -91,26 +97,26 @@ packet::print() const
 /***********************      SCAN_MAP METHODS    ***********************/
 
 size_t
-_360_scan::add_pkt(packet* _p)
+_360_scan::add_packet(packet* _p)
 {
-    using namespace packet_config;
+//    using namespace packet_config;
     
-    if (_p->index == index_min) { begin = _p->p_time; }
-    if (_p->index == index_max) { end = _p->p_time; }
+    if (_p->index == index_min) { t_begin = _p->p_time; }
+    if (_p->index == index_max) { t_end = _p->p_time; }
 
     uint degree = (_p->index - index_min) * data_num;
     //cout <<"\nAdding degree: "<< degree;
-    deg_index[degree + 0]= &_p->d0 ;
-    deg_index[degree + 1]= &_p->d1 ;
-    deg_index[degree + 2]= &_p->d2 ;
-    deg_index[degree + 3]= &_p->d3 ;
-//    deg_index.emplace( pair<uint,data>(degree + 0, _p.d0) ) ;
-//    deg_index.emplace( pair<uint,data>(degree + 1, _p.d1) ) ;
-//    deg_index.emplace( pair<uint,data>(degree + 2, _p.d2) ) ;
-//    deg_index.emplace( pair<uint,data>(degree + 3, _p.d3) ) ;
-    //cout<< "\nAdding packet #" <<deg_index.size();
+    (*this)[degree + 0]= &_p->d0 ;
+    (*this)[degree + 1]= &_p->d1 ;
+    (*this)[degree + 2]= &_p->d2 ;
+    (*this)[degree + 3]= &_p->d3 ;
+//    emplace( pair<uint,data>(degree + 0, _p.d0) ) ;
+//    emplace( pair<uint,data>(degree + 1, _p.d1) ) ;
+//    emplace( pair<uint,data>(degree + 2, _p.d2) ) ;
+//    emplace( pair<uint,data>(degree + 3, _p.d3) ) ;
+    //cout<< "\nAdding packet #" <<size();
     //_p.print();
-    return deg_index.size();
+    return (*this).size();
 }
 
 
@@ -119,10 +125,10 @@ void
 _360_scan::print_pkt()
 {
 	//cout << "\nPrinting...";
-    for(auto it = deg_index.begin(); it != deg_index.end();it++)
+    for(auto it : (*this) )
     {
-        if( (it->first%4 ==0)  )
-            it->second->source->print();
+        if( (it.first%4 ==0)  )
+            it.second->source->print();
 
     }
 }
@@ -131,8 +137,8 @@ void
 _360_scan::print_data()
 {
 	//cout << "\nPrinting...";
-    for(auto it = deg_index.begin(); it != deg_index.end();it++)
+    for(auto it : (*this) )
     {
-        it->second->print(it->first%4);
+        it.second->print(it.first%4);
     }
 }

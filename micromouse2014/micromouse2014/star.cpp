@@ -51,7 +51,7 @@ void star::theLoop()
 		lide.build_scan();
 		//auto deqIterate = lide.scan_hist.begin(); // deque iterator for 360 scan history. points to whole scans. begin is the latest
 		//auto degreeIt = (**deqIterate).begin; // degree iterator
-		////(**deqIterate).deg_index[]; // how to access the individual degree
+		////(**deqIterate)[]; // how to access the individual degree
 		//
 		scan();
 		maze.updateMaze();
@@ -94,10 +94,10 @@ void star::scan()
 
 	auto _360_it = lide.build_scan(); // create new scan
 	auto deqIterate = lide.scan_hist.begin(); // deque iterator for 360 scan history. points to whole scans. begin is the latest
-	//auto deg_it  = (**deqIterate).deg_index.begin(); // degree iterator
+	//auto deg_it  = (**deqIterate).begin(); // degree iterator
 
 	map<uint, const data*>::iterator beginner;
-	beginner = (**deqIterate).deg_index.begin();
+	beginner = (**deqIterate).begin();
 	while (beginner->second->invalid_data)
 	{
 		beginner++;
@@ -109,10 +109,8 @@ void star::scan()
 	map<uint, const data*>::iterator follower;
 	follower = beginner;
 
-	int i = 0;
 	string wallOrientation;
 	double wallDisplacement_x, wallDisplacement_y, distanceToWall;
-	double previous_value;
 	
 
 	// pI is the ahead iterator. follower is right behind it. beginner is the one that 
@@ -123,7 +121,6 @@ void star::scan()
 	int initialDirection;
 
 // prepare to go forward anyway
-	int countSuccess;
 
 	// check direction for the first time, using initialDirection
 	if (!(*pI).second->invalid_data && !(*follower).second->invalid_data)
@@ -137,7 +134,7 @@ void star::scan()
 		follower++;
 	}
 
-	while (pI != (**deqIterate).deg_index.end())
+	while (pI != (**deqIterate).end())
 	{
 		// check direction
 		if (!(*pI).second->invalid_data && !(*follower).second->invalid_data)
@@ -152,7 +149,6 @@ void star::scan()
 				if (angle < 0)
 					angle = -1 * angle;
 				// length from beginning spot to the last spot that was recorded as part of the same wall
-				double length;
 				// create the wall, orient it, and add it to the maze
 				wall *nWall = new wall((*beginner).second->distance, (*follower).second->distance, (*beginner).first, (*follower).first);
 				maze.wallOrienter(*nWall, wallOrientation, wallDisplacement_x, wallDisplacement_y, distanceToWall);
@@ -187,15 +183,15 @@ seeing where the "derivative" changes sign. aka, increasing vs. decreasing*/
 {
 	auto _360_it = lide.build_scan(); // create new scan
 	auto deqIterate = lide.scan_hist.begin(); // deque iterator for 360 scan history. points to whole scans. begin is the latest
-	//auto deg_it  = (**deqIterate).deg_index.begin(); // degree iterator
+	//auto deg_it  = (**deqIterate).begin(); // degree iterator
 
 	// prepare to iterate through the latest scan
 	map<uint, const data*>::iterator pI;
-	pI = (**deqIterate).deg_index.begin();
+	pI = (**deqIterate).begin();
 	map<uint, const data*>::iterator beginner;
-	beginner = (**deqIterate).deg_index.begin();
+	beginner = (**deqIterate).begin();
 	map<uint, const data*>::iterator follower;
-	follower = (**deqIterate).deg_index.begin();
+	follower = (**deqIterate).begin();
 
 	// pI is the ahead iterator. follower is right behind it. beginner is the one that 
 	// is at the beginning of the current wall
@@ -212,7 +208,7 @@ seeing where the "derivative" changes sign. aka, increasing vs. decreasing*/
 	difference = (*pI).second->distance - (*follower).second->distance; // the difference between the follower's distance and the ahead distance 
 	directionOfMeasurementChanges(difference, initialDirection);
 
-	while (pI != (**deqIterate).deg_index.end())
+	while (pI != (**deqIterate).end())
 	{
 		// check direction
 		difference = (*pI).second->distance - (*follower).second->distance; // the difference between the follower's distance and the ahead distance 
@@ -264,8 +260,6 @@ void star::directionOfMeasurementChanges(uint difference, int &direction)
 // Then a breadth search from the goal to the current position is performed, updating the heuristic costs
 int star::decide()
 {
-#ifndef testing
-	using namespace lidar_config;
 
 	uint16_t moveDistance, xDifference, yDifference;
 	cell *currentCell = maze.findCell(maze.xDistance, maze.yDistance);
@@ -303,7 +297,7 @@ int star::decide()
 		auto scanInitial = lide.scan_hist.front();
 		
 		// check the distance of the wall in front, before moving
-		auto pack1 = scanInitial->deg_index.at(degree_north);
+		auto pack1 = scanInitial->at(lidar_config::degree_north);
 		uint16_t distance1 = pack1->distance;
 
 		/***** MOVE THIS MUCH *****/
@@ -320,7 +314,7 @@ int star::decide()
 		// scan again. the difference between the scanned distances for the front 
 		//	should be equal to the calculated moveDistance.
 		auto scanSecond = lide.scan_hist.front();	// second scan
-		auto pack2 = scanSecond->deg_index.at(degree_north);
+		auto pack2 = scanSecond->at(lidar_config::degree_north);
 		uint16_t distance2 = pack2->distance;
 
 		// get the difference between the two distances; cast them to int,
@@ -359,7 +353,7 @@ int star::decide()
 	{
 		// just go forward
 		auto scannnn = lide.scan_hist.front();
-		auto frontpack = scannnn->deg_index.at(degree_north);
+		auto frontpack = scannnn->at(lidar_config::degree_north);
 		moveDistance = frontpack->distance - 0.5 * nav_config::cell_size;
 		navigator.movedistancevariable(moveDistance);
 		PositionChange(moveDistance);
@@ -379,7 +373,6 @@ int star::decide()
 		maze.updateMaze();
 	}
 
-#endif
 	return 0;
 }
 
@@ -439,8 +432,8 @@ void star::breadthSearch()
 
 	// look at child cells
 	cell *cellP = currentCell;
-	int north, south, east, west;
-	cellP->returnSides(north, south, east, west);
+	rose<int> sides; // north, south, east, west;
+	sides = cellP->returnSides();//north, south, east, west);
 
 	int i = 1;
 
@@ -489,7 +482,7 @@ void star::breadthSearch()
 		childCells.pop_front(); // remove the child cell from the queue
 
 		// return the sides of the child cell excluding the source side
-		cellP->returnSides(north, south, east, west, cellP->sourceDirection);
+		sides = cellP->returnSides( cellP->sourceDirection);
 
 		i++;
 		countCost++;
@@ -505,7 +498,7 @@ void star::breadthSearch()
     
 	//why is this here?
     //int north, south, east, west;
-	cellP->returnSides(north, south, east, west);
+	sides = cellP->returnSides();//north, south, east, west);
 
 	countCost = 1;
 	i = 1;

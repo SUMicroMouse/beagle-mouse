@@ -29,8 +29,6 @@ namespace grid_config
     constexpr int origin_x =0 , origin_y =0;
     
     //double goalX, goalY;
-	
-
 }
 
 
@@ -46,20 +44,29 @@ class grid
 	std::vector<cell*> long_headers; // columns
 	
 	cell	*	origin;
-	cell	*	goal;
+//	cell	*	goal;
 	cell	*	center;
     
 public:
 	grid();
 	grid(uint x_dim, uint y_dim);
     
+    /// find the current cell based on the row/column
     cell *  getCell(int _row, int _col);
+    /// find the current cell based on the coordinates in centimeters
     cell *  findCell(double x, double y);
     void    addCell(cell &newcell);
+#ifdef UNUSED
     void    createMaze(); // create the linked lists of cells, 16 by 16
 	void    markGoalCells();
-    
+#endif
+    // take the scan, add walls to the existing map of the maze, and call the 
+    // decision-making function
+    // the return value means
+    /*********should turn to see more if the end of a wall is within the last packet*********/
     int  updateMaze();
+    // get the wall's orientation relative to the robot's field of vision
+    // called by updateMaze
 	void wallOrienter(wall &wallInQuestion, 
                       std::string &orientation, 
                       double &x_displacement, 
@@ -71,7 +78,10 @@ public:
                            double &x_displacement, 
                            double &y_displacement, 
                            double distanceToWall    );
-    
+    // mark the walls of the cells along which the wall runs, and make mark of the empty walls
+    // coordinateAlongWall: the coordinate along the wall is the one on which all the test points are based
+    // xORy: x means x corresponds to the coordinateAlongWall. y means y corresponds to the coordinateAlongWall
+    // - called by addBasedOnCompass
 	void markWalls(wall &wallInQuestion, 
                    double &staticCoord, 
                    double &coordinateAlongWall, 

@@ -18,14 +18,12 @@
 #include <iostream>
 #include <tuple>
 
-#define DIV(a,b) ( b==0 ? a : double(a)/double(b) )
-#define AVG(a,b) ( 0.5 * double(a) + 0.5 * double(b) )
 class star;
 class nav;
 
 namespace nav_config
 {
-    constexpr double PI = 3.14159265359;
+    constexpr double PI             = 3.14159265359;
     
 	constexpr double max_speed      = 1; 
 	constexpr double min_speed      = 0;
@@ -49,11 +47,7 @@ namespace nav_config
 
 	// returns true if they are similar
     static inline
-    bool eqish(double a, double b)
-    {
-        return (abs(DIV(a,b))-1<=(0+min_invariance) &&
-                abs(DIV(a,b))-1<=(0-min_invariance) ? true:false); 
-    }
+    bool eqish(double a, double b);
 
 }
 //change
@@ -73,7 +67,7 @@ protected:
     inline //-1 is invalid
     int dist_at(uint degree)
     {
-        auto it = view.scan_hist.front()->deg_index.at(degree);
+        auto it = view.scan_hist.front()->at(degree);
         return (it->invalid_data?-1:it->distance);
     }
     

@@ -7,45 +7,41 @@
 //
 
 #include "cell.h"
+#include <cmath>
+#include "formatting.h"
 
 using namespace std;
 using namespace cell_config;
 
-cell::cell()
+cell::cell():
+_cells(nullptr,nullptr,nullptr,nullptr),
+_bounds (0,0,0,0)
 {
 	checked = 0;
-    east = north = south = west = nullptr;
 	deadend = false;
 	finish = false;
 }
 
-cell::cell(int r, int c)
+cell::cell(int r, int c):
+_cells(nullptr,nullptr,nullptr,nullptr),
+_bounds (0,0,0,0),row(r),column(c)
 {
-	row = r;
-	column = c;
+	checked     = 0;
+	deadend     = false;
+	finish      = false;
+	goalCell    = false;
 
-	checked = 0;
-	deadend = false;
-	finish = false;
-	b_north = 0;
-	b_south = 0;
-	b_east = 0;
-	b_west = 0;
-
-	goalCell = false;
-
-	x_center = (cellsize * column) + 0.5 * cellsize;
-	y_center = (cellsize * row) + 0.5 * cellsize;
+	x_center    = (cellsize * column) + 0.5 * cellsize;
+	y_center    = (cellsize * row) + 0.5 * cellsize;
 }
 
 // take the coordinates in centimeters and create a cell with the correct row/column attributes
-cell::cell(double x, double y)
+cell::cell(double x, double y):
+_cells(nullptr,nullptr,nullptr,nullptr),
+_bounds (0,0,0,0),
+row(    floor(y/cellsize)   ),
+column( floor(x / cellsize) )
 {
-	double rtemp = y / cellsize;
-	double ctemp = x / cellsize;
-
-	row = floor(rtemp);
-	column = floor(ctemp);
 }
 
 // uses the current direction to determine which walls are false or true
@@ -55,61 +51,61 @@ cell::cell(int left, int right, int front, string direction)
 	finish = false;
 	if (direction == "north")
 	{
-		b_south = true; // set to true so that when returning to the cell, it doesn't go down a path previously traveled
+		_bounds.S() = true; // set to true so that when returning to the cell, it doesn't go down a path previously traveled
 
 		if (left == 1)
-			b_west = true;
+			_bounds.W() = true;
 		if (right == 1)
-			b_east = true;
+			_bounds.E() = true;
 		if (front == 1)
-			b_north = true;
+			_bounds.N() = true;
 	}
 	else if (direction == "south")
 	{
-		b_north = true;
+		_bounds.N() = true;
 
 		if (left == 1)
-			b_east = true;
+			_bounds.E() = true;
 		if (right == 1)
-			b_west = true;
+			_bounds.W() = true;
 		if (front == 1)
-			b_south = true;
+			_bounds.S() = true;
 	}
 	else if (direction == "east")
 	{
-		b_west = true;
+		_bounds.W() = true;
 
 		if (left == 1)
-			b_north = true;
+			_bounds.N() = true;
 		if (right == 1)
-			b_south = true;
+			_bounds.S() = true;
 		if (front == 1)
-			b_east = true;
+			_bounds.E() = true;
 	}
 	else if (direction == "west")
 	{
-		b_east = true;
+		_bounds.E() = true;
 
 		if (left == 1)
-			b_south = true;
+			_bounds.S() = true;
 		if (right == 1)
-			b_north = true;
+			_bounds.N() = true;
 		if (front == 1)
-			b_west = true;
+			_bounds.W() = true;
 	}
 }
-
+#ifdef UNUSED
 // upon revisiting a cell, "close" the direction that you're coming from
 void cell::markSourceDirection(string direction)
 {
 	if (direction == "north")
-		b_south = true; // set to true so that when returning to the cell, it doesn't go down a path previously traveled
+		_bounds.S() = true; // set to true so that when returning to the cell, it doesn't go down a path previously traveled
 	else if (direction == "south")
-		b_north = true;
+		_bounds.N() = true;
 	else if (direction == "east")
-		b_west = true;
+		_bounds.W() = true;
 	else if (direction == "west")
-		b_east = true;
+		_bounds.E() = true;
 }
 
 // returns the values of left, front, right depending on the direction
@@ -117,30 +113,30 @@ void cell::checkVirtualSides(int &left, int &right, int &front, string direction
 {
 	if (direction == "north")
 	{
-		left = b_west;
-		right = b_east;
-		front = b_north;
+		left = _bounds.W();
+		right = _bounds.E();
+		front = _bounds.N();
 	}
 	else if (direction == "south")
 	{
-		left = b_east;
-		right = b_west;
-		front = b_south;
+		left = _bounds.E();
+		right = _bounds.W();
+		front = _bounds.S();
 	}
 	else if (direction == "east")
 	{
-		left = b_north;
-		right = b_south;
-		front = b_east;
+		left = _bounds.N();
+		right = _bounds.S();
+		front = _bounds.E();
 	}
 	else if (direction == "west")
 	{
-		left = b_south;
-		right = b_north;
-		front = b_west;
+		left = _bounds.S();
+		right = _bounds.N();
+		front = _bounds.W();
 	}
 }
-
+#endif
 // returns true if the point is closer to sideA than sideB
 bool closerTo(double sideA, double sideB, double point)
 {
@@ -158,85 +154,34 @@ bool closerTo(double sideA, double sideB, double point)
 // mark the wall and go to the neighboring cell and mark its corresponding wall
 // mode: 1 = mark. -1 = unmark/empty
 // 1 = north. 2 = south. 3 = west. 4 = east.
-void cell::wallMark(int side, int mode)
+void cell::wallMark(char side, int mode)
 {
-	cell *otherCell;
+    assert_or_throw((mode==1||mode==-1), invalid_argument, 
+                    "Argument \"mode\" must be one of {+1,-1}");
+    char adjacent;
+    switch (side)
+	{
+        case 'n': adjacent='s'; break;
+        case 's': adjacent='n'; break;
+        case 'e': adjacent='w'; break;
+        case 'w': adjacent='e'; break;
+        default:    
+            assert_or_throw(false, invalid_argument, 
+                            "Argument \"side\" must be one of {n,e,s,w}");
+	}
+    
+    _bounds[side] = _cells[side]->_bounds[adjacent] = ((mode==1) ? 1:0);
 
-	if (mode == 1) // mark the wall as being present
-	{
-		switch (side)
-		{
-		case 1:{
-				   b_north = 1;
-				   otherCell = north;
-				   otherCell->b_south = 1;
-		}
-			break;
-		case 2:{
-				   b_south = 1;
-				   otherCell = south;
-				   otherCell->b_north = 1;
-		}
-			break;
-		case 3:{
-				   b_west = 1;
-				   otherCell = west;
-				   otherCell->b_east = 1;
-		}
-			break;
-		case 4:{
-				   b_east = 1;
-				   otherCell = east;
-				   otherCell->b_west = 1;
-		}
-			break;
-		default:
-			break;
-		}
-	}
-	else if (mode == -1) // make the wall nonexistent
-	{
-		switch (side)
-		{
-		case 1:{
-				   b_north = 0;
-				   otherCell = north;
-				   otherCell->b_south = 0;
-		}
-			break;
-		case 2:{
-				   b_south = 0;
-				   otherCell = south;
-				   otherCell->b_north = 0;
-		}
-			break;
-		case 3:{
-				   b_west = 0;
-				   otherCell = west;
-				   otherCell->b_east = 0;
-		}
-			break;
-		case 4:{
-				   b_east = 0;
-				   otherCell = east;
-				   otherCell->b_west = 0;
-		}
-			break;
-		default:
-			break;
-		}
-	}
-	
 }
 
 // check to see if the point is within the cell, including the walls
 void cell::markWalls(double x, double y, double sourceX, double sourceY)
 {
-	double rightBound = x_center + 0.5 * cellsize;
-	double leftBound = x_center - 0.5 * cellsize;
+	double rightBound   = x_center + 0.5 * cellsize;
+	double leftBound    = x_center - 0.5 * cellsize;
 	// remember that the top left is the origin of the grid
-	double topBound = y_center + 0.5 * cellsize;
-	double bottomBound = y_center - 0.5 * cellsize;
+	double topBound     = y_center + 0.5 * cellsize;
+	double bottomBound  = y_center - 0.5 * cellsize;
     
     //unused
 	//cell * otherCell;
@@ -253,22 +198,22 @@ void cell::markWalls(double x, double y, double sourceX, double sourceY)
 					if (abs(leftBound - x) < abs(topBound - y))
 					{	// left wall must be present rather than the top wall
 						// turn the left boundary to true, and go to that cell and change its right boundary to true
-						wallMark(3, 1);
+						wallMark('w', 1);
 					}
 					else
 					{	// top wall must be present instead of the left all
-						wallMark(1, 1);
+						wallMark('n', 1);
 					}
 				}
 				else
 				{	// closer to bottom wall
 					if (abs(leftBound - x) < abs(bottomBound - y))
 					{	// left wall is present
-						wallMark(3, 1);
+						wallMark('w', 1);
 					}
 					else
 					{	// bottom wall is present
-						wallMark(2, 1);
+						wallMark('s', 1);
 					}
 				}				
 			}
@@ -278,22 +223,22 @@ void cell::markWalls(double x, double y, double sourceX, double sourceY)
 				{	// closer to top wall
 					if (abs(rightBound - x) < abs(topBound - y))
 					{	// right wall must be present instead of the top wall
-						wallMark(4, 1);
+						wallMark('e', 1);
 					}
 					else
 					{	// top wall must be present instead of the right wall
-						wallMark(1, 1);
+						wallMark('n', 1);
 					}
 				}
 				else
 				{	// closer to bottom wall
 					if (abs(rightBound - x) < abs(bottomBound - y))
 					{	// right wall must be present instead of the bottom wall
-						wallMark(4, 1);
+						wallMark('e', 1);
 					}
 					else
 					{	// bottom wall must be present instead of the right wall
-						wallMark(2, 1);
+						wallMark('s', 1);
 					}
 				}	
 			}
@@ -324,16 +269,16 @@ void cell::declareSideEmpty(double sourceX, double sourceY)
 		if (closerTo(topBound, bottomBound, sourceY))
 		{	// closer to top wall
 			if (abs(leftBound - sourceX) < abs(topBound - sourceY))
-				wallMark(3, -1);
+				wallMark('w', -1);
 			else	
-				wallMark(1, -1);
+				wallMark('n', -1);
 		}
 		else
 		{	// closer to bottom wall
 			if (abs(leftBound - sourceX) < abs(bottomBound - sourceY))
-				wallMark(3, -1);
+				wallMark('w', -1);
 			else
-				wallMark(2, -1);
+				wallMark('s', -1);
 		}
 	}
 	else
@@ -341,16 +286,16 @@ void cell::declareSideEmpty(double sourceX, double sourceY)
 		if (closerTo(topBound, bottomBound, sourceY))
 		{	// closer to top wall
 			if (abs(rightBound - sourceX) < abs(topBound - sourceY))	
-				wallMark(4, -1);
+				wallMark('e', -1);
 			else
-				wallMark(1, -1);
+				wallMark('n', -1);
 		}
 		else
 		{	// closer to bottom wall
 			if (abs(rightBound - sourceX) < abs(bottomBound - sourceY))
-				wallMark(4, 1);
+				wallMark('e', 1);
 			else
-				wallMark(2, -1);
+				wallMark('s', -1);
 		}
 	}
 
@@ -361,7 +306,8 @@ void cell::figureheuristicCost(double goalX, double goalY)
 {
 	double distance;
 
-	distance = sqrt(((x_center - goalX) * (x_center - goalX)) + ((y_center - goalY) * (y_center - goalY)));
+	distance = sqrt(  ((x_center - goalX) * (x_center - goalX)) 
+                    + ((y_center - goalY) * (y_center - goalY))  );
 
 	heuristicCost = distance; // centimeters give a high number...
 }
@@ -370,105 +316,42 @@ void cell::figureheuristicCost(double goalX, double goalY)
 bool cell::declareSidesOpen(char sourceSide)
 {
 	/********** IF TWO ADDITIONAL SIDES ARE OPEN, NOT JUST ONE **********/
-
-	int count = 0;
-
+    
+    int count = 0;
 	switch (sourceSide)
 	{
-	case 'n':{	// north
-				 if (b_east == -1)
-					 count++;
-				 if (b_south == -1)
-					 count++;
-				 if (b_east == -1)
-					 count++;
+        case 'n':
+        case 's':
+        case 'e':
+        case 'w':
+            for(auto _c: {'n','e','s','w'}){  
+                if (_c==sourceSide) {   continue;   }
+                if (_bounds[_c] == -1){  count++;    }
+            }
+            return (count>1);
+        default:    
+            assert_or_throw(false, invalid_argument, 
+                            "Argument must be one of {n,e,s,w}");
 	}
-		break;
-	case 's':{	// south
-				 if (b_east == -1)
-					 count++;
-				 if (b_north == -1)
-					 count++;
-				 if (b_west == -1)
-					 count++;
-	}
-		break;
-	case 'e':{	// east
-				 if (b_north == -1)
-					 count++;
-				 if (b_south == -1)
-					 count++;
-				 if (b_west == -1)
-					 count++;
-	}
-		break;
-	case 'w':{	// west
-				 if (b_east == -1)
-					 count++;
-				 if (b_south == -1)
-					 count++;
-				 if (b_north == -1)
-					 count++;
-	}
-		break;
-	default:
-		break;
-	}
-
-	if (count > 1)
-		return true;
-	else
-		return false;
 }
 
-void cell::returnSides(int &north, int &south, int &east, int &west)
-{
-	north = b_north;
-	south = b_south;
-	east = b_east;
-	west = b_west;
-}
 
 // return values of 1 for closed sides and -1 for open sides
-void cell::returnSides(int &north, int &south, int &east, int &west, char &sourceDirection)
+rose<int>  cell::returnSides( char sourceDirection)
 {
+    rose<int> ret = _bounds;
+    
 	switch (sourceDirection)
 	{
-	case 'n':{
-				 south = b_south;
-				 east = b_east;
-				 west = b_west;
-				 // close off previous side
-				 north = 1;
-	}
-		break;
-	case 's':{
-				 north = b_north;
-				 east = b_east;
-				 west = b_west;
-				 // close off previous side
-				 south = 1;
-	}
-		break;
-	case 'e':{
-				 north = b_north;
-				 west = b_west;
-				 south = b_south;
-				 // close off previous side
-				 east = 1;
-	}
-		break;
-	case 'w':{
-				 north = b_north;
-				 east = b_east;
-				 south = b_south;
-				 // close off previous side
-				 west = 1;
-	}
-		break;
-
-	default:
-		break;
+        case 'n':
+        case 's':
+        case 'e':
+        case 'w':
+            ret[sourceDirection]=1;
+            return ret;
+            
+        default:    
+            return _bounds;
 	}
 }
 
@@ -476,49 +359,37 @@ void cell::returnSides(int &north, int &south, int &east, int &west, char &sourc
 int cell::numUnknownSides()
 {
 	int count = 0;
-	if (b_north == 0)
-		count++;
-	if (b_south == 0)
-		count++;
-	if (b_east == 0)
-		count++;
-	if (b_west == 0)
-		count++;
-
+    for(auto _c: {'n','e','s','w'}){   
+        if (_bounds[_c] == 0)
+            count++;
+    }
 	return count;
 }
 
 // operator ==
 bool cell::operator==(cell &oC)
 {
-	if ((row == oC.row) && (column == oC.column))
-		return true;
-	else
-		return false;
+	return((row == oC.row) && (column == oC.column));
 }
 
 // operator =
 void 
 cell::operator=(cell &c2)
 {
-	row = c2.row;
-	column = c2.row;
-	x_center = c2.x_center;
-	y_center = c2.y_center;
-	goalCell = c2.goalCell;
-	b_north = c2.b_north;
-	b_south = c2.b_south;
-	b_east = c2.b_east;
-	b_west = c2.b_west;
-	north = c2.north;
-	south = c2.south;
-	east = c2.east;
-	west = c2.west;
-	previousCell = c2.previousCell;
-	next = c2.next;
-	movementCost = c2.movementCost;
-	heuristicCost = c2.heuristicCost;
-	sum = c2.sum;
+    //copy cell structure
+	row         = c2.row;
+	column      = c2.column;
+	x_center    = c2.x_center;
+	y_center    = c2.y_center;
+    _bounds     = c2._bounds;
+    _cells      = c2._cells;
+    //copy cell algo data
+    goalCell        = c2.goalCell;
+	previousCell    = c2.previousCell;
+	next            = c2.next;
+	movementCost    = c2.movementCost;
+	heuristicCost   = c2.heuristicCost;
+	sum             = c2.sum;
 	sourceDirection = c2.sourceDirection;
 }
 
@@ -527,34 +398,16 @@ cell::operator=(cell &c2)
 cell * 
 cell::nextCell()
 {
-	if ((north->sum == sum) || north->goalCell)
-		if (!(north == previousCell))
+    for(auto _c: {'n','e','s','w'})
+    {   
+        if(_cells[_c]->sum==sum        ?true:
+           _cells[_c]->goalCell        ?true:
+           _cells[_c] != previousCell  ?true: false)
         {
-            north->previousCell = this;
-			return north;
+            _cells[_c]->previousCell = this;
+            return _cells[_c];
         }
-		
-	if ((south->sum == sum) || south->goalCell)
-		if (!(south == previousCell))
-        {
-            south->previousCell = this;
-			return south;
-        }
-	
-	if ((east->sum == sum) || (east->goalCell))
-		if (!(east == previousCell))
-        {
-            east->previousCell = this;
-			return east;
-        }
-	
-	if ((west->sum == sum) || west->goalCell)
-		if (!(west == previousCell))
-        {
-            west->previousCell = this;
-			return west;
-        }
-    
+    }
     return nullptr;
 }
 
