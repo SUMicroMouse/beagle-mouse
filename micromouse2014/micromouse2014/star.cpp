@@ -17,7 +17,6 @@ lide(the_lidar), navigator(the_nav)
 {
     deadend = false;
     
-#ifndef testing
 	maze.direction = "north";
 	maze.compass = 90; // starting position is 90 degrees, which will be "north". 0 degrees is to the left to match up with the lidar
 	maze.shift = 0.0; // default position, so shift is 0 degrees
@@ -37,8 +36,7 @@ lide(the_lidar), navigator(the_nav)
 	leftTurns = 0;
 
 	// create the maze
-	maze.createMaze();	
-#endif 
+//	maze.createMaze();	
 }
 
 void star::theLoop()
@@ -91,8 +89,8 @@ void star::scan()
 	
 	// subject to change
 	double closeEnough = 1;	// in millimeters
-
-	auto _360_it = lide.build_scan(); // create new scan
+    //Value never used, but function call is meaningful
+	/*auto _360_it =*/ lide.build_scan(); // create new scan
 	auto deqIterate = lide.scan_hist.begin(); // deque iterator for 360 scan history. points to whole scans. begin is the latest
 	//auto deg_it  = (**deqIterate).begin(); // degree iterator
 
@@ -110,13 +108,14 @@ void star::scan()
 	follower = beginner;
 
 	string wallOrientation;
-	double wallDisplacement_x, wallDisplacement_y, distanceToWall;
+	double wallDisplacement_x(0), wallDisplacement_y(0), distanceToWall(0);
 	
 
 	// pI is the ahead iterator. follower is right behind it. beginner is the one that 
 	// is at the beginning of the current wall
+    assert(follower != beginner && "Should not be the same");
 	pI++;
-	uint difference;
+	uint difference (-1);
 	int direction = 0; // 1 = increasing distances, -1 = decreasing distances
 	int initialDirection;
 
@@ -126,7 +125,7 @@ void star::scan()
 	if (!(*pI).second->invalid_data && !(*follower).second->invalid_data)
 		difference = (*pI).second->distance - (*follower).second->distance; // the difference between the follower's distance and the ahead distance 
 	directionOfMeasurementChanges(difference, initialDirection);
-
+    assert(difference!=uint(-1) && "Difference value was not initialized.");
 
 	while ((*pI).second->invalid_data || (*follower).second->invalid_data)
 	{
@@ -144,10 +143,11 @@ void star::scan()
 
 			if ((direction != initialDirection) || (abs((*pI).second->distance - (*follower).second->distance) > closeEnough))
 			{	// create a new wall if the direction of change in measurement switches, or if the difference in measurements is greater than closeEnough
-
+#warning Value stored in "angle" is never used
 				int angle = (*follower).first - (*beginner).first; //angle that encompasses the wall from the viewpoint
 				if (angle < 0)
 					angle = -1 * angle;
+
 				// length from beginning spot to the last spot that was recorded as part of the same wall
 				// create the wall, orient it, and add it to the maze
 				wall *nWall = new wall((*beginner).second->distance, (*follower).second->distance, (*beginner).first, (*follower).first);
@@ -229,15 +229,17 @@ seeing where the "derivative" changes sign. aka, increasing vs. decreasing*/
 // says whether the direction of measurement differences is increasing/decreasing.
 // called by scan()
 void star::directionOfMeasurementChanges(uint difference, int &direction)
-{
+{   
 	if (difference > 0)
 	{	// the distances are increasing
 		direction = 1;
 	}
+#if BAD_CODE//Code never used
 	else if (difference < 0)
 	{	// the distances are decreasing
 		direction = -1;
 	}
+#endif
 	else
 	{	// the distances are the same
 		direction = 0; // not likely to happen, but must include for the sake of including
@@ -261,9 +263,9 @@ void star::directionOfMeasurementChanges(uint difference, int &direction)
 int star::decide()
 {
 
-	uint16_t moveDistance, xDifference, yDifference;
+	uint16_t moveDistance(0), xDifference(0), yDifference(0);
+#warning Value stored in "currentCell" is never used
 	cell *currentCell = maze.findCell(maze.xDistance, maze.yDistance);
-
 	/******************* Find the next upcoming junction *************************/
 	char sourceDirection;
 	cell *cellPoint = maze.getPointerToJunction(sourceDirection); // return sourceDirection
@@ -440,43 +442,18 @@ void star::breadthSearch()
 	// add any cell as long as there's no wall between it and the current cell pointer
 	// add their movement costs
 	do{
-		if (north < 1)
-		{
-			if (!cellP->north->goalCell)
-			{
-				cellP->north->movementCost = countCost;
-				cellP->north->sourceDirection = 'n';
-				childCells.push_back(cellP->north);
-			}
-		}
-		if (west < 1)
-		{
-			if (!cellP->west->goalCell)
-			{
-				cellP->west->movementCost = countCost;
-				cellP->west->sourceDirection = 'w';
-				childCells.push_back(cellP->west);
-			}
-		}
-		if (south < 1)
-		{
-			if (!cellP->south->goalCell)
-			{
-				cellP->south->movementCost = countCost;
-				cellP->south->sourceDirection = 's';
-				childCells.push_back(cellP->south);
-			}
-		}
-		if (east < 1)
-		{
-			if (!cellP->east->goalCell)
-			{
-				cellP->east->movementCost = countCost;
-				cellP->east->sourceDirection = 'e';
-				childCells.push_back(cellP->east);
-			}
-		}
-
+        for(char dir : {'n','w','s','e'})
+        {
+            if (sides[dir] < 1)
+            {
+                if (!cellP->_cells[dir]->goalCell)
+                {
+                    cellP->_cells[dir]->movementCost = countCost;
+                    cellP->_cells[dir]->sourceDirection = dir;
+                    childCells.push_back(cellP->_cells[dir]);
+                }
+            }
+        }
 		// move the pointer to one of the next child cells in the 'queue'
 		cellP = childCells.front();
 		childCells.pop_front(); // remove the child cell from the queue
@@ -506,49 +483,26 @@ void star::breadthSearch()
 	// add any cell as long as there's no wall between it and the current cell pointer
 	// add their movement costs
 	do{
-		if (north < 1)
-		{
-			if (!cellP->north->goalCell)
-			{
-				cellP->north->heuristicCost = countCost;
-				cellP->north->sourceDirection = 'n';
-				childCells.push_back(cellP->north);
-			}
-		}
-		if (west < 1)
-		{
-			if (!cellP->west->goalCell)
-			{
-				cellP->west->heuristicCost = countCost;
-				cellP->west->sourceDirection = 'w';
-				childCells.push_back(cellP->west);
-			}
-		}
-		if (south < 1)
-		{
-			if (!cellP->south->goalCell)
-			{
-				cellP->south->heuristicCost = countCost;
-				cellP->south->sourceDirection = 's';
-				childCells.push_back(cellP->south);
-			}
-		}
-		if (east < 1)
-		{
-			if (!cellP->east->goalCell)
-			{
-				cellP->east->heuristicCost = countCost;
-				cellP->east->sourceDirection = 'e';
-				childCells.push_back(cellP->east);
-			}
-		}
-
+        
+        for(char dir : {'n','w','s','e'})
+        {
+            if (sides[dir] < 1)
+            {
+                if (!cellP->_cells[dir]->goalCell)
+                {
+                    cellP->_cells[dir]->heuristicCost = countCost;
+                    cellP->_cells[dir]->sourceDirection = dir;
+                    childCells.push_back(cellP->_cells[dir]);
+                }
+            } 
+        }
+		
 		// move the pointer to one of the next child cells in the 'queue'
 		cellP = childCells.front();
 		childCells.pop_front(); // remove the child cell from the queue
 
 		// return the sides of the child cell excluding the source side
-		cellP->returnSides(north, south, east, west, cellP->sourceDirection);
+		sides = cellP->returnSides(cellP->sourceDirection);
 
 		i++;
 		countCost++;
@@ -559,15 +513,16 @@ void star::breadthSearch()
 // mode 1 = go with the "known" path
 // mode 2 = go with the "unknown" path
 void star::depthSearch(int mode)
-{
+{   assert(mode==1 && "Both options are the same");
 	// start at current cell once again
 	cell *current = maze.findCell(maze.xDistance, maze.yDistance);
 	// prepare to check walls
-	int north, south, east, west;
+	rose<int> sides; //int north, south, east, west;
 
 	// check for dead end. if it's a dead end, return
-	current->returnSides(north, south, east, west);
-	int walls = north + south + east + west;
+	sides = current->returnSides();//north, south, east, west);
+	int walls(0);// = north + south + east + west;
+    for(char dir : {'n','w','s','e'}){  walls+=sides[dir];  }
 	/*//if (walls >= 3)
 	//{
 	//	// turn around
@@ -579,286 +534,121 @@ void star::depthSearch(int mode)
 
 	/***** container for the possible paths *****/
 	vector<path*> possiblePaths;
-
 	path *chosenPath;
-
 	switch (mode)
 	{
-	case 1:{	// go with the known path
-			   if (north < 1)
-			   {
-				   if (current->north->returnSum() <= current->returnSum()) // a dead end will have a sum greater than the current cell
-				   {
-					   path *p1 = new path();
-					   cell *c1;
-					   c1 = current->nextCell(); // move to next cell and mark its previouscell as this current one
-					   p1->members.push_back(c1);
-
-					   while (true)
-					   {	// go to the child cells and add cells with the same sum to the path
-						   c1 = c1->nextCell();
-						   p1->members.push_back(c1);
-						   p1->unknownWalls += c1->numUnknownSides(); // count the unknown sides
-
-						   if (c1->goalCell)
-							   break;
-					   }
-					   possiblePaths.push_back(p1);
-				   }
-			   }
-			   if (south < 1)
-			   {
-				   if (current->south->returnSum() <= current->returnSum()) // a dead end will have a sum greater than the current cell
-				   {
-					   path *p2 = new path();
-					   cell *c2 = current->nextCell();
-					   p2->members.push_back(c2);
-					   
-					   while (true)
-					   {
-						   c2 = c2->nextCell();
-						   p2->members.push_back(c2);
-						   p2->unknownWalls += c2->numUnknownSides();
-
-						   if (c2->goalCell)
-							   break;
-					   }
-
-					   possiblePaths.push_back(p2);
-				   }
-			   }
-			   if (east < 1)
-			   {
-				   if (current->east->returnSum() <= current->returnSum()) // a dead end will have a sum greater than the current cell
-				   {
-					   path *p3 = new path();
-					   cell *c3 = current->nextCell();
-					   p3->members.push_back(c3);
-
-					   while (true)
-					   {
-						   c3 = c3->nextCell();
-						   p3->members.push_back(c3);
-						   p3->unknownWalls += c3->numUnknownSides(); // count the unknown sides
-
-						   if (c3->goalCell)
-							   break;
-					   }
-
-					   possiblePaths.push_back(p3);
-				   }
-			   }
-			   if (west < 1)
-			   {
-				   if (current->west->returnSum() <= current->returnSum()) // a dead end will have a sum greater than the current cell
-				   {
-					   path *p4 = new path();
-					   cell *c4 = current->nextCell();
-					   p4->members.push_back(c4);
-
-					   while (true)
-					   {
-						   c4 = c4->nextCell();
-						   p4->members.push_back(c4);
-						   p4->unknownWalls += c4->numUnknownSides();
-
-						   if (c4->goalCell)
-							   break;
-					   }
-
-					   possiblePaths.push_back(p4);
-				   }
-			   }
-
-			   // choose the path with the least unknowns. just do walls in general for now
-			   int lowestIndex = 0;
-			   for (int q = 0; q < possiblePaths.size(); q++)
-			   {
-				   if (possiblePaths[q]->unknownWalls < possiblePaths[lowestIndex]->unknownWalls)
-					   lowestIndex = q;
-			   }
-			   // choose the path
-			   chosenPath = possiblePaths[lowestIndex];
-
-			   // switch statement
-			   switch (lowestIndex)
-			   {
-			   case 0:{
-						  // go north
-						  turn(0);
-			   }
-				   break;
-			   case 1:{
-						  // go south
-						  turn(1);
-			   }
-				   break;
-			   case 2:{
-						  // go east
-						  turn(2);
-			   }
-				   break;
-			   case 3:{
-						  // go west
-						  turn(3);
-			   }
-				   break;
-			   default:
-				   break;
-			   }
-			   		
-	}	break;
-	case 2:{	// go with the most unknown path
-			   if (north < 1)
-			   {
-				   if (current->north->returnSum() <= current->returnSum()) // a dead end will have a sum greater than the current cell
-				   {
-					   path *p1 = new path();
-					   cell *c1;
-					   c1 = current->nextCell();
-					   p1->members.push_back(c1);
-
-					   while (true)
-					   {	// go to the child cells and add cells with the same sum to the path
-						   c1 = c1->nextCell();
-						   p1->members.push_back(c1);
-						   p1->unknownWalls += c1->numUnknownSides(); // count the unknown sides
-
-						   if (c1->goalCell)
-							   break;
-					   }
-					   possiblePaths.push_back(p1);
-				   }
-			   }
-			   if (south < 1)
-			   {
-				   if (current->south->returnSum() <= current->returnSum()) // a dead end will have a sum greater than the current cell
-				   {
-					   path *p2 = new path();
-					   cell *c2 = current->nextCell();
-					   p2->members.push_back(c2);
-
-					   while (true)
-					   {
-						   c2 = c2->nextCell();
-						   p2->members.push_back(c2);
-						   p2->unknownWalls += c2->numUnknownSides();
-
-						   if (c2->goalCell)
-							   break;
-					   }
-
-					   possiblePaths.push_back(p2);
-				   }
-			   }
-			   if (east < 1)
-			   {
-				   if (current->east->returnSum() <= current->returnSum()) // a dead end will have a sum greater than the current cell
-				   {
-					   path *p3 = new path();
-					   cell *c3 = current->nextCell();
-					   p3->members.push_back(c3);
-
-					   while (true)
-					   {
-						   c3 = c3->nextCell();
-						   p3->members.push_back(c3);
-						   p3->unknownWalls += c3->numUnknownSides(); // count the unknown sides
-
-						   if (c3->goalCell)
-							   break;
-					   }
-
-					   possiblePaths.push_back(p3);
-				   }
-			   }
-			   if (west < 1)
-			   {
-				   if (current->west->returnSum() <= current->returnSum()) // a dead end will have a sum greater than the current cell
-				   {
-					   path *p4 = new path();
-					   cell *c4 = current->nextCell();
-					   p4->members.push_back(c4);
-
-					   while (true)
-					   {
-						   c4 = c4->nextCell();
-						   p4->members.push_back(c4);
-						   p4->unknownWalls += c4->numUnknownSides();
-
-						   if (c4->goalCell)
-							   break;
-					   }
-
-					   possiblePaths.push_back(p4);
-				   }
-			   }
-
-			   // choose the path with the most unknowns. just do walls in general for now
-			   int highestIndex = 0;
-			   for (int h = 0; h < possiblePaths.size(); h++)
-			   {
-				   if (possiblePaths[h]->unknownWalls > possiblePaths[highestIndex]->unknownWalls)
-					   highestIndex = h;
-			   }
-			   // choose path
-			   chosenPath = possiblePaths[highestIndex];
-
-			   // switch statement
-			   switch (highestIndex)
-			   {
-			   case 0:{
-						  // go north
-						  turn(0);
-			   }
-				   break;
-			   case 1:{
-						  // go south
-						  turn(1);
-			   }
-				   break;
-			   case 2:{
-						  // go east
-						  turn(2);
-			   }
-				   break;
-			   case 3:{
-						  // go west
-						  turn(3);
-			   }
-				   break;
-			   default:
-				   break;
-			   }
-
+        case 1:{	// go with the known path
+            
+            for(char dir : {'n','s','e','w'})
+            {
+                if (sides[dir] < 1)
+                {    // a dead end will have a sum greater than the current cell
+                    if (current->_cells[dir]->returnSum() <= current->returnSum()) 
+                    {
+                        path *p1 = new path();
+                        cell *c1;
+                        // move to next cell and mark its previouscell as this current one
+                        c1 = current->nextCell();
+                        p1->members.push_back(c1);
+                        
+                        while (true)
+                        {	// go to the child cells and add cells with the same sum to the path
+                            c1 = c1->nextCell();
+                            p1->members.push_back(c1);
+                            // count the unknown sides
+                            p1->unknownWalls += c1->numUnknownSides(); 
+                            
+                            if (c1->goalCell)
+                                break;
+                        }
+                        possiblePaths.push_back(p1);
+                    }
+                }
+            }
+            
+            // choose the path with the least unknowns. just do walls in general for now
+            int lowestIndex = 0;
+            for (int q = 0; q < possiblePaths.size(); q++)
+            {
+                if (possiblePaths[q]->unknownWalls < possiblePaths[lowestIndex]->unknownWalls)
+                    lowestIndex = q;
+            }
+            // choose the path
+#warning Value stored in "chosenPath" is never used
+            chosenPath = possiblePaths[lowestIndex];
+            char path[4] = {'n','s','e','w'};
+            assert(lowestIndex>=0 && lowestIndex<4 && "Counting error");
+            turn(path[lowestIndex]);
+            
+        }	break;
+        case 2:{	// go with the most unknown path
+            for(char dir : {'n','s','e','w'})
+            {
+                if (sides[dir] < 1)
+                {// a dead end will have a sum greater than the current cell
+                    if (current->_cells[dir]->returnSum() <= current->returnSum())                     {
+                        path *p1 = new path();
+                        cell *c1;
+                        c1 = current->nextCell();
+                        p1->members.push_back(c1);
+                        
+                        while (true)
+                        {	// go to the child cells and add cells with the same sum to the path
+                            c1 = c1->nextCell();
+                            p1->members.push_back(c1);
+                            p1->unknownWalls += c1->numUnknownSides(); // count the unknown sides
+                            
+                            if (c1->goalCell)
+                                break;
+                        }
+                        possiblePaths.push_back(p1);
+                    }
+                }
+            }
+            
+            
+            // choose the path with the most unknowns. just do walls in general for now
+            int highestIndex = 0;
+            for (int h = 0; h < possiblePaths.size(); h++)
+            {
+                if (possiblePaths[h]->unknownWalls > possiblePaths[highestIndex]->unknownWalls)
+                    highestIndex = h;
+            }
+            // choose path
+#warning Value stored in "chosenPath" is never used
+            chosenPath = possiblePaths[highestIndex];
+            char path[4] = {'n','s','e','w'};
+            assert(highestIndex>=0 && highestIndex<4 && "Counting error");
+            turn(path[highestIndex]);
+            
+        }
+        default:
+            break;
 	}
-	default:
-		break;
-	}
-
+    
 }
 
 // turn to a certain side. 0 = north. 1 = south. 2 = east. 3 = west
-void star::turn(int direction)
+void star::turn(char /*int*/ direction)
 {
 	// assuming 90 is the starting direction. 0 is to the left at the beginning
 	if ((maze.compass > 315) && (maze.compass < 45))
 	{ // facing west
 		switch (direction)
 		{
-		case 0:	// turn right
+		case 'n':	// turn right
 			navigator.turnright();
 			maze.adjustCompass(90);
 			break;
-		case 1:	// turn left
+		case 's':	// turn left
 			navigator.turnleft();
 			maze.adjustCompass(-90);
 			break;
-		case 2:	// do 180 degree turn
+		case 'e':	// do 180 degree turn
 			navigator.turnaround();
 			maze.adjustCompass(180);
 			break;
-		case 3:	// do nothing
+		case 'w':	// do nothing
 			break;
 		default:
 			break;
@@ -868,17 +658,17 @@ void star::turn(int direction)
 	{ // facing north
 		switch (direction)
 		{
-		case 0:	// do nothing
+		case 'n':	// do nothing
 			break;
-		case 1:	// do 180 degree turn
+		case 's':	// do 180 degree turn
 			navigator.turnaround();
 			maze.adjustCompass(180);
 			break;
-		case 2:	// turn right
+		case 'e':	// turn right
 			navigator.turnright();
 			maze.adjustCompass(90);
 			break;
-		case 3:	// turn left
+		case 'w':	// turn left
 			navigator.turnleft();
 			maze.adjustCompass(-90);
 			break;
@@ -890,17 +680,17 @@ void star::turn(int direction)
 	{ // facing east
 		switch (direction)
 		{
-		case 0:	// turn left
+		case 'n':	// turn left
 			navigator.turnleft();
 			maze.adjustCompass(-90);
 			break;
-		case 1:	// turn right
+		case 's':	// turn right
 			navigator.turnright();
 			maze.adjustCompass(90);
 			break;
-		case 2:	// do nothing
+		case 'e':	// do nothing
 			break;
-		case 3:	// do 180 degree turn
+		case 'w':	// do 180 degree turn
 			navigator.turnaround();
 			maze.adjustCompass(180);
 			break;
@@ -912,17 +702,17 @@ void star::turn(int direction)
 	{	// facing south
 		switch (direction)
 		{
-		case 0:	// do 180 degree turn
+		case 'n':	// do 180 degree turn
 			navigator.turnaround();
 			maze.adjustCompass(180);
 			break;
-		case 1:	// do nothing
+		case 's':	// do nothing
 			break;
-		case 2:	// turn right
+		case 'e':	// turn right
 			navigator.turnright();
 			maze.adjustCompass(90);
 			break;
-		case 3:	// turn left
+		case 'w':	// turn left
 			navigator.turnleft();
 			maze.adjustCompass(-90);
 			break;
@@ -944,41 +734,27 @@ exclude the previous cell
 */
 cell *star::nextCellinPath(cell &current)
 {
-    cell *chosen;
-	int north, south, east, west;
-    current.returnSides(north,south,east,west);
-
-	if ((north < 1) && (current.north != current.previousCell))
-	{
-		if ((current.north->returnSum() == current.returnSum()) || (current.north->goalCell))
-			chosen = current.north;
-
-		if (current.north->goalCell)
-			chosen = current.north;
-	}
-	if ((south < 1) && (current.south != current.previousCell))
-	{
-		if ((current.south->returnSum() == current.returnSum()) || (current.south->goalCell))
-			chosen = current.south;
-	}
-	if ((east < 1) && (current.east != current.previousCell))
-	{
-		if ((current.east->returnSum() == current.returnSum()) || (current.east->goalCell))
-			chosen = current.east;
-	}
-	if ((west < 1) && (current.west != current.previousCell))
-	{
-		if ((current.west->returnSum() == current.returnSum()) || (current.west->goalCell))
-			chosen = current.west;
-	}
+    cell *chosen =nullptr;
+	rose<int> sides; //int north, south, east, west;
+    sides = current.returnSides();//north,south,east,west);
+    for(char dir : {'n','s','e','w'})
+    {
+        if ((sides[dir] < 1) && (current._cells[dir] != current.previousCell))
+        {
+            if ( (current._cells[dir]->returnSum() == current.returnSum()) ||
+                 (current._cells[dir]->goalCell)                            )
+                chosen = current._cells[dir];
+        }
+    }
+    assert(chosen!=nullptr && "value should have been assigned.");
     return chosen;
 }
 
 void star::determineMovementCost(cell &ce)
 {
+#warning Value stored in "cellIt" is never used
 	cell * cellIt;
 	cellIt = maze.findCell(0, 0);
-
 
 	// this isn't used, i don't think
 }
@@ -1006,39 +782,33 @@ star::getPointerToJunction(char &sourceDirection)
 	//	Check the cells in front for 
 	//	where there's an upcoming junction
 	//
+    char face(0),rear(0);
 	if ((compass > 315) && (compass < 45))
 	{ // facing west
-		do{
-			cellPoint = cellPoint->west;
-		} while (cellPoint->declareSidesOpen('e') == false);
-		sourceDirection = 'e';
+        face='w'; rear='e';
 	}
 	else if ((compass > 45) && (compass < 135))
-	{ // default direction	
-		do{
-			cellPoint = cellPoint->north;
-		} while (cellPoint->declareSidesOpen('s') == false);
-		sourceDirection = 's';
+	{ // default direction
+        face='n'; rear='s';
 	}
 	else if ((compass > 135) && (compass < 225))
 	{ // facing east
-		do{
-			cellPoint = cellPoint->east;
-		} while (cellPoint->declareSidesOpen('w') == false);
-		sourceDirection = 'w';
+        face='e'; rear='w';
 	}
 	else if ((compass > 225) && (compass < 315))
 	{ // facing south
-		do{
-			cellPoint = cellPoint->south;
-		} while (cellPoint->declareSidesOpen('n') == false);
-		sourceDirection = 'n';
+        face='s'; rear='n';
 	}
 	else if ((compass == 45) || (compass == 135) || (compass == 225) || (compass == 315))
 	{
 		// hmmmm......
 		// possibly a turn instruction
 	}
+    
+    do{
+        cellPoint = cellPoint->_cells[face];
+    } while (cellPoint->declareSidesOpen(rear) == false);
+    sourceDirection = rear;
     
 	return cellPoint;
 

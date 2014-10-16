@@ -71,11 +71,13 @@ grid::getCell(int _row, int _col)
 void 
 grid::createMaze()
 {
+    assert(false && "This function does nothing!");
     //moved to constructor
 }
 
 void grid::markGoalCells()
 {
+    assert(false && "This function does nothing!");
     //moved to constructor   
 }
 #endif
@@ -142,13 +144,13 @@ void grid::wallOrienter(wall &wallInQuestion, string &orientation,
 		double perimeter = (  wallInQuestion.radiusLeft 
                             + wallInQuestion.length 
                             + wallInQuestion.radiusRight );
-        
+#warning Value stored in "area" is never used        
 		// Heron's formula for area
 		double area = sqrt(  perimeter 
                            * (perimeter - wallInQuestion.radiusLeft) 
                            * (perimeter - wallInQuestion.length) 
                            * (perimeter - wallInQuestion.radiusRight)  );
-        
+
 		// area = (1/2) * base * height
 		// height = (2*area)/base . 
         // base = wallinquestion.length. 
@@ -396,7 +398,7 @@ grid::getPointerToJunction(char & sourceDirection)
 		// hmmmm......
 		// possibly a turn instruction
 	}
-    
+    assert(moveTwo && sourceDirection && "Values must be initialized");
     do{
         cellPoint = cellPoint->_cells[moveTwo];
     } while (cellPoint->declareSidesOpen(sourceDirection) == false);
@@ -461,64 +463,48 @@ bool grid::closeEnough(double angle1, double angle2)
 int 
 grid::updateMaze()
 {
-
 	/**************** THE ABOVE IS IN STAR::SCAN() **************/
     
 	// Add to cells the empty boundaries that must exist where it has been determined that there is no wall
 	cell *cellPoint = findCell(xDistance, yDistance);
-    
+    char b_face(0), b_left(0), b_right(0);
 	if ((compass > 315) && (compass < 45))
 	{ // facing west
-		do{
-			cellPoint = cellPoint->west;
-            
-			if (cellPoint->gNorth() == 0)
-				cellPoint->sNorth(-1);
-			if (cellPoint->gSouth() == 0)
-				cellPoint->sSouth(-1);
-		} while (cellPoint->gWest() != 1);
+        b_left='n'; b_right='s';
+        b_face='w';
 	}
 	else if ((compass > 45) && (compass < 135))
-	{ // default direction	
-		do{
-			cellPoint = cellPoint->north;
-            
-			if (cellPoint->gEast() == 0)
-				cellPoint->sEast(-1);
-			if (cellPoint->gWest() == 0)
-				cellPoint->sWest(-1);
-		} while (cellPoint->gNorth() != 1);
+	{ // default direction
+        b_left='e'; b_right='w';
+        b_face='n';
 	}
 	else if ((compass > 135) && (compass < 225))
 	{ // facing east
-		do{
-			cellPoint = cellPoint->east;
-            
-			if (cellPoint->gNorth() == 0)
-				cellPoint->sNorth(-1);
-			if (cellPoint->gSouth() == 0)
-				cellPoint->sSouth(-1);
-		} while (cellPoint->gEast() != 1);
+        b_left='n'; b_right='s';
+        b_face='e';
 	}
 	else if ((compass > 225) && (compass < 315))
 	{ // facing south
-		do{
-			cellPoint = cellPoint->south;
-            
-			if (cellPoint->gEast() == 0)
-				cellPoint->sEast(-1);
-			if (cellPoint->gWest() == 0)
-				cellPoint->sWest(-1);
-            
-		} while (cellPoint->gSouth() != 1);
+        b_left='e'; b_right='w';
+        b_face='s';
 	}
 	else if ((compass == 45)  || (compass == 135) || 
              (compass == 225) || (compass == 315)  )
 	{
 		// hmmmm......
 	}
+    assert_or_throw(b_left && b_right && b_face, std::logic_error, 
+                    "Compass logic failed; must assign values.");
     
-    
+    do{
+        cellPoint = cellPoint->_cells[b_face];
+        
+        if (cellPoint->_bounds[b_left]  == 0)
+            cellPoint->_bounds[b_left]  =(-1);
+        if (cellPoint->_bounds[b_right] == 0)
+            cellPoint->_bounds[b_right] =(-1);
+        
+    } while (cellPoint->_bounds[b_face] != 1);
     
 	return 0;
 }
@@ -535,8 +521,7 @@ void grid::adjustCompass(int degrees)
 	else if (degrees < 0)
 	{
 		compass -= degrees;
-		if (compass < 0)
-		{
+		if (compass < 0){
 			compass += 359;
 		}
 	}

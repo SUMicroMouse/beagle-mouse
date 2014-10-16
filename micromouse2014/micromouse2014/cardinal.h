@@ -185,28 +185,7 @@ typedef std::integral_constant<DIR, DIR::_S_> south_dir;
 typedef std::integral_constant<DIR, DIR::_E_> east_dir;
 typedef std::integral_constant<DIR, DIR::_W_> west_dir;
 
-#include <string>
-void sdfsdf()
-{
-    rose<std::string> rose_str, str2;
 
-    rose<std::string> rose_st = {"","","",""};
-    
-    str2 = rose_str;
-    
-    int i1,i2,i3,i4;
-    rose<int&>  rose_ref_int {i1,i2,i3,i4};
-    rose<int> rose_int, ints{0,0,0,0};
-    
-//    rose<int&> refs (std::move(rose_ref_int));
-    
-    rose_int = ints;
-    
-//    rose_int = {0,0,0,0};
-    ints = rose_int;
-    
-    
-}
 #endif
 
 

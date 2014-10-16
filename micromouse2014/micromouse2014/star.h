@@ -139,7 +139,7 @@ public:
 	// determining movementCost & heuristicCost
 	void breadthSearch();
 	void depthSearch(int mode);
-	void turn(int direction);
+	void turn(char /*int*/ direction);
 	cell *nextCellinPath(cell &current);
 	void pushChildCellsToDeque(std::deque<cell*> &childCells);
     

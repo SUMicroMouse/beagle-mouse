@@ -59,7 +59,7 @@ nav::movedistancevariable(int mm)
         
         move(_d);
         synchronize(_d);
-        
+#warning Value stored in "_t" is never used
         _t = enc.hist.front();
     }
              

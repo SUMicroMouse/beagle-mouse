@@ -44,7 +44,7 @@ class grid
 	std::vector<cell*> long_headers; // columns
 	
 	cell	*	origin;
-//	cell	*	goal;
+	cell	*	goal;
 	cell	*	center;
     
 public:
