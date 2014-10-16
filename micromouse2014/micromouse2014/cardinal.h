@@ -53,8 +53,8 @@ struct rose
     { 
         switch(d){
             case 'N':case 'n': return  std::get<DIR::_N_>(_tup); 
-            case 'S':case 'e': return  std::get<DIR::_E_>(_tup); 
-            case 'E':case 's': return  std::get<DIR::_S_>(_tup);
+            case 'E':case 'e': return  std::get<DIR::_E_>(_tup); 
+            case 'S':case 's': return  std::get<DIR::_S_>(_tup);
             case 'W':case 'w': return  std::get<DIR::_W_>(_tup);
             default: throw std::invalid_argument
                 ("Argument must be one of {N,E,S,W,} or {n,e,s,w}");
@@ -69,50 +69,12 @@ struct rose
         std::vector<int> v;
     }
     
-//    /// Tuple constructor
-//    template<typename arg_t>
-//    rose(arg_t a):
-//        std::tuple<_type,_type,_type,_type>(a)
-//    {
-//    }
-//    /// Tuple constructor
-//    template<typename arg_t>
-//    rose(const arg_t& a...):
-//    std::tuple<_type,_type,_type,_type>(std::forward_as_tuple(a))
-//    {
-//    }
-//    /// Tuple constructor
-//    template<typename arg_t>
-//    rose(arg_t&& a...):
-//    std::tuple<_type,_type,_type,_type>(std::make_tuple(a))
-//    {
-//    }
-    
-//    /// move constructor
-//    rose(rose&& _r):
-//        _tup(std::forward_as_tuple(_r._tup))
-//    {}
     
     /// Copy constructor
     rose(const _type &_n, const _type &_e, const _type &_s, const _type &_w):
         _tup( _n, _e, _s, _w )
     {}
     
-//    /// Copy constructor
-//    rose(_type &&_n, _type &&_e, _type &&_s, _type &&_w):
-//    std::tuple<_type,_type,_type,_type>
-//    (  std::forward<_type>(_n), 
-//        std::forward<_type>(_e), 
-//        std::forward<_type>(_s), 
-//        std::forward<_type>(_w)      )
-//    {}
-//    /// Copy constructor
-//    rose(std::initializer_list<_type> _r):
-//    std::tuple<_type,_type,_type,_type>
-//    ({  *(_r.begin()+DIR::_N_),*(_r.begin()+DIR::_E_),
-//        *(_r.begin()+DIR::_S_),*(_r.begin()+DIR::_W_)
-//    })
-//    {}
     /// Copy constructor
     explicit 
     rose(std::array<_type,4> _r):
@@ -125,16 +87,6 @@ struct rose
     {}
     
 
-//    /// Assignment operator
-//    rose& operator=(std::array<_type,4> _r)
-//    {
-//        std::get<DIR::_N_>(*this) = std::get<DIR::_N_>(_r);
-//        std::get<DIR::_E_>(*this) = std::get<DIR::_E_>(_r);
-//        std::get<DIR::_S_>(*this) = std::get<DIR::_S_>(_r);
-//        std::get<DIR::_W_>(*this) = std::get<DIR::_W_>(_r);
-//        return *this;
-//    }
-//    
     /// Assignment operator
     rose& operator=(std::tuple<_type,_type,_type,_type> _r)
     {
@@ -154,18 +106,6 @@ struct rose
         std::get<DIR::_W_>(_tup) = std::get<DIR::_W_>(_r._tup);
         return *this;
     }
-//    /// Assignment operator
-//    rose& operator=(rose&& _r)
-//    {
-////        (*this) = std::forward_as_tuple(_r);
-//        std::get<DIR::_N_>(_tup) = std::forward<_type>(std::get<DIR::_N_>(_r));
-//        std::get<DIR::_E_>(_tup) = std::forward<_type>(std::get<DIR::_E_>(_r));
-//        std::get<DIR::_S_>(_tup) = std::forward<_type>(std::get<DIR::_S_>(_r));
-//        std::get<DIR::_W_>(_tup) = std::forward<_type>(std::get<DIR::_W_>(_r));
-//        return *this;
-//    }
-    
-
     
     
 };
