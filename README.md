@@ -28,13 +28,16 @@ This README would normally document whatever steps are necessary to get your app
 * Repo owner or admin
 * Other community or team contact
 * hi i am danush . I like micro mouse because i like robotics.
+* Hi, this is Kenan
 * another edit here
+* Again, Kenan
 -------
 
 ````
 int main()
 {
-	return 0;}
+	return 0;
+}
 ````
 
 ### WOOOO MICROMOUSE
