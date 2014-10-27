@@ -17,32 +17,11 @@ Task Title
 
 #### __Your first goal__
 A description of the thing you wish to create and how it will work. This could include a UML diagram (more on that [here][uml]). This should be your over-arching idea.
-```sequence
-Diagram->Idea: Explains
-Note left of Idea: A helpful note
-Idea-->Diagram: Shows	
-```
+
 [uml]:http://bramp.github.io/js-sequence-diagrams/
 
 #### __Your second goal__
- A description of the next goal. This (and subsequent goals) is usually created through the following process (more on [flow charts][flow]):
-```flow
-start=>start: Begin with your first goal.
-work=>operation: Work on that goal.
-
-falter=>condition: Too difficult?
-elaborate=>condition: Too big?
-
-newgoal=>operation: Create a new (smaller) goal.
-done=>end: Complete the goal.
-
-start->work->falter
-falter(yes)->newgoal->work
-elaborate(yes)->newgoal->work
-falter(no)->elaborate
-elaborate(no)->done
-```
-[flow]:http://adrai.github.io/flowchart.js/
+ A description of the next goal. This (and subsequent goals) is usually created through a process or iteration. Start with your main idea. Then as you try and tackle it, you will inevitably see a necessity to break the main goal down into smaller parts. Each of these is another goal to go here.
  
 #### __And so forth__
 You get the idea...
@@ -67,9 +46,6 @@ preferably = [
 ```
 
 *  A [website](http://en.wikipedia.org/wiki/Markdown) that helped you understand something.
-*  A math formula reference 
-$$\mathbb MaT_H e^x  \Bbb P r^{ess} \Bbb I \emptyset \Bbb N$$
-> **Note:** You can find more information about **LaTeX** mathematical expressions [here](http://meta.math.stackexchange.com/questions/5020/mathjax-basic-tutorial-and-quick-reference).
  
 *  A helpful image. 
 ![The beaglebone pinout](http://insigntech.files.wordpress.com/2013/09/bbb_pinouts.jpg)
