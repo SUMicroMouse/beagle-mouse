@@ -6,6 +6,7 @@ DC Motor Controller & Encoder
 ## Authors
 
 #### *Evan Rivera*
+####*Kenan O'Neal*
 
 ------------------------------------------------
 
