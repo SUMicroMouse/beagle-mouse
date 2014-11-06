@@ -8,6 +8,7 @@ PING ))) Sonar Sensor
 
 
 #### *Maiya Caldwell*
+#### *Kenan O’Neal*
 
 ------------------------------------------------
 
