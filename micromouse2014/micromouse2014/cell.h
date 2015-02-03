@@ -18,6 +18,7 @@
 
 class star;
 class grid;
+//
 
 
 namespace cell_config 
