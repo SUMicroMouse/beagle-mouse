@@ -23,7 +23,7 @@ class grid;
 namespace cell_config 
 {
     // Max cell width
-    constexpr double max_width  = 180;//mm
+    constexpr double max_width  = 180;//m
     
     // Max cell length
     constexpr double max_length = 180;//mm
