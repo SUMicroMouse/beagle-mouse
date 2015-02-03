@@ -13,7 +13,7 @@
 #include <string>
 #include <array>
 
-//#include "device.cpp"
+//#include "device.cpp"//
 #include "device.h"
 
 class gpio;
