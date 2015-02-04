@@ -21,16 +21,16 @@ public:
 	Coordinate_new * get_coordinate(){ return coordinate; }
 	
 	// Adjacent cell getters
-	Cell_new * left_wall();
-	Cell_new * top_wall();
-	Cell_new * right_wall();
-	Cell_new * bottom_wall();
+	Cell_new * wall_left();
+	Cell_new * wall_top();
+	Cell_new * wall_right();
+	Cell_new * wall_bottom();
 
 	// Adjacent cell setters
-	void left_wall(Cell_new * cell);
-	void top_wall(Cell_new * cell);
-	void right_wall(Cell_new * cell);
-	void bottom_wall(Cell_new * cell);
+	void wall_left(Cell_new * cell);
+	void wall_top(Cell_new * cell);
+	void wall_right(Cell_new * cell);
+	void wall_bottom(Cell_new * cell);
 
 	void print();				// debugging use
 
