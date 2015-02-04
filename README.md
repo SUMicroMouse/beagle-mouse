@@ -14,6 +14,8 @@
 * Danush Tr
 * Nick Danyluk
 * Maiya Caldwell
+* Mark Skinner
+* Khadesha McLeish
 * Evan Rivera
 * Kenan O'Neal
 * Geri Mandanguit
