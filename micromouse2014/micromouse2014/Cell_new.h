@@ -2,6 +2,7 @@
 #define __CELL_NEW_H__
 
 #include "Coordinate_new.h"
+#include "Direction.h"
 #include <iostream>
 
 /**
@@ -20,17 +21,9 @@ public:
 	// Public coordinate getter
 	Coordinate_new * get_coordinate(){ return coordinate; }
 	
-	// Adjacent cell getters
-	Cell_new * wall_left();
-	Cell_new * wall_top();
-	Cell_new * wall_right();
-	Cell_new * wall_bottom();
-
-	// Adjacent cell setters
-	void wall_left(Cell_new * cell);
-	void wall_top(Cell_new * cell);
-	void wall_right(Cell_new * cell);
-	void wall_bottom(Cell_new * cell);
+	
+	Cell_new *wall(Direction direction);					// Adjacent cell getter
+	void set_wall(Direction direction, Cell_new * cell);	// Adjacent cell setter
 
 	void print();				// debugging use
 
@@ -65,6 +58,44 @@ Cell_new::Cell_new(int x, int y)
 Cell_new::~Cell_new()
 {
 	delete(coordinate);
+}
+
+/**
+* Return the specified cell
+*/
+Cell_new * Cell_new::wall(Direction direction)
+{
+	switch (direction)
+	{
+	case L: return left;
+		break;
+	case T: return top;
+		break;
+	case R: return right;
+		break;
+	case B:	return bottom;
+		break;
+	default:
+		break;
+	}
+	return nullptr;
+}
+
+void Cell_new::set_wall(Direction direction, Cell_new * cell)
+{
+	switch (direction)
+	{
+	case L:	left = cell;
+		break;
+	case T: top = cell;
+		break;
+	case R: right = cell;
+		break;
+	case B: bottom = cell;
+		break;
+	default:
+		break;
+	}
 }
 
 /**
