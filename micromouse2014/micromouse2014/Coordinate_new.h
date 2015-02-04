@@ -1,6 +1,8 @@
 #ifndef __COORDINATE_NEW_H__
 #define __COORDINATE_NEW_H__
 
+#include <iostream>
+
 /**
 * Simple class to hold the x and y grid coordinates of a cell
 */
@@ -18,9 +20,16 @@ public:
 		this->y = Y;
 	}
 
+	void print();
+
 private:
 	int x;
 	int y;
 };
+
+void Coordinate_new::print()
+{
+	std::cout << x << "," << y;
+}
 
 #endif
