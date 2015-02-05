@@ -1,7 +1,7 @@
 #ifndef __DIRECTION_H__
 #define __DIRECTION_H__
 
-static enum Direction
+enum Direction
 {
 	L,	// left
 	T,	// top
