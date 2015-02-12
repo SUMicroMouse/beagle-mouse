@@ -3,33 +3,37 @@
 
 #include <iostream>
 
-/**
-* Simple class to hold the x and y grid coordinates of a cell
-*/
-class Coordinate_new
+namespace Algorithm
 {
-public:
-	Coordinate_new()
+	/**
+	* Simple class to hold the x and y grid coordinates of a cell
+	*/
+	class Coordinate_new
 	{
-		this->x = -1;
-		this->y = -1;
-	}
-	Coordinate_new(int X, int Y)
+		friend class Grid_new;
+	public:
+		Coordinate_new()
+		{
+			this->x = -1;
+			this->y = -1;
+		}
+		Coordinate_new(int X, int Y)
+		{
+			this->x = X;
+			this->y = Y;
+		}
+
+		void print();
+
+	private:
+		int x;
+		int y;
+	};
+
+	void Coordinate_new::print()
 	{
-		this->x = X;
-		this->y = Y;
+		std::cout << x << "," << y;
 	}
-
-	void print();
-
-private:
-	int x;
-	int y;
-};
-
-void Coordinate_new::print()
-{
-	std::cout << x << "," << y;
 }
 
 #endif
