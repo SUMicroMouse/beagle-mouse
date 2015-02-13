@@ -1,9 +1,12 @@
 #ifndef __GRID_NEW_H__
 #define __GRID_NEW_H__
 
-#include "Cell_new.h"
 #include <iostream>
 #include <vector>
+#include <limits>
+#include "Cell_new.h"
+#include "PrintOptions.h"
+
 namespace Algorithm
 {
 
@@ -23,7 +26,7 @@ namespace Algorithm
 
 		int size(){ return cell_count; }
 
-		void print();				// debugging use
+		void print(PrintOptions print_type);				// debugging use
 
 	private:
 		// cells for viewing the grid externally
@@ -128,11 +131,11 @@ namespace Algorithm
 	/**
 	* Print grid in reverse, so that it appears with typical cartesian coordinates
 	*/
-	void Grid_new::print()
+	void Grid_new::print(PrintOptions print_type)
 	{
 		auto row_start = x_y;				// start at end
 		while (row_start->const_neighbors->getNeighbor(Direction::L) != nullptr)
-			row_start = row_start->const_neighbors->getNeighbor(Direction::L);	// get to x=0 column
+			row_start = row_start->const_neighbors->getNeighbor(Direction::L);  // get to x=0 column
 
 		while (row_start != nullptr)
 		{
@@ -140,12 +143,22 @@ namespace Algorithm
 			Cell_new *iterator = row_start;
 			while (iterator != nullptr)
 			{
-				iterator->print();
+				// Decide how to print
+				switch (print_type)
+				{
+				case PositionsAndWalls: iterator->print();
+					break;
+				case BreadthHeuristic: iterator->print_breadth_heuristic();
+					break;
+				default:
+					break;
+				}
+				
 				std::cout << "   ";
 				iterator = iterator->const_neighbors->getNeighbor(Direction::R); // go right
 			}
 			std::cout << std::endl;			// new line
-			row_start = row_start->const_neighbors->getNeighbor(Direction::B);	// next row down
+			row_start = row_start->const_neighbors->getNeighbor(Direction::B);   // next row down
 		}
 	}
 
@@ -175,5 +188,6 @@ namespace Algorithm
 		return cell_p;
 	}
 
+	
 }
 #endif

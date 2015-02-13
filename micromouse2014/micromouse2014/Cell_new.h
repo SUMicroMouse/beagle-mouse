@@ -36,11 +36,13 @@ namespace Algorithm
 
 		// Set the parent cell, which is used during searches
 		void set_parent(Cell_new * _parent) { parent = _parent; }
+		Cell_new * get_parent() { return parent; }
 
 		void print();				// debugging use
 		void print_breadth_heuristic();
 
 		void set_breadth_heuristic(int new_value);
+		int get_breadth_heuristic();
 		
 
 	private:
@@ -58,6 +60,7 @@ namespace Algorithm
 		Cell_new * parent;
 
 		int breadth_heuristic;
+		void reset_breadth_heuristic();
 	};
 
 	Cell_new::Cell_new()
@@ -66,6 +69,7 @@ namespace Algorithm
 		neighbors_accessible = new Neighbors<Cell_new*>();
 		const_neighbors = new Neighbors<Cell_new*>();
 		parent = nullptr;
+		breadth_heuristic = std::numeric_limits<int>::max();
 	}
 
 	Cell_new::Cell_new(int x, int y)
@@ -74,6 +78,7 @@ namespace Algorithm
 		neighbors_accessible = new Neighbors<Cell_new*>();
 		const_neighbors = new Neighbors<Cell_new*>();
 		parent = nullptr;
+		breadth_heuristic = std::numeric_limits<int>::max();
 	}
 
 	Cell_new::~Cell_new()
@@ -119,7 +124,10 @@ namespace Algorithm
 		while (vi != vect->end())
 		{
 			if ((*vi) == parent)
+			{
 				vect->erase(vect->begin() + i);
+				break;
+			}
 			vi++;	i++;
 		}
 		return vect;
@@ -162,6 +170,16 @@ namespace Algorithm
 	void Cell_new::set_breadth_heuristic(int new_value)
 	{
 		breadth_heuristic = new_value;
+	}
+
+	int Cell_new::get_breadth_heuristic()
+	{
+		return breadth_heuristic;
+	}
+
+	void Cell_new::reset_breadth_heuristic()
+	{
+		breadth_heuristic = std::numeric_limits<int>::max();
 	}
 }
 #endif
