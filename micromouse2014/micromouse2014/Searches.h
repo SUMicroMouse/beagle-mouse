@@ -133,7 +133,7 @@ namespace Algorithm
 
 		do
 		{
-			vector<Room&> children = current_room.get_children();
+			vector<Room&> &children = current_room.get_children(maze);
 		} while (st.size() > 0);
 
 		return path_list;
