@@ -5,8 +5,10 @@
 
 #include <queue>
 #include <vector>
+#include <stack>
 #include "Cell_new.h"
 #include "Maze.h"
+#include "Path_new.h"
 
 namespace Algorithm
 {
@@ -20,6 +22,8 @@ namespace Algorithm
 		static void breadth_first_search(Cell_new * origin);
 		// Update the cells' heuristic values starting from the given cell
 		static void breadth_first_search(Maze &maze, int x, int y);
+
+		static vector<Path_new> & depth_search(Maze &maze, int x, int y);
 
 	private:
 		// Probably will need a variable to represent when a search is in progress vs. finished
@@ -75,10 +79,10 @@ namespace Algorithm
 	*/
 	void Searches::breadth_first_search(Maze &mazeClass, int x, int y)
 	{
-		std::queue<Room> * q = new std::queue<Room>();	// queue holds child cells
+		std::queue<Room&> * q = new std::queue<Room&>();	// queue holds child cells
 
-		auto maze = mazeClass.maze;
-		auto current_room = maze[y][x];
+		auto &maze = mazeClass.maze;
+		auto &current_room = maze[y][x];
 
 		current_room.set_breadth_heuristic(0);	// start heuristic count at 0
 
@@ -89,7 +93,7 @@ namespace Algorithm
 		do
 		{
 			// add children to queue
-			std::vector<Room> children; 
+			std::vector<Room&> children; 
 
 			// get children and not the current "parent"
 			if (x_current - 1 > 0)	// left
@@ -101,7 +105,7 @@ namespace Algorithm
 			if (y_current - 1 > 0)	// bottom
 				children.push_back(maze[y_current - 1][x_current]);
 
-			std::vector<Room>::iterator cIt = children.begin();
+			std::vector<Room&>::iterator cIt = children.begin();
 			while (cIt != children.end())
 			{
 				// Do each node only once
@@ -119,6 +123,22 @@ namespace Algorithm
 		} while (q->size() > 0);
 	}
 
+	vector<Path_new> & depth_search(Maze &mazeClass, int x, int y)
+	{
+		vector<Path_new> path_list;
+		auto maze = mazeClass.maze;
+
+		Room &current_room = maze[y][x];
+		stack<Room&> st;	// stack to hold the child rooms
+
+		do
+		{
+			vector<Room&> children = current_room.get_children();
+		} while (st.size() > 0);
+
+		return path_list;
+	}
+	
 }
 
 #endif

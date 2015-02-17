@@ -8,6 +8,10 @@ class Room
 	char* room;
 	vector<int> openings; // 0 means open, 1 means closed
 	int opens;
+
+	// neighboring rooms
+	std::vector<Room&> neighbors;
+
 public:
 	Room()
 	{
@@ -101,11 +105,12 @@ public:
 	int get_breadth_heuristic();
 	void set_breadth_heuristic(int new_value);
 
-
+	std::vector<Room&> & get_children();
+	bool checked;						// boolean used in depth first search to prevent looping
 private:
 	int breadth_heuristic;
 	void reset_breadth_heuristic();
-
+	void set_adjacent_rooms(Room(&maze)[16][16]);
 };
 
 int Room::get_breadth_heuristic()
@@ -121,4 +126,28 @@ void Room::set_breadth_heuristic(int new_value)
 void Room::reset_breadth_heuristic()
 {
 	breadth_heuristic = std::numeric_limits<int>::max();
+}
+
+void Room::set_adjacent_rooms(Room(&maze)[16][16])
+{
+	// left
+	if (loc.x - 1 > 0)	
+		neighbors.push_back(maze[loc.y][loc.x - 1]);
+
+	// top
+	if (loc.y + 1 < 16)
+		neighbors.push_back(maze[loc.y + 1][loc.x]);
+
+	// right
+	if (loc.x + 1 < 16)
+		neighbors.push_back(maze[loc.y][loc.x + 1]);
+
+	// bottom
+	if (loc.y - 1 > 0)
+		neighbors.push_back(maze[loc.y - 1][loc.x]);
+}
+
+std::vector<Room&> & Room::get_children()
+{
+	
 }
