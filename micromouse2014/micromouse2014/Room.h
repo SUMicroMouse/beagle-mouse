@@ -1,3 +1,4 @@
+#define NOMINMAX
 #include <vector>
 
 using namespace std;
@@ -6,6 +7,7 @@ class Room
 {
 	char* room;
 	vector<int> openings; // 0 means open, 1 means closed
+	vector<Room> adjacent_rooms;
 	int opens;
 public:
 	Room()
@@ -14,7 +16,10 @@ public:
 		room = new char[9];
 		for (int i = 0; i < 4; i++) // left,bottom,right,top is order of walls
 			openings.push_back(0); // initially all walls are open
+
+		breadth_heuristic = std::numeric_limits<int>::max();
 	}
+
 	Room(int v)
 	{
 		// Variable v determine which kind of room will be made.
@@ -82,6 +87,8 @@ public:
 			for (int i = 0; i < 9; i++){ room[i] = 176; }
 			for (int i = 0; i < 4; i++){ openings[i] = -1; } break;
 		}
+
+		breadth_heuristic = std::numeric_limits<int>::max();
 	}
 
 	vector<int> getOpenings(){ return openings; }
@@ -90,4 +97,39 @@ public:
 	void setOpenings(int index, int newNum){ openings[index] = newNum; }
 	void setPassages(int numOpenings){ opens = numOpenings; }
 	void setRoom(char* s){ memcpy(room, s, 9); }
+
+	// Heuristics
+	int get_breadth_heuristic();
+	void set_breadth_heuristic(int new_value);
+
+	// Children rooms
+	vector<Room> & children();
+
+private:
+	int breadth_heuristic;
+	void reset_breadth_heuristic();
+
 };
+
+int Room::get_breadth_heuristic()
+{
+	return breadth_heuristic;
+}
+
+void Room::set_breadth_heuristic(int new_value)
+{
+	breadth_heuristic = new_value;
+}
+
+void Room::reset_breadth_heuristic()
+{
+	breadth_heuristic = std::numeric_limits<int>::max();
+}
+
+/**
+* Return references to the actual neighboring rooms
+*/
+vector<Room> & children()
+{
+
+}
