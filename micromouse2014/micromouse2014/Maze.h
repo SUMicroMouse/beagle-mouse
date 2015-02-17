@@ -7,13 +7,11 @@
 #include <stdio.h>
 #include <windows.h>
 #include "Room.h"
-#include "Location.h"
-#include <string.h>
+#include <array>
 
 class Maze
 {
 public:
-	Room maze[16][16];
 	Maze(){ rooms = 0; initMaze(); makeMaze(); }
 
 	// Bracket overload
@@ -28,6 +26,8 @@ public:
 	
 	void printMaze();
 private:
+	std::array<std::array<Room,16>,16> maze;
+	// for (auto& i; maze..) to loop through
 	std::deque<Location> opening_locations;
 	int rooms;
 
