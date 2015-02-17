@@ -13,26 +13,28 @@
 class Maze
 {
 public:
-	vector<vector<Room>> maze;
-	Maze(){ mazeType = ""; rooms = 0; dimensions = 10; initMaze(); makeMaze(); }
-	Maze(int dim){ mazeType = ""; rooms = 0; dimensions = dim; initMaze(); makeMaze(); }
-	Maze(string maze){ mazeType = "MicroMouse"; rooms = 0; dimensions = 16; initMaze(); makeMaze(); }
+	Room maze[16][16];
+	Maze(){ rooms = 0; initMaze(); makeMaze(); }
+
+	// Bracket overload
+	// To use:
+	// Room r = m[std::pair<int, int>(1,1)];
+	Room operator [] (std::pair<int,int> param) { return maze[param.first][param.second]; }
+
+	// Parentheses overload
+	// To use:
+	// Room r = m(1,1);
+	Room operator () (int x, int y) { return maze[x][y]; }
 	
 	void printMaze();
-
-	string getMazeType() { return mazeType; }
-	int getDimensions() { return dimensions; }
-	Location* getEnd(){ return end; }
 private:
-	deque<Location> opening_locations;
-	Location* end;
-	int dimensions;
+	std::deque<Location> opening_locations;
 	int rooms;
-	string mazeType;
 
 	void initMaze();
 	void makeMaze();
 	void clearMaze();
+	void cleanMaze();
 	int getChoice(int x, int y);
 	int getAdjacentRooms(int x, int y);
 	int find(Location loc);
