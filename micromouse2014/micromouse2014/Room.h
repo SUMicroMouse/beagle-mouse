@@ -7,7 +7,6 @@ class Room
 {
 	char* room;
 	vector<int> openings; // 0 means open, 1 means closed
-	vector<Room> adjacent_rooms;
 	int opens;
 public:
 	Room()
@@ -102,8 +101,6 @@ public:
 	int get_breadth_heuristic();
 	void set_breadth_heuristic(int new_value);
 
-	// Children rooms
-	vector<Room> & children();
 
 private:
 	int breadth_heuristic;
@@ -124,12 +121,4 @@ void Room::set_breadth_heuristic(int new_value)
 void Room::reset_breadth_heuristic()
 {
 	breadth_heuristic = std::numeric_limits<int>::max();
-}
-
-/**
-* Return references to the actual neighboring rooms
-*/
-vector<Room> & children()
-{
-
 }
