@@ -15,7 +15,7 @@ public:
 private:
 	bool open;
 	int known;	// starts at -1 (unknown), and increments up with more assurances
-	vector<Room*> parents;
+	std::vector<Room*> parents;
 public:
 	
 };

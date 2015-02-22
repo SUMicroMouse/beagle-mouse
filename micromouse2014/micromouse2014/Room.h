@@ -1,3 +1,9 @@
+#ifndef __ROOM_H__
+#define __ROOM_H__
+
+#undef min
+#undef max
+
 #include <vector>
 #include "Wall.h"
 #include "Location.h"
@@ -26,8 +32,11 @@ private:
 	void set_adjacent_rooms(Room(&maze)[16][16]);
 
 public:
-	Room() :openings(4), opens(0), type(NONE), loc(0,0)
-	{ breadth_heuristic = std::numeric_limits<int>::max(); }
+	Room() :openings(4), opens(0), loc(0,0)
+	{ 
+		breadth_heuristic = std::numeric_limits<int>::max(); 
+		type = RoomType::NONE;
+	}
 
 	Room(int v, int x, int y) :openings(4), opens(0), loc(x,y)
 	{
@@ -154,81 +163,83 @@ public:
 			if (side == 0) // add wall to left
 			{
 				if (type == NONE)
-					type = LEFT;
+					type = RoomType::LEFT;
 				else if (type == BOTTOM)
-					type = LEFT_BOTTOM;
+					type = RoomType::LEFT_BOTTOM;
 				else if (type == RIGHT)
-					type = LEFT_RIGHT;
+					type = RoomType::LEFT_RIGHT;
 				else if (type == TOP)
-					type = LEFT_TOP;
+					type = RoomType::LEFT_TOP;
 				else if (type == BOTTOM_RIGHT)
-					type = LEFT_BOTTOM_RIGHT;
+					type = RoomType::LEFT_BOTTOM_RIGHT;
 				else if (type == BOTTOM_TOP)
-					type = LEFT_BOTTOM_TOP;
+					type = RoomType::LEFT_BOTTOM_TOP;
 				else if (type == RIGHT_TOP)
-					type = LEFT_RIGHT_TOP;
+					type = RoomType::LEFT_RIGHT_TOP;
 				else if (type == BOTTOM_RIGHT_TOP)
-					type = ALL;
+					type = RoomType::ALL;
 			}
 			else if (side == 1) // add wall to bottom
 			{
 				if (type == NONE)
-					type = BOTTOM;
+					type = RoomType::BOTTOM;
 				else if (type == LEFT)
-					type = LEFT_BOTTOM;
+					type = RoomType::LEFT_BOTTOM;
 				else if (type == RIGHT)
-					type = BOTTOM_RIGHT;
+					type = RoomType::BOTTOM_RIGHT;
 				else if (type == TOP)
-					type = BOTTOM_TOP;
+					type = RoomType::BOTTOM_TOP;
 				else if (type == LEFT_RIGHT)
-					type = LEFT_BOTTOM_RIGHT;
+					type = RoomType::LEFT_BOTTOM_RIGHT;
 				else if (type == LEFT_TOP)
-					type = LEFT_BOTTOM_TOP;
+					type = RoomType::LEFT_BOTTOM_TOP;
 				else if (type == RIGHT_TOP)
-					type = BOTTOM_RIGHT_TOP;
+					type = RoomType::BOTTOM_RIGHT_TOP;
 				else if (type == LEFT_RIGHT_TOP)
-					type = ALL;
+					type = RoomType::ALL;
 			}
 			else if (side == 2) // add wall to right
 			{
 				if (type == NONE)
-					type = RIGHT;
+					type = RoomType::RIGHT;
 				else if (type == LEFT)
-					type = LEFT_RIGHT;
+					type = RoomType::LEFT_RIGHT;
 				else if (type == BOTTOM)
-					type = BOTTOM_RIGHT;
+					type = RoomType::BOTTOM_RIGHT;
 				else if (type == TOP)
-					type = RIGHT_TOP;
+					type = RoomType::RIGHT_TOP;
 				else if (type == LEFT_BOTTOM)
-					type = LEFT_BOTTOM_RIGHT;
+					type = RoomType::LEFT_BOTTOM_RIGHT;
 				else if (type == BOTTOM_TOP)
-					type = BOTTOM_RIGHT_TOP;
+					type = RoomType::BOTTOM_RIGHT_TOP;
 				else if (type == LEFT_TOP)
-					type = LEFT_RIGHT_TOP;
+					type = RoomType::LEFT_RIGHT_TOP;
 				else if (type == LEFT_BOTTOM_TOP)
-					type = ALL;
+					type = RoomType::ALL;
 			}
 			else if (side == 3) // add wall to top
 			{
 				if (type == NONE)
-					type = TOP;
+					type = RoomType::TOP;
 				else if (type == LEFT)
-					type = LEFT_TOP;
+					type = RoomType::LEFT_TOP;
 				else if (type == BOTTOM)
-					type = BOTTOM_TOP;
+					type = RoomType::BOTTOM_TOP;
 				else if (type == RIGHT)
-					type = RIGHT_TOP;
+					type = RoomType::RIGHT_TOP;
 				else if (type == LEFT_BOTTOM)
-					type = LEFT_BOTTOM_TOP;
+					type = RoomType::LEFT_BOTTOM_TOP;
 				else if (type == BOTTOM_RIGHT)
-					type = BOTTOM_RIGHT_TOP;
+					type = RoomType::BOTTOM_RIGHT_TOP;
 				else if (type == LEFT_RIGHT)
-					type = LEFT_RIGHT_TOP;
+					type = RoomType::LEFT_RIGHT_TOP;
 				else if (type == LEFT_BOTTOM_RIGHT)
-					type = ALL;
+					type = RoomType::ALL;
 			}
 		}
 	}
+
+	void operator =(Room & room2);
 };
 
 int Room::get_breadth_heuristic()
@@ -269,3 +280,5 @@ std::vector<Room&> & Room::get_children()
 {
 
 }
+
+#endif

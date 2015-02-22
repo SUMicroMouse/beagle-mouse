@@ -1,7 +1,9 @@
 #ifndef __SEARCHES_H__
 #define __SEARCHES_H__
 
-#define NOMINMAX
+//#define NOMINMAX
+#undef min
+#undef max
 
 #include <queue>
 #include <vector>
@@ -9,6 +11,10 @@
 #include "Cell_new.h"
 #include "Maze.h"
 #include "Path_new.h"
+
+//#include "Searches.cpp"	// to get certain code to work inn the Searches.cpp file
+
+//using namespace Algorithm;
 
 namespace Algorithm
 {
@@ -21,15 +27,16 @@ namespace Algorithm
 		// Update the cells' heuristic values starting from the given cell
 		static void breadth_first_search(Cell_new * origin);
 		// Update the cells' heuristic values starting from the given cell
-		static void breadth_first_search(Maze &maze, int x, int y);
+		static void breadth_first_search(Maze &mazeClass, int x, int y);
 
-		static vector<Path_new> & depth_search(Maze &maze, int x, int y);
+		Path_new & depth_search(Maze &mazeClass, int x, int y);
 
 	private:
 		// Probably will need a variable to represent when a search is in progress vs. finished
 		// so that multithreading works properly.. "condition variable"
 	};	
-
+		
+	
 	/**
 	* Update the cells' heuristic values starting from the given origin cell
 	*/
@@ -38,7 +45,7 @@ namespace Algorithm
 		std::queue<Cell_new*> * q = new std::queue<Cell_new*>();	// queue holds child cells
 
 		Cell_new * current_cell = origin;
-		
+
 		current_cell->set_breadth_heuristic(0);	// start heuristic count at 0
 
 		int heuristic = 1, hCountDown = 0; // heuristic and variable to control when the heuristic increases
@@ -57,7 +64,7 @@ namespace Algorithm
 						cIt++;
 						continue;
 					}
-					
+
 					// Do each node only once
 					if ((*cIt)->get_breadth_heuristic() == std::numeric_limits<int>::max())
 					{
@@ -70,7 +77,7 @@ namespace Algorithm
 				delete(children);
 			}
 			current_cell = q->front();		// move to next child
-			q->pop();               	
+			q->pop();
 		} while (q->size() > 0);
 	}
 
@@ -79,25 +86,29 @@ namespace Algorithm
 	*/
 	void Searches::breadth_first_search(Maze &mazeClass, int x, int y)
 	{
-		std::queue<Room&> * q = new std::queue<Room&>();	// queue holds child cells
+		std::queue<Room*> * q = new std::queue<Room*>();	// queue holds child cells
 
-		auto &maze = mazeClass.maze;
-		auto &current_room = maze[y][x];
+		std::vector<std::vector<Room*>> & maze = *mazeClass.maze;
+		//auto &maze = mazeClass.maze;
+		auto current_room = maze[y][x];
 
-		current_room.set_breadth_heuristic(0);	// start heuristic count at 0
+		current_room->set_breadth_heuristic(0);	// start heuristic count at 0
 
 		int heuristic = 1, hCountDown = 0; // heuristic and variable to control when the heuristic increases
 
 		int x_current = x, y_current = y;
-		
+
 		do
 		{
 			// add children to queue
-			std::vector<Room&> children; 
+			std::vector<Room*> children;
+
+			Room * test = maze[y_current][x_current - 1];
 
 			// get children and not the current "parent"
 			if (x_current - 1 > 0)	// left
 				children.push_back(maze[y_current][x_current - 1]);
+				//children.push_back(mazeClass(y_current, x_current));
 			if (y_current + 1 < 16)	// top
 				children.push_back(maze[y_current + 1][x_current]);
 			if (x_current + 1 < 16)	// right
@@ -105,14 +116,14 @@ namespace Algorithm
 			if (y_current - 1 > 0)	// bottom
 				children.push_back(maze[y_current - 1][x_current]);
 
-			std::vector<Room&>::iterator cIt = children.begin();
+			std::vector<Room*>::iterator cIt = children.begin();
 			while (cIt != children.end())
 			{
 				// Do each node only once
-				if (cIt->get_breadth_heuristic() == std::numeric_limits<int>::max())
+				if ((*cIt)->get_breadth_heuristic() == std::numeric_limits<int>::max())
 				{
-					cIt->set_breadth_heuristic(current_room.get_breadth_heuristic() + 1);   // set heuristic to parent's heuristic + 1
-					q->push(*cIt);                              // add to queue
+					(*cIt)->set_breadth_heuristic(current_room->get_breadth_heuristic() + 1);   // set heuristic to parent's heuristic + 1
+					q->push((*cIt));                              // add to queue
 				}
 				++cIt;
 			}
@@ -123,22 +134,16 @@ namespace Algorithm
 		} while (q->size() > 0);
 	}
 
-	vector<Path_new> & depth_search(Maze &mazeClass, int x, int y)
+
+
+	/*Path_new & Searches::depth_search(Maze &mazeClass, int x, int y)
 	{
-		vector<Path_new> path_list;
-		auto maze = mazeClass.maze;
+		Path_new path;
 
-		Room &current_room = maze[y][x];
-		stack<Room&> st;	// stack to hold the child rooms
+		auto current_cell = mazeClass;
 
-		do
-		{
-			vector<Room&> &children = current_room.get_children(maze);
-		} while (st.size() > 0);
-
-		return path_list;
-	}
-	
+		return path;
+	}*/
 }
 
 #endif
