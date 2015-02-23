@@ -72,7 +72,7 @@ void Maze::cleanMaze()
 }
 
 /// <summary>
-/// Method makeMaze
+/// Method setWallParents
 /// This method is called after cleanMaze(). This
 /// method will go through the generated rooms and
 /// assign the second parent of each wall. I do this
