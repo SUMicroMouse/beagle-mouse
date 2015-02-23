@@ -45,10 +45,5 @@ Room * Wall::getOtherParent(Room * parent)
 // of the Wall object
 void Wall::setParent(int spouse, Room* parent)
 {
-	// I thought this would work.. but through debugging
-	// I noticed that if this method is called (which
-	// occurs in the Maze::setWallParents() method),
-	// the opposite parent will return to NULL..
-	// Carlton - see if you get the same result
 	parents[spouse] = parent;
 }

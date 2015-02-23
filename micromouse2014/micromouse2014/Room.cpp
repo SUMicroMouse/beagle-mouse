@@ -46,7 +46,7 @@ Room::Room(int v, int x, int y) :opens(0), loc(x, y)
 	}
 
 	for (int i = 0; i < 4; i++)
-		openings[0]->setParent(0, this);
+		openings[i]->setParent(0, this);
 }
 
 char* Room::getRoom()
