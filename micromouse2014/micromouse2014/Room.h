@@ -44,8 +44,11 @@ public:
 	Room(int v, int x, int y);
 
 	std::vector<bool> getOpenings();
+	std::vector<Wall*> getWalls() { return openings; }
 
 	// Heuristics
+	float weight();	// lower = better?
+
 	int get_breadth_heuristic();
 	void set_breadth_heuristic(int new_value);
 
@@ -56,6 +59,9 @@ public:
 	void setWall(int side, bool value);
 
 	void operator =(Room & room2);
+	bool operator <(Room & room2);
+	bool operator >(Room & room2);
+	bool operator ==(Room & room2);
 };
 
 #endif

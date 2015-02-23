@@ -1,6 +1,4 @@
 #include "Maze.h"
-//#include "Room.h"
-
 
 static int openings = 0;
 
@@ -32,6 +30,23 @@ void Maze::clearMaze()
 			maze[i][j] = new Room(-1,i,j);
 }
 
+/*
+Clear the boolean checked values for all of the rooms. Reset to false
+*/
+void Maze::clearChecked()
+{
+	for (int o = 0; o < 16; o++)
+		for (int i = 0; i < 16; i++)
+			maze[o][i]->checked = false;
+}
+
+/// <summary>
+/// Method cleanMaze
+/// This method is called after makeMaze() and will
+/// clean up the maze enough so that there are no
+/// extra instances of an open 2x2 section anywhere
+/// in the maze besides the center.
+/// </summary>
 void Maze::cleanMaze()
 {
 	Room *topLeft, *topRight, *bottomLeft, *bottomRight;
@@ -52,6 +67,69 @@ void Maze::cleanMaze()
 				maze[i + 1][j + 1]->setWall(3,true);
 				maze[i][j + 1]->setWall(1,true);
 			}
+		}
+	}
+}
+
+/// <summary>
+/// Method makeMaze
+/// This method is called after cleanMaze(). This
+/// method will go through the generated rooms and
+/// assign the second parent of each wall. I do this
+/// after the creation of the maze because if you
+/// try to implement it during the creation, some
+/// parents may be lost, and/or it would require
+/// much complexity to add the parents dynamically.
+/// </summary>
+void Maze::setWallParents()
+{
+	Room *Current, *Left, *Right, *Top, *Bottom;
+	int dimensions = 16;
+	for (int i = 0; i < dimensions; i++) // rows
+	{
+		for (int j = 0; j < dimensions; j++) // columns
+		{
+			Current = maze[i][j];
+			Left = Right = Top = Bottom = NULL;
+			if (j == 0) // left side
+			{
+				if (i != 0) // not top left corner
+					Top = maze[i - 1][j];
+				Right = maze[i][j + 1];
+				if (i != dimensions - 1) // not top right corner
+					Bottom = maze[i + 1][j];
+			}
+			else if (j == dimensions - 1) // right side
+			{
+				if (i != 0) // not top left corner
+					Top = maze[i - 1][j];
+				Left = maze[i][j - 1];
+				if (i != dimensions - 1) // not top right corner
+					Bottom = maze[i + 1][j];
+			}
+			else // top,bottom,middle
+			{
+				Left = maze[i][j - 1];
+				Right = maze[i][j + 1];
+				if (i == 0) // top, but not corners
+					Bottom = maze[i + 1][j];
+				else if (i == dimensions - 1) // bottom, but not corners
+					Top = maze[i - 1][j];
+				else // middle of maze
+				{
+					Top = maze[i - 1][j];
+					Bottom = maze[i + 1][j];
+				}
+			}
+
+			if (Left != NULL) // Room to the left
+				Left->getWalls()[2]->setParent(1, Current);
+			if (Right != NULL) // Room to the right
+				Right->getWalls()[0]->setParent(1, Current);
+			if (Top != NULL)
+				Top->getWalls()[1]->setParent(1, Current);
+			if (Bottom != NULL)
+				Bottom->getWalls()[3]->setParent(1, Current);
 		}
 	}
 }
@@ -156,6 +234,7 @@ void Maze::makeMaze()
 	}
 
 	cleanMaze();
+	setWallParents();
 }
 
 /// <summary>
@@ -351,7 +430,7 @@ int Maze::getAdjacentRooms(int x, int y)
 
 /// <summary>
 /// Method printMaze
-/// This method prints out the maze in a nice fashion->
+/// This method prints out the maze in a nice fashion.
 /// </summary>
 void Maze::printMaze()
 {

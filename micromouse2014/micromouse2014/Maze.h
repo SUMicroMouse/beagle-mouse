@@ -16,11 +16,9 @@
 class Maze
 {
 public:
-	Maze(){ rooms = 0; initMaze(); makeMaze(); }
-
-	
-	
+	Maze(){ rooms = 0; initMaze(); makeMaze(); }	
 	void printMaze();
+
 private:
 	std::array<std::array<Room*,16>,16> maze;
 	// for (auto& i; maze..) to loop through
@@ -30,7 +28,9 @@ private:
 	void initMaze();
 	void makeMaze();
 	void clearMaze();
+	void clearChecked();
 	void cleanMaze();
+	void setWallParents();
 	int getChoice(int x, int y);
 	int getAdjacentRooms(int x, int y);
 	int find(Location * loc);
@@ -39,12 +39,12 @@ public:
 	// Bracket overload
 	// To use:
 	// Room r = m[std::pair<int, int>(1,1)];
-	Room * operator [] (std::pair<int, int> param) { return maze[param.first][param.second]; }
+	Room* operator [] (std::pair<int, int> param) { return maze[param.first][param.second]; }
 
 	// Parentheses overload
 	// To use:
 	// Room r = m(1,1);
-	Room * operator () (int x, int y) { return maze[x][y]; }
+	Room* operator () (int x, int y) { return maze[x][y]; }
 };
 
 #endif

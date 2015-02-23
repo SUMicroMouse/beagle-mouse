@@ -5,7 +5,6 @@
 class Location
 {
 public:
-	Location(){ ; }
 	Location(int xx, int yy){ x = xx; y = yy; }
 	int x, y;
 };
