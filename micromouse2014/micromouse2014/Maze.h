@@ -17,9 +17,7 @@ class Maze
 {
 public:
 	Maze(){ rooms = 0; initMaze(); makeMaze(); }
-
-	
-	
+		
 	void printMaze();
 private:
 	std::array<std::array<Room*,16>,16> maze;
@@ -30,6 +28,7 @@ private:
 	void initMaze();
 	void makeMaze();
 	void clearMaze();
+	void clearChecked();
 	void cleanMaze();
 	int getChoice(int x, int y);
 	int getAdjacentRooms(int x, int y);
@@ -44,7 +43,7 @@ public:
 	// Parentheses overload
 	// To use:
 	// Room r = m(1,1);
-	Room * operator () (int x, int y) { return maze[x][y]; }
+	Room * operator () (int x, int y) { return maze[y][x]; }
 };
 
 #endif

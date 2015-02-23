@@ -32,6 +32,16 @@ void Maze::clearMaze()
 			maze[i][j] = new Room(-1,i,j);
 }
 
+/*
+Clear the boolean checked values for all of the rooms. Reset to false
+*/
+void Maze::clearChecked()
+{
+	for (int o = 0; o < 16; o++)
+		for (int i = 0; i < 16; i++)
+			maze[o][i]->checked = false;
+}
+
 void Maze::cleanMaze()
 {
 	Room *topLeft, *topRight, *bottomLeft, *bottomRight;
