@@ -25,9 +25,11 @@ public:
 
 	void setParent(int spouse, Room* parent);
 
+	int known;	// starts at -1 (unknown), and increments up with more assurances
+
 private:
 	bool closed;	// true = closed
-	int known;	// starts at -1 (unknown), and increments up with more assurances
+	
 
 	std::array<Room*, 2> parents;
 

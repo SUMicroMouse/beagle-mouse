@@ -36,9 +36,10 @@ Room * Wall::getOtherParent(Room * parent)
 {
 	for (auto p : parents)
 	{
-		if (p == parent)
+		if (p != parent)
 			return p;
 	}
+	return NULL;
 }
 
 // sets the designated parent (mother = 0, father = 1)

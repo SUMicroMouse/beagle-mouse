@@ -24,7 +24,6 @@ int Maze::find(Location * loc)
 /// </summary>
 void Maze::clearMaze()
 {
-	int dimensions = 16;
 	for (int i = 0; i < dimensions; i++)
 		for (int j = 0; j < dimensions; j++)
 			maze[i][j] = new Room(-1,i,j);
@@ -50,7 +49,6 @@ void Maze::clearChecked()
 void Maze::cleanMaze()
 {
 	Room *topLeft, *topRight, *bottomLeft, *bottomRight;
-	int dimensions = 16;
 	for (int i = 0; i < dimensions-1; i++) // rows
 	{
 		for (int j = 0; j < dimensions-1; j++) // columns
@@ -84,7 +82,6 @@ void Maze::cleanMaze()
 void Maze::setWallParents()
 {
 	Room *Current, *Left, *Right, *Top, *Bottom;
-	int dimensions = 16;
 	for (int i = 0; i < dimensions; i++) // rows
 	{
 		for (int j = 0; j < dimensions; j++) // columns
@@ -145,7 +142,6 @@ void Maze::makeMaze()
 	Location* loc; // a Location (X,Y) object, used for locating open rooms
 	Room* r; // a Room object, used for generating rooms to put in grid
 	int choice = -1; // decides which room to make
-	int dimensions = 16; // dimensions of maze
 
 	// Diregard lastX and lastY; they're here to determine which room
 	// was generated last. Variables X and Y refer to the current location
@@ -251,8 +247,8 @@ void Maze::initMaze()
 
 	// clears/initializes maze
 	clearMaze();
-
-	int dimensions = 16;
+	if (dimensions != 16)
+		return;
 
 	Room* r;
 
@@ -306,6 +302,7 @@ void Maze::initMaze()
 
 	rooms++;
 	maze[7][7] = r;
+	goal[0] = r;
 
 	// top right room
 	if (random != 3 && random != 4) // all choices besides 3 and 4 are the same for top right..
@@ -323,6 +320,7 @@ void Maze::initMaze()
 
 	rooms++;
 	maze[7][8] = r;
+	goal[1] = r;
 
 	// bottom right room
 	if (random != 5 && random != 6) // all choices besides 5 and 6 are the same for bottom right..
@@ -340,6 +338,7 @@ void Maze::initMaze()
 
 	rooms++;
 	maze[8][8] = r;
+	goal[2] = r;
 
 	// bottom left room
 	if (random != 7 && random != 0) // all choices besides 7 and 0 are the same for bottom left..
@@ -357,6 +356,7 @@ void Maze::initMaze()
 
 	rooms++;
 	maze[8][7] = r;
+	goal[3] = r;
 
 	/******CORNER ROOMS******/
 
@@ -401,6 +401,18 @@ void Maze::initMaze()
 		opening_locations.push_back(new Location(dimensions - 2, 0));
 
 	openings = opening_locations.size();
+
+	current = new Location(0, 1);
+
+	random = rand() % 4;
+	if (random == 0) // start in top left corner
+		start = new Location(0, 0);
+	else if (random == 1) // start in top right corner
+		start = new Location(0, dimensions - 1);
+	else if (random == 2) // start in bottom right corner
+		start = new Location(dimensions - 1, dimensions - 1);
+	else // start in bottom left corner
+		start = new Location(dimensions - 1, 0);
 }
 
 /// <summary>
@@ -411,7 +423,6 @@ void Maze::initMaze()
 /// </summary>
 int Maze::getAdjacentRooms(int x, int y)
 {
-	int dimensions = 16;
 	int total = 0;
 	if (x - 1 >= 0) // check above
 		if (maze[x - 1][y]->getPassages() != 0 && maze[x - 1][y]->getOpenings()[1] == 0)
@@ -431,11 +442,15 @@ int Maze::getAdjacentRooms(int x, int y)
 /// <summary>
 /// Method printMaze
 /// This method prints out the maze in a nice fashion.
+/// If the parameter is true, only known walls will be
+/// printed, otherwise all walls will be printed.
 /// </summary>
-void Maze::printMaze()
+void Maze::printMaze(bool walls_hidden)
 {
-	int dimensions = 16;
+	bool show = true;
+	Room* currentRoom;
 	char room[9];
+	std::vector<Wall*> walls(4);
 	// 3 "rows" = row; 3 "columns" = column
 	for (int i = 0; i < dimensions; i++) // rows
 	{
@@ -443,18 +458,54 @@ void Maze::printMaze()
 		{
 			for (int j = 0; j < dimensions; j++) // columns
 			{
-				memcpy(room, maze[i][j]->getRoom(), 9);
+				currentRoom = maze[i][j];
+				walls = currentRoom->getWalls();
+				
+				memcpy(room, currentRoom->getRoom(), 9);
 				for (int m = 0; m < 3; m++) // "columns"
 				{
-					if (m == 1 && k == 1)
+					if (m == 1 && k == 1) // center square
 					{
-						if (maze[i][j]->getPassages() != 0)
+						if (start->x == i && start->y == j) // start
+							std::cout << "*";
+						else if (current->x == i && current->y == j) // current location
+							std::cout << ">";
+						else if (currentRoom->getPassages() != 0)
 							std::cout << " ";
 						else
 							std::cout << room[m + (k * 3)];
 					}
-					else
-						std::cout << room[m + (k * 3)];
+					else // walls
+					{
+						if (walls_hidden)
+						{
+							show = false;
+							if (k == 0) // left walls
+							{
+								if (walls[0]->known >= 0)
+									show = true;
+							}
+							else if (k == 2) // right walls
+							{
+								if (walls[2]->known >= 0)
+									show = true;
+							}
+							else if (m == 0) // top walls
+							{
+								if (walls[3]->known >= 0)
+									show = true;
+							}
+							else if (m == 2) // bottom walls
+							{
+								if (walls[1]->known >= 0)
+									show = true;
+							}
+						}
+						if (show)
+							std::cout << room[m + (k * 3)];
+						else
+							std::cout << " ";
+					}
 				}
 			}
 			if (k % 3 == 1)
@@ -482,7 +533,6 @@ void Maze::printMaze()
 /// </summary>
 int Maze::getChoice(int x, int y) // current X(row) value, current Y(column) value
 {
-	int dimensions = 16;
 	std::vector<int> choices; // contains a list of possible rooms for each location (x,y)
 	int choice = -1; // the chosen room, to be returned
 	
@@ -979,6 +1029,8 @@ int Maze::getChoice(int x, int y) // current X(row) value, current Y(column) val
 //{
 //	Maze m;
 //	std::cout << "\n\n";
-//	m.printMaze();
+//	m.printMaze(true);
+//	std::cout << "\n\n";
+//	m.printMaze(false);
 //	getchar();
 //}

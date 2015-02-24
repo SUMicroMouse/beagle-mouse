@@ -16,14 +16,17 @@
 class Maze
 {
 public:
-	Maze(){ rooms = 0; initMaze(); makeMaze(); }	
-	void printMaze();
+	Maze(){ rooms = 0; dimensions = 16; initMaze(); makeMaze(); }
+	Maze(int dim) { rooms = 0; dimensions = dim; initMaze(); }
+	void printMaze(bool walls_hidden);
 
 private:
 	std::array<std::array<Room*,16>,16> maze;
 	// for (auto& i; maze..) to loop through
 	std::deque<Location*> opening_locations;
-	int rooms;
+	Location *start, *current; // Starting/Current location
+	std::array<Room*, 4> goal; // goal
+	int rooms, dimensions;
 
 	void initMaze();
 	void makeMaze();
