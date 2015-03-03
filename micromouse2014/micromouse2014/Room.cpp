@@ -120,79 +120,157 @@ void Room::setWall(int side, bool value)
 		opens--;
 		if (side == 0) // add wall to left
 		{
-			if (type == NONE)
+			if (type == RoomType::NONE)
 				type = RoomType::LEFT;
-			else if (type == BOTTOM)
+			else if (type == RoomType::BOTTOM)
 				type = RoomType::LEFT_BOTTOM;
-			else if (type == RIGHT)
+			else if (type == RoomType::RIGHT)
 				type = RoomType::LEFT_RIGHT;
-			else if (type == TOP)
+			else if (type == RoomType::TOP)
 				type = RoomType::LEFT_TOP;
-			else if (type == BOTTOM_RIGHT)
+			else if (type == RoomType::BOTTOM_RIGHT)
 				type = RoomType::LEFT_BOTTOM_RIGHT;
-			else if (type == BOTTOM_TOP)
+			else if (type == RoomType::BOTTOM_TOP)
 				type = RoomType::LEFT_BOTTOM_TOP;
-			else if (type == RIGHT_TOP)
+			else if (type == RoomType::RIGHT_TOP)
 				type = RoomType::LEFT_RIGHT_TOP;
-			else if (type == BOTTOM_RIGHT_TOP)
+			else if (type == RoomType::BOTTOM_RIGHT_TOP)
 				type = RoomType::ALL;
 		}
 		else if (side == 1) // add wall to bottom
 		{
-			if (type == NONE)
+			if (type == RoomType::NONE)
 				type = RoomType::BOTTOM;
-			else if (type == LEFT)
+			else if (type == RoomType::LEFT)
 				type = RoomType::LEFT_BOTTOM;
-			else if (type == RIGHT)
+			else if (type == RoomType::RIGHT)
 				type = RoomType::BOTTOM_RIGHT;
-			else if (type == TOP)
+			else if (type == RoomType::TOP)
 				type = RoomType::BOTTOM_TOP;
-			else if (type == LEFT_RIGHT)
+			else if (type == RoomType::LEFT_RIGHT)
 				type = RoomType::LEFT_BOTTOM_RIGHT;
-			else if (type == LEFT_TOP)
+			else if (type == RoomType::LEFT_TOP)
 				type = RoomType::LEFT_BOTTOM_TOP;
-			else if (type == RIGHT_TOP)
+			else if (type == RoomType::RIGHT_TOP)
 				type = RoomType::BOTTOM_RIGHT_TOP;
-			else if (type == LEFT_RIGHT_TOP)
+			else if (type == RoomType::LEFT_RIGHT_TOP)
 				type = RoomType::ALL;
 		}
 		else if (side == 2) // add wall to right
 		{
-			if (type == NONE)
+			if (type == RoomType::NONE)
 				type = RoomType::RIGHT;
-			else if (type == LEFT)
+			else if (type == RoomType::LEFT)
 				type = RoomType::LEFT_RIGHT;
-			else if (type == BOTTOM)
+			else if (type == RoomType::BOTTOM)
 				type = RoomType::BOTTOM_RIGHT;
-			else if (type == TOP)
+			else if (type == RoomType::TOP)
 				type = RoomType::RIGHT_TOP;
-			else if (type == LEFT_BOTTOM)
+			else if (type == RoomType::LEFT_BOTTOM)
 				type = RoomType::LEFT_BOTTOM_RIGHT;
-			else if (type == BOTTOM_TOP)
+			else if (type == RoomType::BOTTOM_TOP)
 				type = RoomType::BOTTOM_RIGHT_TOP;
-			else if (type == LEFT_TOP)
+			else if (type == RoomType::LEFT_TOP)
 				type = RoomType::LEFT_RIGHT_TOP;
-			else if (type == LEFT_BOTTOM_TOP)
+			else if (type == RoomType::LEFT_BOTTOM_TOP)
 				type = RoomType::ALL;
 		}
 		else if (side == 3) // add wall to top
 		{
-			if (type == NONE)
+			if (type == RoomType::NONE)
 				type = RoomType::TOP;
-			else if (type == LEFT)
+			else if (type == RoomType::LEFT)
 				type = RoomType::LEFT_TOP;
-			else if (type == BOTTOM)
+			else if (type == RoomType::BOTTOM)
 				type = RoomType::BOTTOM_TOP;
-			else if (type == RIGHT)
+			else if (type == RoomType::RIGHT)
 				type = RoomType::RIGHT_TOP;
-			else if (type == LEFT_BOTTOM)
+			else if (type == RoomType::LEFT_BOTTOM)
 				type = RoomType::LEFT_BOTTOM_TOP;
-			else if (type == BOTTOM_RIGHT)
+			else if (type == RoomType::BOTTOM_RIGHT)
 				type = RoomType::BOTTOM_RIGHT_TOP;
-			else if (type == LEFT_RIGHT)
+			else if (type == RoomType::LEFT_RIGHT)
 				type = RoomType::LEFT_RIGHT_TOP;
-			else if (type == LEFT_BOTTOM_RIGHT)
+			else if (type == RoomType::LEFT_BOTTOM_RIGHT)
 				type = RoomType::ALL;
+		}
+	}
+	else
+	{
+		opens++;
+		if (side == 0) // remove wall from left
+		{
+			if (type == RoomType::LEFT)
+				type = RoomType::NONE;
+			else if (type == RoomType::LEFT_BOTTOM)
+				type = RoomType::BOTTOM;
+			else if (type == RoomType::LEFT_RIGHT)
+				type = RoomType::RIGHT;
+			else if (type == RoomType::LEFT_TOP)
+				type = RoomType::TOP;
+			else if (type == RoomType::LEFT_BOTTOM_RIGHT)
+				type = RoomType::BOTTOM_RIGHT;
+			else if (type == RoomType::LEFT_BOTTOM_TOP)
+				type = RoomType::BOTTOM_TOP;
+			else if (type == RoomType::ALL)
+				type = RoomType::BOTTOM_RIGHT_TOP;
+		}
+		else if (side == 1) // remove wall from bottom
+		{
+			if (type == RoomType::BOTTOM)
+				type = RoomType::NONE;
+			else if (type == RoomType::LEFT_BOTTOM)
+				type = RoomType::LEFT;
+			else if (type == RoomType::BOTTOM_RIGHT)
+				type = RoomType::RIGHT;
+			else if (type == RoomType::BOTTOM_TOP)
+				type = RoomType::TOP;
+			else if (type == RoomType::LEFT_BOTTOM_RIGHT)
+				type = RoomType::LEFT_RIGHT;
+			else if (type == RoomType::LEFT_BOTTOM_TOP)
+				type = RoomType::LEFT_TOP;
+			else if (type == RoomType::BOTTOM_RIGHT_TOP)
+				type = RoomType::RIGHT_TOP;
+			else if (type == RoomType::ALL)
+				type = RoomType::LEFT_RIGHT_TOP;
+		}
+		else if (side == 2) // remove wall from right
+		{
+			if (type == RoomType::RIGHT)
+				type = RoomType::NONE;
+			else if (type == RoomType::LEFT_RIGHT)
+				type = RoomType::LEFT;
+			else if (type == RoomType::BOTTOM_RIGHT)
+				type = RoomType::BOTTOM;
+			else if (type == RoomType::RIGHT_TOP)
+				type = RoomType::TOP;
+			else if (type == RoomType::LEFT_BOTTOM_RIGHT)
+				type = RoomType::LEFT_BOTTOM;
+			else if (type == RoomType::LEFT_RIGHT_TOP)
+				type = RoomType::LEFT_TOP;
+			else if (type == RoomType::BOTTOM_RIGHT_TOP)
+				type = RoomType::BOTTOM_RIGHT;
+			else if (type == RoomType::ALL)
+				type = RoomType::LEFT_BOTTOM_TOP;
+		}
+		else if (side == 3) // remove wall from top
+		{
+			if (type == RoomType::TOP)
+				type = RoomType::NONE;
+			else if (type == RoomType::LEFT_TOP)
+				type = RoomType::LEFT;
+			else if (type == RoomType::BOTTOM_TOP)
+				type = RoomType::BOTTOM;
+			else if (type == RoomType::RIGHT_TOP)
+				type = RoomType::RIGHT;
+			else if (type == RoomType::LEFT_BOTTOM_TOP)
+				type = RoomType::LEFT_BOTTOM;
+			else if (type == RoomType::LEFT_RIGHT_TOP)
+				type = RoomType::LEFT_RIGHT;
+			else if (type == RoomType::BOTTOM_RIGHT_TOP)
+				type = RoomType::BOTTOM_RIGHT;
+			else if (type == RoomType::ALL)
+				type = RoomType::LEFT_BOTTOM_RIGHT;
 		}
 	}
 }

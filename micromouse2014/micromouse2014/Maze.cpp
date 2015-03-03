@@ -26,7 +26,7 @@ void Maze::clearMaze()
 {
 	for (int i = 0; i < dimensions; i++)
 		for (int j = 0; j < dimensions; j++)
-			maze[i][j] = new Room(-1,i,j);
+			maze[i][j] = new Room(-1, i, j);
 }
 
 /*
@@ -48,10 +48,19 @@ void Maze::clearChecked()
 /// </summary>
 void Maze::cleanMaze()
 {
+	// This will remove all chunks of empty rooms
+	//clearEmptyRooms();
+	// This will remove all 2x2 instances
+	clearPillars();
+}
+
+void Maze::clearPillars()
+
+{
 	Room *topLeft, *topRight, *bottomLeft, *bottomRight;
-	for (int i = 0; i < dimensions-1; i++) // rows
+	for (int i = 0; i < dimensions - 1; i++) // rows
 	{
-		for (int j = 0; j < dimensions-1; j++) // columns
+		for (int j = 0; j < dimensions - 1; j++) // columns
 		{
 			if (i == 7 && j == 7)
 				continue;
@@ -62,8 +71,46 @@ void Maze::cleanMaze()
 			if (!topLeft->getOpenings()[2] && !topRight->getOpenings()[0] && !bottomLeft->getOpenings()[2] && !bottomRight->getOpenings()[0] &&
 				!topLeft->getOpenings()[1] && !topRight->getOpenings()[1] && !bottomLeft->getOpenings()[3] && !bottomRight->getOpenings()[3])
 			{
-				maze[i + 1][j + 1]->setWall(3,true);
-				maze[i][j + 1]->setWall(1,true);
+				int random = rand() % 4;
+				if (random == 0) // generate wall on left
+				{
+					maze[i][j]->setWall(1, true);
+					maze[i + 1][j]->setWall(3, true);
+				}
+				else if (random == 1) // generate wall on bottom
+				{
+					maze[i + 1][j]->setWall(2, true);
+					maze[i + 1][j + 1]->setWall(0, true);
+				}
+				else if (random == 2) // generate wall on right side
+				{
+					maze[i + 1][j + 1]->setWall(3, true);
+					maze[i][j + 1]->setWall(1, true);
+				}
+				else if (random == 3) // generate wall on top side
+				{
+					maze[i][j]->setWall(2, true);
+					maze[i][j + 1]->setWall(0, true);
+				}
+			}
+		}
+	}
+}
+
+void Maze::clearEmptyRooms()
+{
+	std::vector<Room*> roomsToChange;
+	for (int i = 0; i < dimensions; i++)
+	{
+		for (int j = 0; j < dimensions; j++)
+		{
+			if (maze[i][j]->getPassages() == 0)
+			{
+				int random = rand() % 4;
+				std::vector<Room*> rooms = getAdjacentRooms(i, j);
+				while (rooms[random]->getPassages() == 0)
+					random = rand() % 4;
+				// finish this
 			}
 		}
 	}
@@ -177,11 +224,11 @@ void Maze::makeMaze()
 			// get the current candidate for a new room
 			X = opening_locations[j]->x;
 			Y = opening_locations[j]->y;
-			
+
 			choice = getChoice(X, Y); // decide which room to make
-			r = new Room(choice,X,Y); // make the room
+			r = new Room(choice, X, Y); // make the room
 			rooms++; // increment number of rooms
-			openings += r->getPassages() - getAdjacentRooms(X,Y)*2; // update the amounts of pathways remaining in grid
+			openings += r->getPassages() - getNumberOfAdjacentRooms(X, Y) * 2; // update the amounts of pathways remaining in grid
 			maze[X][Y] = r; // add the room to the grid
 
 			// Check all four sides of new rooms and find the
@@ -283,21 +330,21 @@ void Maze::initMaze()
 	// OPTION 8:
 	// opening bottom-left
 	/*******************/
-		
+
 	// using random, make each room individually as opposed to 4 separate set ups..
-		
+
 	// top left room
 	if (random != 1 && random != 2) // all choices besides 1 and 2 are the same for top left..
-		r = new Room(9,7,7); // left and top are walls
+		r = new Room(9, 7, 7); // left and top are walls
 	else if (random == 1)
 	{
-		r = new Room(5,7,7); // top is a wall
-		opening_locations.push_back(new Location(7,6));
+		r = new Room(5, 7, 7); // top is a wall
+		opening_locations.push_back(new Location(7, 6));
 	}
 	else // random = 2
 	{
-		r = new Room(2,7,7); // left is a wall
-		opening_locations.push_back(new Location(6,7));
+		r = new Room(2, 7, 7); // left is a wall
+		opening_locations.push_back(new Location(6, 7));
 	}
 
 	rooms++;
@@ -306,16 +353,16 @@ void Maze::initMaze()
 
 	// top right room
 	if (random != 3 && random != 4) // all choices besides 3 and 4 are the same for top right..
-		r = new Room(11,7,8); // right and top are walls
+		r = new Room(11, 7, 8); // right and top are walls
 	else if (random == 3)
 	{
-		r = new Room(4,7,8); // right is a wall
-		opening_locations.push_back(new Location(6,8));
+		r = new Room(4, 7, 8); // right is a wall
+		opening_locations.push_back(new Location(6, 8));
 	}
 	else // random = 4
 	{
-		r = new Room(5,7,8); // top is a wall
-		opening_locations.push_back(new Location(7,9));
+		r = new Room(5, 7, 8); // top is a wall
+		opening_locations.push_back(new Location(7, 9));
 	}
 
 	rooms++;
@@ -324,16 +371,16 @@ void Maze::initMaze()
 
 	// bottom right room
 	if (random != 5 && random != 6) // all choices besides 5 and 6 are the same for bottom right..
-		r = new Room(7,8,8); // right and bottom are walls
+		r = new Room(7, 8, 8); // right and bottom are walls
 	else if (random == 5)
 	{
-		r = new Room(3,8,8); // bottom is a wall
-		opening_locations.push_back(new Location(8,9));
+		r = new Room(3, 8, 8); // bottom is a wall
+		opening_locations.push_back(new Location(8, 9));
 	}
 	else // random = 6
 	{
-		r = new Room(4,8,8); // right is a wall
-		opening_locations.push_back(new Location(9,8));
+		r = new Room(4, 8, 8); // right is a wall
+		opening_locations.push_back(new Location(9, 8));
 	}
 
 	rooms++;
@@ -342,16 +389,16 @@ void Maze::initMaze()
 
 	// bottom left room
 	if (random != 7 && random != 0) // all choices besides 7 and 0 are the same for bottom left..
-		r = new Room(6,8,7); // left and bottom are walls
+		r = new Room(6, 8, 7); // left and bottom are walls
 	else if (random == 7)
 	{
-		r = new Room(2,8,7); // left is a wall
-		opening_locations.push_back(new Location(9,7));
+		r = new Room(2, 8, 7); // left is a wall
+		opening_locations.push_back(new Location(9, 7));
 	}
 	else // random = 0
 	{
-		r = new Room(3,8,7); // bottom is a wall
-		opening_locations.push_back(new Location(8,6));
+		r = new Room(3, 8, 7); // bottom is a wall
+		opening_locations.push_back(new Location(8, 6));
 	}
 
 	rooms++;
@@ -361,7 +408,7 @@ void Maze::initMaze()
 	/******CORNER ROOMS******/
 
 	// top left
-	r = new Room(getChoice(0,0),0,0);
+	r = new Room(getChoice(0, 0), 0, 0);
 	rooms++;
 	maze[0][0] = r;
 	if (!maze[0][0]->getOpenings()[1])
@@ -371,17 +418,17 @@ void Maze::initMaze()
 		opening_locations.push_back(new Location(0, 1));
 
 	// top right
-	r = new Room(getChoice(0, dimensions - 1),0,dimensions-1);
+	r = new Room(getChoice(0, dimensions - 1), 0, dimensions - 1);
 	rooms++;
-	maze[0][dimensions-1] = r;
-	if (!maze[0][dimensions-1]->getOpenings()[0])
+	maze[0][dimensions - 1] = r;
+	if (!maze[0][dimensions - 1]->getOpenings()[0])
 		opening_locations.push_back(new Location(1, dimensions - 1));
 
-	if (!maze[0][dimensions-1]->getOpenings()[1])
+	if (!maze[0][dimensions - 1]->getOpenings()[1])
 		opening_locations.push_back(new Location(0, dimensions - 2));
 
 	// bottom right
-	r = new Room(getChoice(dimensions - 1, dimensions - 1),dimensions-1,dimensions-1);
+	r = new Room(getChoice(dimensions - 1, dimensions - 1), dimensions - 1, dimensions - 1);
 	rooms++;
 	maze[dimensions - 1][dimensions - 1] = r;
 	if (!maze[dimensions - 1][dimensions - 1]->getOpenings()[0])
@@ -391,7 +438,7 @@ void Maze::initMaze()
 		opening_locations.push_back(new Location(dimensions - 2, dimensions - 1));
 
 	// bottom left
-	r = new Room(getChoice(dimensions - 1, 0),dimensions-1,0);
+	r = new Room(getChoice(dimensions - 1, 0), dimensions - 1, 0);
 	rooms++;
 	maze[dimensions - 1][0] = r;
 	if (!maze[dimensions - 1][0]->getOpenings()[2])
@@ -402,17 +449,25 @@ void Maze::initMaze()
 
 	openings = opening_locations.size();
 
-	current = new Location(0, 1);
-
 	random = rand() % 4;
 	if (random == 0) // start in top left corner
-		start = new Location(0, 0);
+	{
+		start = new Location(0, 0); direction = 2;
+	}
 	else if (random == 1) // start in top right corner
-		start = new Location(0, dimensions - 1);
+	{
+		start = new Location(0, dimensions - 1); direction = 0;
+	}
 	else if (random == 2) // start in bottom right corner
-		start = new Location(dimensions - 1, dimensions - 1);
+	{
+		start = new Location(dimensions - 1, dimensions - 1); direction = 0;
+	}
 	else // start in bottom left corner
-		start = new Location(dimensions - 1, 0);
+	{
+		start = new Location(dimensions - 1, 0); direction = 2;
+	}
+
+	current = new Location(start->x, start->y);
 }
 
 /// <summary>
@@ -421,7 +476,7 @@ void Maze::initMaze()
 /// connected to the given location. This can be modified
 /// to return the actual Room objects if needed..
 /// </summary>
-int Maze::getAdjacentRooms(int x, int y)
+int Maze::getNumberOfAdjacentRooms(int x, int y)
 {
 	int total = 0;
 	if (x - 1 >= 0) // check above
@@ -437,6 +492,21 @@ int Maze::getAdjacentRooms(int x, int y)
 		if (maze[x][y + 1]->getPassages() != 0 && maze[x][y + 1]->getOpenings()[0] == 0)
 			total++;
 	return total;
+}
+
+std::vector<Room*> Maze::getAdjacentRooms(int x, int y)
+{
+	std::vector<Room*> rooms;
+	int total = 0;
+	if (x - 1 >= 0) // check above
+		rooms.push_back(maze[x - 1][y]);
+	if (x + 1 < dimensions) // check below
+		rooms.push_back(maze[x + 1][y]);
+	if (y - 1 >= 0) // check left
+		rooms.push_back(maze[x][y - 1]);
+	if (y + 1 < dimensions) // check right
+		rooms.push_back(maze[x][y + 1]);
+	return rooms;
 }
 
 /// <summary>
@@ -460,7 +530,7 @@ void Maze::printMaze(bool walls_hidden)
 			{
 				currentRoom = maze[i][j];
 				walls = currentRoom->getWalls();
-				
+
 				memcpy(room, currentRoom->getRoom(), 9);
 				for (int m = 0; m < 3; m++) // "columns"
 				{
@@ -469,7 +539,7 @@ void Maze::printMaze(bool walls_hidden)
 						if (start->x == i && start->y == j) // start
 							std::cout << "*";
 						else if (current->x == i && current->y == j) // current location
-							std::cout << ">";
+							std::cout << (direction == 0) ? "<" : (direction == 1) ? "V" : (direction == 2) ? ">" : "^";
 						else if (currentRoom->getPassages() != 0)
 							std::cout << " ";
 						else
@@ -535,7 +605,7 @@ int Maze::getChoice(int x, int y) // current X(row) value, current Y(column) val
 {
 	std::vector<int> choices; // contains a list of possible rooms for each location (x,y)
 	int choice = -1; // the chosen room, to be returned
-	
+
 	// Variables up, down, left, right determine whether or not
 	// the generated room MUST have an opening on a specific side.
 	// Variables roomUp, roomDown, roomLeft, roomRight state
@@ -1019,18 +1089,3 @@ int Maze::getChoice(int x, int y) // current X(row) value, current Y(column) val
 
 	return choice;
 }
-
-
-
-/*****TEST THE MAZE*****/
-/* For testing purposes. Put this into another */
-/* cpp file to test it. */
-//void main()
-//{
-//	Maze m;
-//	std::cout << "\n\n";
-//	m.printMaze(true);
-//	std::cout << "\n\n";
-//	m.printMaze(false);
-//	getchar();
-//}

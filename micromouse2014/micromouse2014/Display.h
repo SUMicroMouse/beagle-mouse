@@ -7,10 +7,12 @@
 class Display
 {
 public:
+	Display();
+	Display(Maze m) { maze = m; }
 	void print(); // print info
-	void collect(); // unsure of functionality atm..
+	void collect(); // collect will gather all information from Sensor and Motor and update Maze
 private:
-	Maze* maze;
+	Maze maze;
 };
 
 #endif

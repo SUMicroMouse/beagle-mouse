@@ -14,7 +14,7 @@ enum RoomType
 {
 	NONE, LEFT, BOTTOM, RIGHT, TOP,
 	LEFT_BOTTOM, BOTTOM_RIGHT, LEFT_RIGHT, LEFT_TOP, BOTTOM_TOP, RIGHT_TOP,
-	LEFT_BOTTOM_RIGHT, LEFT_BOTTOM_TOP, LEFT_RIGHT_TOP, BOTTOM_RIGHT_TOP,ALL
+	LEFT_BOTTOM_RIGHT, LEFT_BOTTOM_TOP, LEFT_RIGHT_TOP, BOTTOM_RIGHT_TOP, ALL
 };
 
 class Room
@@ -33,7 +33,7 @@ private:
 	//void set_adjacent_rooms(Room(&maze)[16][16]);
 
 public:
-	Room() :opens(0), loc(0,0)
+	Room() :opens(0), loc(0, 0)
 	{
 		for (int i = 0; i < 4; i++)
 			openings.push_back(new Wall());
@@ -52,6 +52,7 @@ public:
 	int get_breadth_heuristic();
 	void set_breadth_heuristic(int new_value);
 
+	Location Location() { return loc; }
 	std::vector<Room*> * get_children();
 	bool checked;						// boolean used in depth first search to prevent looping
 	int getPassages(){ return opens; }

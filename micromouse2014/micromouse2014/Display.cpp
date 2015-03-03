@@ -2,10 +2,10 @@
 
 void Display::print()
 {
-	maze->printMaze(true);
+	maze.printMaze(true);
 }
 
 void Display::collect()
 {
-	
+
 }

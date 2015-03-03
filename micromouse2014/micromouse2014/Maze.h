@@ -17,25 +17,42 @@ class Maze
 {
 public:
 	Maze(){ rooms = 0; dimensions = 16; initMaze(); makeMaze(); }
-	Maze(int dim) { rooms = 0; dimensions = dim; initMaze(); }
+	Maze(bool instantiate) { rooms = 0; dimensions = 16; if (instantiate) { initMaze(); makeMaze(); } }
+	Maze(int dim) { rooms = 0; dimensions = dim; initMaze(); makeMaze(); }
 	void printMaze(bool walls_hidden);
 
+	int Direction() { return direction; }
+	void Direction(int dir)
+	{
+		direction = dir;
+		if (direction < 0)
+			direction = 3;
+		else if (direction > 3)
+			direction = 0;
+	}
+	Location* Start() { return start; }
+	void Current(Location* loc) { current = loc; }
+	std::array<Room*, 4> Goal() { return goal; }
+
 private:
-	std::array<std::array<Room*,16>,16> maze;
+	std::array<std::array<Room*, 16>, 16> maze;
 	// for (auto& i; maze..) to loop through
 	std::deque<Location*> opening_locations;
 	Location *start, *current; // Starting/Current location
 	std::array<Room*, 4> goal; // goal
-	int rooms, dimensions;
+	int rooms, dimensions, direction;
 
 	void initMaze();
 	void makeMaze();
 	void clearMaze();
 	void clearChecked();
 	void cleanMaze();
+	void clearPillars();
+	void clearEmptyRooms();
 	void setWallParents();
 	int getChoice(int x, int y);
-	int getAdjacentRooms(int x, int y);
+	int getNumberOfAdjacentRooms(int x, int y);
+	std::vector<Room*> getAdjacentRooms(int x, int y);
 	int find(Location * loc);
 
 public:
@@ -48,6 +65,10 @@ public:
 	// To use:
 	// Room r = m(1,1);
 	Room* operator () (int x, int y) { return maze[x][y]; }
+
+	/*
+	void operator = (Maze m);
+	*/
 };
 
 #endif
