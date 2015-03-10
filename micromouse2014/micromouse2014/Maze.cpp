@@ -30,13 +30,16 @@ void Maze::clearMaze()
 }
 
 /*
-Clear the boolean checked values for all of the rooms. Reset to false
+Clear the boolean checked values for all of the rooms. reset to an empty map
 */
 void Maze::clearChecked()
 {
 	for (int o = 0; o < 16; o++)
 		for (int i = 0; i < 16; i++)
-			maze[o][i]->checked = false;
+		{
+			delete(&maze[o][i]->checked);
+			maze[o][i]->checked = *new std::map<int, bool>();
+		}
 }
 
 /// <summary>

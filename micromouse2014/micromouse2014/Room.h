@@ -6,6 +6,7 @@
 #undef max
 
 #include <vector>
+#include <map>
 #include "wall.h"
 #include "Location.h"
 
@@ -54,15 +55,124 @@ public:
 
 	Location Location() { return loc; }
 	std::vector<Room*> * get_children();
-	bool checked;						// boolean used in depth first search to prevent looping
+
+	/* map of booleans used in depth first search to prevent looping
+	* one for each generated path*/
+	std::map<int, bool> checked;
+
+	/* Map of pointers to previous rooms for each path */
+	std::map<int, Room*> previous;
+	std::map<int, Room*> next;
+
+private: 
+	std::map<int, int> _alongPathConfidence;	// confidence of walls along the side of the path
+	std::map<int, int> _inPathConfidence;		// confidence of walls inside path
+public:
+
+	/* Reset the checked, previous, & next maps, and confidence maps */
+	void reset();
+
+
 	int getPassages(){ return opens; }
 	char* getRoom();
 	void setWall(int side, bool value);
 
+	
+	
 	void operator =(Room & room2);
 	bool operator <(Room & room2);
 	bool operator >(Room & room2);
 	bool operator ==(Room & room2);
+
+	/* 
+	For two adjacent rooms on a given path, give the previous room a
+	pointer to the next, and the next room a pointer to the previous. 
+	For the previous room, calculate the confidence for the walls along
+	the path and the walls inside the path
+	*/
+	static void MarkPathAndCalculateWallCosts(int pathNumber, Room *previous, Room *next)
+	{
+		previous->next[pathNumber] = next;
+		next->previous[pathNumber] = previous;
+
+		determineInnerAndOuterWalls(pathNumber, previous);
+	}
+
+
+
+private:
+
+	/* Determine a room's inner and outer wall costs using its already-created
+	map of previous-next values for a given path */
+	static void determineInnerAndOuterWalls(int pathNumber, Room *current)
+	{
+		Room* nex = current->next[pathNumber];
+		if (nex == nullptr)
+			return;
+		Room *previous = current->previous[pathNumber];
+		if (previous == nullptr)
+			return;
+
+		int wallIndex1 = -1, wallIndex2 = -1;
+
+		// Next
+		if (nex->loc.y == current->loc.y)
+		{
+			if (nex->loc.x == current->loc.x - 1) // left
+				wallIndex1 = 0;
+			else if (nex->loc.x == current->loc.x + 1) // right
+				wallIndex1 = 2;
+		}
+		else if (nex->loc.x == current->loc.x)
+		{
+			if (nex->loc.y == current->loc.y + 1) // top
+				wallIndex1 = 1;
+			else if (nex->loc.y == current->loc.y - 1) // bottom
+				wallIndex1 = 3;
+		}
+
+		// Previous
+		if (nex->loc.y == previous->loc.y)
+		{
+			if (nex->loc.x == previous->loc.x - 1) // left
+				wallIndex2 = 0;
+			else if (nex->loc.x == previous->loc.x + 1) // right
+				wallIndex2 = 2;
+		}
+		else if (nex->loc.x == previous->loc.x)
+		{
+			if (nex->loc.y == previous->loc.y + 1) // top
+				wallIndex2 = 1;
+			else if (nex->loc.y == previous->loc.y - 1) // bottom
+				wallIndex2 = 3;
+		}
+
+		calculateWallCosts(current, pathNumber, wallIndex1, wallIndex2, 'i');  // inner walls
+		calculateWallCosts(current, pathNumber, wallIndex1, wallIndex2, 'o');  // outer walls
+
+	}
+
+	/*
+	Calculate the costs of the inner walls and the walls along the sides of the path, given
+	the two wall indices of the next&previous rooms in the path
+	*/
+	static void calculateWallCosts(Room *current, int pathNumber, int wallIndex1, int wallIndex2, char inORout)
+	{
+		switch (inORout)
+		{
+		case 'i': // inner
+			auto w1 = current->openings[wallIndex1], w2 = current->openings[wallIndex2];
+			current->_inPathConfidence[pathNumber] = w1->known + w2->known;
+			break;
+		case 'o': // outer
+			for (int i = 0; i < 3; i++)
+				if (i != wallIndex1 && i != wallIndex2)
+					current->_alongPathConfidence[pathNumber] += current->openings[i]->known;
+			break;
+		default:
+			return;
+		}
+	}
 };
 
 #endif

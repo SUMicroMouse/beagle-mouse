@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <windows.h>
 #include <array>
+#include <map>
 
 #include "Room.h"
 
@@ -45,7 +46,9 @@ private:
 	void initMaze();
 	void makeMaze();
 	void clearMaze();
+public:
 	void clearChecked();
+private:
 	void cleanMaze();
 	void clearPillars();
 	void clearEmptyRooms();

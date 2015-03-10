@@ -332,6 +332,15 @@ std::vector<Room*> * Room::get_children()
 	return children;
 }
 
+void Room::reset()
+{
+	checked.clear();
+	previous.clear();
+	next.clear();
+	_alongPathConfidence.clear();
+	_inPathConfidence.clear();
+}
+
 bool Room::operator<(Room & room2)
 {
 	if (this->weight() < room2.weight())

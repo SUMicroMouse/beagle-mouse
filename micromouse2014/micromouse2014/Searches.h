@@ -27,7 +27,10 @@ namespace Algorithm
 		// Update the cells' heuristic values starting from the given cell
 		static void breadth_first_search(Maze &mazeClass, int x, int y);
 
-		std::deque<Path_new*> & depth_search(Maze &maze, Location &start, Location &goal);
+		/**
+		* Obtain all the possible paths from a selected room
+		*/
+		std::deque<Path_new*> * depth_search(Maze &maze, Location &start, Location &goal);
 
 	private:
 		// Probably will need a variable to represent when a search is in progress vs. finished

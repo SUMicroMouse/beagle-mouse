@@ -63,21 +63,27 @@ namespace Algorithm
 	}
 
 
-	std::deque<Path_new*> & Searches::depth_search(Maze &maze, Location &start, Location &goal)
+	std::deque<Path_new*> * Searches::depth_search(Maze &maze, Location &start, Location &goal)
 	{
-		std::deque<Path_new*> paths;
-		Path_new * current_path = new Path_new();
+		// Reset the paths and the rooms' checked values
+		Path_new::pathCount = 0;
+		maze.clearChecked();
+
+		std::deque<Path_new*> *paths = new std::deque<Path_new*>();	// set of paths to return
 
 		// Temporarily hold rooms and the paths to each 
 		std::stack<Room*> * stac = new std::stack<Room*>();
 		std::stack<Path_new*> * pstack = new std::stack<Path_new*>();
 
-		// clear the checked values of all the cells (set to false)
-		
+		// Starting room & path
 		Room * current_room = maze(start.x, start.y);
+		Path_new * current_path = new Path_new();
 
 		do
 		{
+			// Mark the room as checked by the current path
+			current_room->checked[current_path->Number()] = true;
+
 			// get reachable child cells
 			std::vector<Room*> * children = current_room->get_children();
 			// Sort the children according to their weight (greatest is first)
@@ -88,14 +94,23 @@ namespace Algorithm
 			while (children->size() > 0)
 			{
 				std::vector<Room*>::reverse_iterator nIt = children->rbegin();
-				stac->push(*nIt);	// Push the child with the least weight/confidence first
-				pstack->push(new Path_new(current_path, *nIt));
+				auto n_child = *nIt;
+
+				// Add the child if the current path hasn't already looked at it
+				if (n_child->checked[current_path->Number()] == false)
+				{ 
+					// Calculate the inner & outer wall confidence of the paths while building
+					Room::MarkPathAndCalculateWallCosts(current_path->Number(), current_room, n_child);
+
+					stac->push(n_child);	// Push the child with the least weight/confidence first
+					pstack->push(new Path_new(current_path, n_child));
+				}
 
 				children->pop_back();
 			}
 
 			// Add path to list of paths
-			paths.push_back(current_path);
+			paths->push_back(current_path); 
 
 			// Look at next room & path
 			current_room = stac->top();
