@@ -12,20 +12,34 @@ namespace Algorithm
 	{
 	public:
 		Path_new();
+		Path_new(Room * new_room);
 		Path_new(Path_new *old_path, Room * new_room);
 		~Path_new();
-
+	private:
 		static int pathCount;	// identifier for each path
-		
+	public:
+		static void resetPathCount()
+		{
+			pathCount = 0;
+		}
 		int Number();
+
+		// mark if the path is finished
+		bool success;	
 
 		bool operator <(Path_new &p2);
 		bool operator >(Path_new &p2);
 		bool operator ==(Path_new &p2);
+		bool operator <=(Path_new &p2);
+		bool operator >=(Path_new &p2);
 		static ExploreMode mode;
 	private:
-		std::deque<Room*> *rooms;
+		std::deque<Room*> *_rooms;
 		int path_number;
+
+		// Get the checked values in each cell corresponding to the old path
+		// and copy these to the position for the new path
+		void copyCheckedValues(Path_new * old_path);
 
 		/********* Variables for calculating path weight *********/
 
@@ -36,8 +50,20 @@ namespace Algorithm
 		int length();
 	private:
 		// Accumulated certainty from all of the cells
-		float certainty();
+		float confidence(bool edges);
+		int edgeCertainty;
+		int innerCertainty;
 
+		// Number of turns involved in following the path
+		int turns();
+
+		// Getters
+	public:
+		std::deque<Room*> * Rooms();
+		std::vector<Room*> * RoomsVector();
+		
+		/* Check if the path contains the location */
+		bool Contains(int x, int y);
 	};
 }
 

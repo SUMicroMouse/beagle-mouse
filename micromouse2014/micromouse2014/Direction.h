@@ -3,10 +3,10 @@
 
 enum Direction
 {
-	L,	// left
-	T,	// top
-	R,	// right
-	B	// bottom
+	Left,  // left
+	Up,     // Up/top
+	Right,  // right
+	Down    // Down/bottom
 };
 
 #endif

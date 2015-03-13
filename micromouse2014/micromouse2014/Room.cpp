@@ -47,6 +47,7 @@ Room::Room(int v, int x, int y) :opens(0), loc(x, y)
 
 	for (int i = 0; i < 4; i++)
 		openings[i]->setParent(0, this);
+
 }
 
 char* Room::getRoom()
@@ -277,7 +278,7 @@ void Room::setWall(int side, bool value)
 
 float Room::weight()
 {
-	return -1.0;
+	return get_breadth_heuristic();
 }
 
 std::vector<bool> Room::getOpenings()
@@ -325,11 +326,57 @@ std::vector<Room*> * Room::get_children()
 
 	for (auto wall : openings)
 	{
-		if (!wall->getClosed())	// if wall is open
+		if (wall->getClosed() == false)	// if wall is open
 			children->push_back(wall->getOtherParent(this));
 	}
 
 	return children;
+}
+
+/* Get children that aren't already in the given collection */
+std::vector<Room*> * Room::get_children(std::vector<Room*> & existingCollection)
+{
+	std::vector<Room*> * children = new std::vector<Room*>();
+
+	for (auto wall : openings)
+	{
+		bool existsInOtherCollection = false;
+		if (wall->getClosed() == false)	// if wall is open
+		{
+			for (int i = 0; i < existingCollection.size(); i++)
+				if (wall->getOtherParent(this) == existingCollection[i])
+					existsInOtherCollection = true;
+
+			if (!existsInOtherCollection)	// add child if it's not already in the given collection
+				children->push_back(wall->getOtherParent(this));
+		}
+	}
+
+	return children;
+}
+
+// Get confidence of the walls for the specified path. 
+// If edgeConfidence, return _alongPathConfidence.
+// -100: error. values weren't calculated
+int Room::confidence(int pathNumber, bool edgeConfidence)
+{
+	if (!edgeConfidence)	// walls in path
+	{
+		// Make sure the values were calculated
+		if (_inPathConfidence.count(pathNumber) == 0)
+			return -100;
+
+		return _inPathConfidence[pathNumber];
+	}
+	
+	// walls along path *******************
+	
+	// Make sure the values were calculated
+	if (_alongPathConfidence.count(pathNumber) == 0)
+		return -100;
+
+	return _alongPathConfidence[pathNumber];
+
 }
 
 void Room::reset()
@@ -339,6 +386,20 @@ void Room::reset()
 	next.clear();
 	_alongPathConfidence.clear();
 	_inPathConfidence.clear();
+}
+
+// Return 1 if there's a turn or 0 if there isn't
+int Room::turn(int pathNumber)
+{
+	if (previous.count(pathNumber) == 0 || next.count(pathNumber))
+		return 0;	// this might be a mistake, but 
+
+	if (previous[pathNumber]->Location().x != next[pathNumber]->Location().x)
+		return 1;
+	if (previous[pathNumber]->Location().y != next[pathNumber]->Location().y)
+		return 1;
+
+	return 0;
 }
 
 bool Room::operator<(Room & room2)
@@ -358,6 +419,20 @@ bool Room::operator>(Room & room2)
 bool Room::operator==(Room & room2)
 {
 	if (this->weight() == room2.weight())
+		return true;
+	return false;
+}
+
+bool Room::operator<=(Room & room2)
+{
+	if (this->weight() <= room2.weight())
+		return true;
+	return false;
+}
+
+bool Room::operator>=(Room & room2)
+{
+	if (this->weight() >= room2.weight())
 		return true;
 	return false;
 }

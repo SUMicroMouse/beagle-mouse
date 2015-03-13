@@ -39,7 +39,7 @@ namespace Sorting
 
 			while (j < r)
 			{
-				if (arr[j] <= arr[r])
+				if (*arr[j] <= *arr[r])
 				{
 					i++;
 					swapvals(arr[j], arr[i]);	// swap a[i] & a[j]
@@ -59,7 +59,7 @@ namespace Sorting
 
 			while (j < r)
 			{
-				if (arr[j] <= arr[r])
+				if (*arr[j] <= *arr[r])
 				{
 					i++;
 					swapvals(arr[j], arr[i]);	// swap a[i] & a[j]

@@ -55,6 +55,8 @@ public:
 
 	Location Location() { return loc; }
 	std::vector<Room*> * get_children();
+	// Get children that aren't already in the given collection
+	std::vector<Room*> * get_children(std::vector<Room*> & existingCollection);
 
 	/* map of booleans used in depth first search to prevent looping
 	* one for each generated path*/
@@ -64,13 +66,23 @@ public:
 	std::map<int, Room*> previous;
 	std::map<int, Room*> next;
 
+	/***** Confidence *****/
+
 private: 
 	std::map<int, int> _alongPathConfidence;	// confidence of walls along the side of the path
 	std::map<int, int> _inPathConfidence;		// confidence of walls inside path
 public:
-
-	/* Reset the checked, previous, & next maps, and confidence maps */
+	// Get confidence of the walls for the specified path. 
+	// If edgeConfidence, return _alongPathConfidence.
+	// -100: error. values weren't calculated
+	int confidence(int pathNumber, bool edgeConfidence);
+	
+	/* Reset the checked, previous, next, confidence */
 	void reset();
+	/**********************/
+
+	// Return 1 if there's a turn or 0 if there isn't
+	int turn(int pathNumber);
 
 
 	int getPassages(){ return opens; }
@@ -83,6 +95,8 @@ public:
 	bool operator <(Room & room2);
 	bool operator >(Room & room2);
 	bool operator ==(Room & room2);
+	bool operator <=(Room & room2);
+	bool operator >=(Room & room2);
 
 	/* 
 	For two adjacent rooms on a given path, give the previous room a
@@ -95,16 +109,16 @@ public:
 		previous->next[pathNumber] = next;
 		next->previous[pathNumber] = previous;
 
-		determineInnerAndOuterWalls(pathNumber, previous);
+		determineInnerAndOuterWallCosts(pathNumber, previous);
 	}
 
 
 
 private:
 
-	/* Determine a room's inner and outer wall costs using its already-created
-	map of previous-next values for a given path */
-	static void determineInnerAndOuterWalls(int pathNumber, Room *current)
+	/* Determine a room's inner and outer wall costs (in relation to a path) using 
+	its already-created	map of previous-next values for a given path */
+	static void determineInnerAndOuterWallCosts(int pathNumber, Room *current)
 	{
 		Room* nex = current->next[pathNumber];
 		if (nex == nullptr)
@@ -158,10 +172,10 @@ private:
 	*/
 	static void calculateWallCosts(Room *current, int pathNumber, int wallIndex1, int wallIndex2, char inORout)
 	{
+		auto w1 = current->openings[wallIndex1], w2 = current->openings[wallIndex2];
 		switch (inORout)
 		{
 		case 'i': // inner
-			auto w1 = current->openings[wallIndex1], w2 = current->openings[wallIndex2];
 			current->_inPathConfidence[pathNumber] = w1->known + w2->known;
 			break;
 		case 'o': // outer

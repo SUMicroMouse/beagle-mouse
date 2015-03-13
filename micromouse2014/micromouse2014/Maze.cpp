@@ -36,10 +36,14 @@ void Maze::clearChecked()
 {
 	for (int o = 0; o < 16; o++)
 		for (int i = 0; i < 16; i++)
-		{
-			delete(&maze[o][i]->checked);
-			maze[o][i]->checked = *new std::map<int, bool>();
-		}
+			maze[o][i]->checked.clear();
+}
+
+void Maze::resetBreadthHeuristics()
+{
+	for (int o = 0; o < 16; o++)
+		for (int i = 0; i < 16; i++)
+			maze[o][i]->set_breadth_heuristic(std::numeric_limits<int>::max());
 }
 
 /// <summary>
