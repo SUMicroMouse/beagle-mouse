@@ -7,7 +7,7 @@ Room::Room(int v, int x, int y) :opens(0), loc(x, y)
 
 	for (int i = 0; i < 4; i++)
 		openings.push_back(new Wall());
-	type = (RoomType)(v - 1);
+	type = (v > 0) ? (RoomType)(v - 1) : (RoomType)(15);
 	switch (v)
 	{
 	case 1: // none
@@ -115,6 +115,8 @@ char* Room::getRoom()
 
 void Room::setWall(int side, bool value)
 {
+	if (value == openings[side]->getClosed())
+		return;
 	openings[side]->setClosed(value);
 	if (value)
 	{
@@ -250,7 +252,7 @@ void Room::setWall(int side, bool value)
 			else if (type == RoomType::LEFT_RIGHT_TOP)
 				type = RoomType::LEFT_TOP;
 			else if (type == RoomType::BOTTOM_RIGHT_TOP)
-				type = RoomType::BOTTOM_RIGHT;
+				type = RoomType::BOTTOM_TOP;
 			else if (type == RoomType::ALL)
 				type = RoomType::LEFT_BOTTOM_TOP;
 		}

@@ -49,14 +49,14 @@ void Maze::resetBreadthHeuristics()
 /// <summary>
 /// Method cleanMaze
 /// This method is called after makeMaze() and will
-/// clean up the maze enough so that there are no
-/// extra instances of an open 2x2 section anywhere
-/// in the maze besides the center.
+/// clean up the maze by removing all closed off rooms
+/// as well as all open 2x2 instances that occur that
+/// are not in the center of the maze.
 /// </summary>
 void Maze::cleanMaze()
 {
 	// This will remove all chunks of empty rooms
-	//clearEmptyRooms();
+	clearEmptyRooms();
 	// This will remove all 2x2 instances
 	clearPillars();
 }
@@ -106,18 +106,35 @@ void Maze::clearPillars()
 
 void Maze::clearEmptyRooms()
 {
-	std::vector<Room*> roomsToChange;
+	std::vector<Room*> rooms;
+	Room* room;
 	for (int i = 0; i < dimensions; i++)
 	{
 		for (int j = 0; j < dimensions; j++)
 		{
-			if (maze[i][j]->getPassages() == 0)
+			room = maze[i][j];
+			if (room->getPassages() == 0)
 			{
+				rooms = getAdjacentRooms(i, j);
 				int random = rand() % 4;
-				std::vector<Room*> rooms = getAdjacentRooms(i, j);
-				while (rooms[random]->getPassages() == 0)
-					random = rand() % 4;
-				// finish this
+				int x = 0, y = 0;
+
+				while (true)
+				{
+					while (rooms[random]->getPassages() == 0)
+						random = rand() % 4;
+					x = rooms[random]->Location().x;
+					y = rooms[random]->Location().y;
+					if ((x != 7 && x != 8) || (y != 7 && y != 8))
+						break;
+					else
+						random = rand() % 4;
+				}
+
+				maze[x][y]->setWall((random > 1) ? random - 2 : random + 2, false);
+				maze[i][j]->setWall(random, false);
+
+				rooms.clear();
 			}
 		}
 	}
@@ -505,14 +522,22 @@ std::vector<Room*> Maze::getAdjacentRooms(int x, int y)
 {
 	std::vector<Room*> rooms;
 	int total = 0;
-	if (x - 1 >= 0) // check above
-		rooms.push_back(maze[x - 1][y]);
-	if (x + 1 < dimensions) // check below
-		rooms.push_back(maze[x + 1][y]);
 	if (y - 1 >= 0) // check left
 		rooms.push_back(maze[x][y - 1]);
+	else
+		rooms.push_back(new Room());
+	if (x + 1 < dimensions) // check below
+		rooms.push_back(maze[x + 1][y]);
+	else
+		rooms.push_back(new Room());
 	if (y + 1 < dimensions) // check right
 		rooms.push_back(maze[x][y + 1]);
+	else
+		rooms.push_back(new Room());
+	if (x - 1 >= 0) // check above
+		rooms.push_back(maze[x - 1][y]);
+	else
+		rooms.push_back(new Room());
 	return rooms;
 }
 
@@ -593,9 +618,9 @@ void Maze::printMaze(bool walls_hidden)
 	// last row
 	for (int i = 0; i < dimensions; i++)
 		if (i < 10)
-			std::cout << " " << i + 1 << " ";
+			std::cout << " " << i << " ";
 		else
-			std::cout << " " << i + 1;
+			std::cout << " " << i;
 }
 
 /// <summary>

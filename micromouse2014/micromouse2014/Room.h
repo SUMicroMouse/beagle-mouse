@@ -39,7 +39,7 @@ public:
 		for (int i = 0; i < 4; i++)
 			openings.push_back(new Wall());
 		breadth_heuristic = std::numeric_limits<int>::max();
-		type = RoomType::NONE;
+		type = RoomType::ALL;
 	}
 
 	Room(int v, int x, int y);
