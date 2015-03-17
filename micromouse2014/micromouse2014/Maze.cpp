@@ -579,7 +579,7 @@ void Maze::printMaze(bool walls_hidden)
 				}
 			}
 			if (k % 3 == 1)
-				std::cout << " " << i + 1;
+				std::cout << " " << i;
 			std::cout << std::endl;
 		}
 	}
