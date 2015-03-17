@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <windows.h>
 #include <array>
+#include <map>
 
 #include "Room.h"
 
@@ -45,7 +46,12 @@ private:
 	void initMaze();
 	void makeMaze();
 	void clearMaze();
+public:
+	// Clear the boolean checked values for all of the rooms. reset to an empty map
 	void clearChecked();
+	// Reset the breadth heuristics to the max int
+	void resetBreadthHeuristics();
+private:
 	void cleanMaze();
 	void clearPillars();
 	void clearEmptyRooms();

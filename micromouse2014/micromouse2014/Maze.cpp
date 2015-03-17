@@ -30,13 +30,20 @@ void Maze::clearMaze()
 }
 
 /*
-Clear the boolean checked values for all of the rooms. Reset to false
+Clear the boolean checked values for all of the rooms. reset to an empty map
 */
 void Maze::clearChecked()
 {
 	for (int o = 0; o < 16; o++)
 		for (int i = 0; i < 16; i++)
-			maze[o][i]->checked = false;
+			maze[o][i]->checked.clear();
+}
+
+void Maze::resetBreadthHeuristics()
+{
+	for (int o = 0; o < 16; o++)
+		for (int i = 0; i < 16; i++)
+			maze[o][i]->set_breadth_heuristic(std::numeric_limits<int>::max());
 }
 
 /// <summary>
