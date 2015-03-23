@@ -1,5 +1,7 @@
 #include "Path_new.h"
 
+using namespace Data;
+
 namespace Algorithm
 {
 	int Path_new::pathCount;	// identifier for each path
@@ -14,7 +16,7 @@ namespace Algorithm
 		success = false;
 	}
 
-	Path_new::Path_new(Room *new_room)
+	Path_new::Path_new(Data::Room *new_room)
 	{
 		_rooms = new std::deque<Room*>();
 		_rooms->push_back(new_room);
@@ -27,7 +29,7 @@ namespace Algorithm
 	/**
 	Create a new path that is a copy of the given one with the addition of the new room
 	*/
-	Path_new::Path_new(Path_new *old_path, Room *new_room)
+	Path_new::Path_new(Path_new *old_path, Data::Room *new_room)
 	{
 		_rooms = new std::deque<Room*>(*old_path->_rooms);	// copy
 		_rooms->push_back(new_room);

@@ -3,13 +3,14 @@
 #define __SENSOR_H__
 
 #include <array>
-
 #include "Maze.h"
 
-class Sensor
+namespace Hardware
 {
-public:
-	Maze* read();
-};
-
+	class Sensor
+	{
+	public:
+		Data::Maze* read();
+	};
+}
 #endif

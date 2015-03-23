@@ -5,35 +5,38 @@
 #include <array>
 //#include "Room.h"
 
-class Room;
-
-class Wall
+namespace Data
 {
-public:
-	Wall();
-	Wall(bool closed_value);
-	~Wall();
+	class Room;
 
-	int Confidence();
-	int Value();
+	class Wall
+	{
+	public:
+		Wall();
+		Wall(bool closed_value);
+		~Wall();
 
-	bool getClosed();
-	void setClosed(bool _closed);
+		int Confidence();
+		int Value();
 
-	// Get the parent opposite from the given one
-	Room * getOtherParent(Room * parent);
+		bool getClosed();
+		void setClosed(bool _closed);
 
-	void setParent(int spouse, Room* parent);
+		// Get the parent opposite from the given one
+		Room * getOtherParent(Room * parent);
 
-	int known;	// starts at -1 (unknown), and increments up with more assurances
+		void setParent(int spouse, Room* parent);
 
-private:
-	bool closed;	// true = closed
-	
+		int known;	// starts at -1 (unknown), and increments up with more assurances
 
-	std::array<Room*, 2> parents;
+	private:
+		bool closed;	// true = closed
 
-	//friend class Room;
-};
+
+		std::array<Room*, 2> parents;
+
+		//friend class Room;
+	};
+}
 
 #endif

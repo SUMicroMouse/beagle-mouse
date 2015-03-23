@@ -2,7 +2,7 @@
 #include "Sorts.h"
 
 //#include "Cell_new.h"
-
+using namespace Data;
 
 namespace Algorithm
 {

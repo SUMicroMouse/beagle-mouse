@@ -14,7 +14,7 @@
 #include "Maze.h"
 #include "Path_new.h"
 
-class ::Maze;
+class Data::Maze;
 
 namespace Algorithm
 {
@@ -28,19 +28,19 @@ namespace Algorithm
 		//static void breadth_first_search(Cell_new * origin);
 
 		// Update the cells' heuristic values starting from the given cell
-		static void breadth_first_search(Maze & maze, int x, int y);
+		static void breadth_first_search(Data::Maze & maze, int x, int y);
 
 		/**
 		* Obtain all the possible paths from a selected room
 		*/
-		static std::deque<Path_new*> * depth_search(Maze &maze, Location &start, Location &goal);
+		static std::deque<Path_new*> * depth_search(Data::Maze &maze, Location &start, Location &goal);
 
 	private:
 		// Probably will need a variable to represent when a search is in progress vs. finished
 		// so that multithreading works properly.. "condition variable"
 
 
-		static int depth_helper(std::map<int, std::stack<Room*>> & pathStacks, std::deque<Path_new*> & paths, Location & goal);
+		static int depth_helper(std::map<int, std::stack<Data::Room*>> & pathStacks, std::deque<Path_new*> & paths, Location & goal);
 		static void replacePathInCollection(std::deque<Path_new*> &paths, Path_new * newPath);
 	};		
 }

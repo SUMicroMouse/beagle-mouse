@@ -12,8 +12,8 @@ namespace Algorithm
 	{
 	public:
 		Path_new();
-		Path_new(Room * new_room);
-		Path_new(Path_new *old_path, Room * new_room);
+		Path_new(Data::Room * new_room);
+		Path_new(Path_new *old_path, Data::Room * new_room);
 		~Path_new();
 	private:
 		static int pathCount;	// identifier for each path
@@ -34,7 +34,7 @@ namespace Algorithm
 		bool operator >=(Path_new &p2);
 		static ExploreMode mode;
 	private:
-		std::deque<Room*> *_rooms;
+		std::deque<Data::Room*> *_rooms;
 		int path_number;
 
 		// Get the checked values in each cell corresponding to the old path
@@ -59,8 +59,8 @@ namespace Algorithm
 
 		// Getters
 	public:
-		std::deque<Room*> * Rooms();
-		std::vector<Room*> * RoomsVector();
+		std::deque<Data::Room*> * Rooms();
+		std::vector<Data::Room*> * RoomsVector();
 		
 		/* Check if the path contains the location */
 		bool Contains(int x, int y);

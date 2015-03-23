@@ -8,11 +8,11 @@ class Display
 {
 public:
 	Display();
-	Display(Maze m) { maze = m; }
+	Display(Data::Maze m) { maze = m; }
 	void print(); // print info
 	void collect(); // collect will gather all information from Sensor and Motor and update Maze
 private:
-	Maze maze;
+	Data::Maze maze;
 };
 
 #endif

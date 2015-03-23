@@ -4,8 +4,8 @@ namespace Algorithm
 {
 	Mouse::Mouse() :
 		// member-initializer list
-		maze(new Maze()),
-		sensor(new Sensor())
+		maze(new Data::Maze()),
+		sensor(new Hardware::Sensor())
 	{
 		location = maze->Start();
 		maze->printMaze(false);

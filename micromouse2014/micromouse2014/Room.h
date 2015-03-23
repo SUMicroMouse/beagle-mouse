@@ -10,182 +10,186 @@
 #include "wall.h"
 #include "Location.h"
 
-// Designates where the walls are
-enum RoomType
+namespace Data
 {
-	NONE, LEFT, BOTTOM, RIGHT, TOP,
-	LEFT_BOTTOM, BOTTOM_RIGHT, LEFT_RIGHT, LEFT_TOP, BOTTOM_TOP, RIGHT_TOP,
-	LEFT_BOTTOM_RIGHT, LEFT_BOTTOM_TOP, LEFT_RIGHT_TOP, BOTTOM_RIGHT_TOP, ALL
-};
-
-class Room
-{
-private:
-	std::vector<Wall*> openings; // Vector of Wall objects
-	int opens; // Number of openings
-	Location loc;
-	RoomType type;
-
-	// neighboring rooms
-	std::vector<Room*> neighbors;
-
-	int breadth_heuristic;
-	void reset_breadth_heuristic();
-	//void set_adjacent_rooms(Room(&maze)[16][16]);
-
-public:
-	Room() :opens(0), loc(0, 0)
+	// Designates where the walls are
+	enum RoomType
 	{
-		for (int i = 0; i < 4; i++)
-			openings.push_back(new Wall());
-		breadth_heuristic = std::numeric_limits<int>::max();
-		type = RoomType::ALL;
-	}
+		NONE, LEFT, BOTTOM, RIGHT, TOP,
+		LEFT_BOTTOM, BOTTOM_RIGHT, LEFT_RIGHT, LEFT_TOP, BOTTOM_TOP, RIGHT_TOP,
+		LEFT_BOTTOM_RIGHT, LEFT_BOTTOM_TOP, LEFT_RIGHT_TOP, BOTTOM_RIGHT_TOP, ALL
+	};
 
-	Room(int v, int x, int y);
-
-	std::vector<bool> getOpenings();
-	std::vector<Wall*> getWalls() { return openings; }
-
-	// Heuristics
-	float weight();	// lower = better?
-
-	int get_breadth_heuristic();
-	void set_breadth_heuristic(int new_value);
-
-	Location Location() { return loc; }
-	std::vector<Room*> * get_children();
-	// Get children that aren't already in the given collection
-	std::vector<Room*> * get_children(std::vector<Room*> & existingCollection);
-
-	/* map of booleans used in depth first search to prevent looping
-	* one for each generated path*/
-	std::map<int, bool> checked;
-
-	/* Map of pointers to previous rooms for each path */
-	std::map<int, Room*> previous;
-	std::map<int, Room*> next;
-
-	/***** Confidence *****/
-
-private: 
-	std::map<int, int> _alongPathConfidence;	// confidence of walls along the side of the path
-	std::map<int, int> _inPathConfidence;		// confidence of walls inside path
-public:
-	// Get confidence of the walls for the specified path. 
-	// If edgeConfidence, return _alongPathConfidence.
-	// -100: error. values weren't calculated
-	int confidence(int pathNumber, bool edgeConfidence);
-	
-	/* Reset the checked, previous, next, confidence */
-	void reset();
-	/**********************/
-
-	// Return 1 if there's a turn or 0 if there isn't
-	int turn(int pathNumber);
-
-
-	int getPassages(){ return opens; }
-	char* getRoom();
-	void setWall(int side, bool value);
-
-	
-	
-	void operator =(Room & room2);
-	bool operator <(Room & room2);
-	bool operator >(Room & room2);
-	bool operator ==(Room & room2);
-	bool operator <=(Room & room2);
-	bool operator >=(Room & room2);
-
-	/* 
-	For two adjacent rooms on a given path, give the previous room a
-	pointer to the next, and the next room a pointer to the previous. 
-	For the previous room, calculate the confidence for the walls along
-	the path and the walls inside the path
-	*/
-	static void MarkPathAndCalculateWallCosts(int pathNumber, Room *previous, Room *next)
+	class Room
 	{
-		previous->next[pathNumber] = next;
-		next->previous[pathNumber] = previous;
+	private:
+		std::vector<Wall*> openings; // Vector of Wall objects
+		int opens; // Number of openings
+		Location loc;
+		RoomType type;
 
-		determineInnerAndOuterWallCosts(pathNumber, previous);
-	}
+		// neighboring rooms
+		std::vector<Room*> neighbors;
 
+		int breadth_heuristic;
+		void reset_breadth_heuristic();
+		//void set_adjacent_rooms(Room(&maze)[16][16]);
 
-
-private:
-
-	/* Determine a room's inner and outer wall costs (in relation to a path) using 
-	its already-created	map of previous-next values for a given path */
-	static void determineInnerAndOuterWallCosts(int pathNumber, Room *current)
-	{
-		Room* nex = current->next[pathNumber];
-		if (nex == nullptr)
-			return;
-		Room *previous = current->previous[pathNumber];
-		if (previous == nullptr)
-			return;
-
-		int wallIndex1 = -1, wallIndex2 = -1;
-
-		// Next
-		if (nex->loc.y == current->loc.y)
+	public:
+		Room() :opens(0), loc(0, 0)
 		{
-			if (nex->loc.x == current->loc.x - 1) // left
-				wallIndex1 = 0;
-			else if (nex->loc.x == current->loc.x + 1) // right
-				wallIndex1 = 2;
-		}
-		else if (nex->loc.x == current->loc.x)
-		{
-			if (nex->loc.y == current->loc.y + 1) // top
-				wallIndex1 = 1;
-			else if (nex->loc.y == current->loc.y - 1) // bottom
-				wallIndex1 = 3;
+			for (int i = 0; i < 4; i++)
+				openings.push_back(new Wall());
+			breadth_heuristic = std::numeric_limits<int>::max();
+			type = RoomType::ALL;
 		}
 
-		// Previous
-		if (current->loc.y == previous->loc.y)
+		Room(int v, int x, int y);
+
+		std::vector<bool> getOpenings();
+		std::vector<Wall*> getWalls() { return openings; }
+
+		// Heuristics
+		float weight();	// lower = better?
+
+		int get_breadth_heuristic();
+		void set_breadth_heuristic(int new_value);
+
+		Location Location() { return loc; }
+		std::vector<Room*> * get_children();
+		// Get children that aren't already in the given collection
+		std::vector<Room*> * get_children(std::vector<Room*> & existingCollection);
+
+		/* map of booleans used in depth first search to prevent looping
+		* one for each generated path*/
+		std::map<int, bool> checked;
+
+		/* Map of pointers to previous rooms for each path */
+		std::map<int, Room*> previous;
+		std::map<int, Room*> next;
+
+		/***** Confidence *****/
+
+	private:
+		std::map<int, int> _alongPathConfidence;	// confidence of walls along the side of the path
+		std::map<int, int> _inPathConfidence;		// confidence of walls inside path
+	public:
+		// Get confidence of the walls for the specified path. 
+		// If edgeConfidence, return _alongPathConfidence.
+		// -100: error. values weren't calculated
+		int confidence(int pathNumber, bool edgeConfidence);
+
+		/* Reset the checked, previous, next, confidence */
+		void reset();
+		/**********************/
+
+		// Return 1 if there's a turn or 0 if there isn't
+		int turn(int pathNumber);
+
+
+		int getPassages(){ return opens; }
+		char* getRoom();
+		void setWall(int side, bool value);
+
+
+
+		void operator =(Room & room2);
+		bool operator <(Room & room2);
+		bool operator >(Room & room2);
+		bool operator ==(Room & room2);
+		bool operator <=(Room & room2);
+		bool operator >=(Room & room2);
+
+		/*
+		For two adjacent rooms on a given path, give the previous room a
+		pointer to the next, and the next room a pointer to the previous.
+		For the previous room, calculate the confidence for the walls along
+		the path and the walls inside the path
+		*/
+		static void MarkPathAndCalculateWallCosts(int pathNumber, Room *previous, Room *next)
 		{
-			if (current->loc.x == previous->loc.x - 1) // left
-				wallIndex2 = 0;
-			else if (current->loc.x == previous->loc.x + 1) // right
-				wallIndex2 = 2;
-		}
-		else if (current->loc.x == previous->loc.x)
-		{
-			if (current->loc.y == previous->loc.y + 1) // top
-				wallIndex2 = 1;
-			else if (current->loc.y == previous->loc.y - 1) // bottom
-				wallIndex2 = 3;
+			previous->next[pathNumber] = next;
+			next->previous[pathNumber] = previous;
+
+			determineInnerAndOuterWallCosts(pathNumber, previous);
 		}
 
-		calculateWallCosts(current, pathNumber, wallIndex1, wallIndex2, 'i');  // inner walls
-		calculateWallCosts(current, pathNumber, wallIndex1, wallIndex2, 'o');  // outer walls
-	}
 
-	/*
-	Calculate the costs of the inner walls and the walls along the sides of the path, given
-	the two wall indices of the next&previous rooms in the path
-	*/
-	static void calculateWallCosts(Room *current, int pathNumber, int wallIndex1, int wallIndex2, char inORout)
-	{
-		auto w1 = current->openings[wallIndex1], w2 = current->openings[wallIndex2];
-		switch (inORout)
+
+	private:
+
+		/* Determine a room's inner and outer wall costs (in relation to a path) using
+		its already-created	map of previous-next values for a given path */
+		static void determineInnerAndOuterWallCosts(int pathNumber, Room *current)
 		{
-		case 'i': // inner
-			current->_inPathConfidence[pathNumber] = w1->known + w2->known;
-			break;
-		case 'o': // outer
-			for (int i = 0; i < 3; i++)
-				if (i != wallIndex1 && i != wallIndex2)
-					current->_alongPathConfidence[pathNumber] += current->openings[i]->known;
-			break;
-		default:
-			return;
+			Room* nex = current->next[pathNumber];
+			if (nex == nullptr)
+				return;
+			Room *previous = current->previous[pathNumber];
+			if (previous == nullptr)
+				return;
+
+			int wallIndex1 = -1, wallIndex2 = -1;
+
+			// Next
+			if (nex->loc.y == current->loc.y)
+			{
+				if (nex->loc.x == current->loc.x - 1) // left
+					wallIndex1 = 0;
+				else if (nex->loc.x == current->loc.x + 1) // right
+					wallIndex1 = 2;
+			}
+			else if (nex->loc.x == current->loc.x)
+			{
+				if (nex->loc.y == current->loc.y + 1) // top
+					wallIndex1 = 1;
+				else if (nex->loc.y == current->loc.y - 1) // bottom
+					wallIndex1 = 3;
+			}
+
+			// Previous
+			if (current->loc.y == previous->loc.y)
+			{
+				if (current->loc.x == previous->loc.x - 1) // left
+					wallIndex2 = 0;
+				else if (current->loc.x == previous->loc.x + 1) // right
+					wallIndex2 = 2;
+			}
+			else if (current->loc.x == previous->loc.x)
+			{
+				if (current->loc.y == previous->loc.y + 1) // top
+					wallIndex2 = 1;
+				else if (current->loc.y == previous->loc.y - 1) // bottom
+					wallIndex2 = 3;
+			}
+
+			calculateWallCosts(current, pathNumber, wallIndex1, wallIndex2, 'i');  // inner walls
+			calculateWallCosts(current, pathNumber, wallIndex1, wallIndex2, 'o');  // outer walls
 		}
-	}
-};
+
+		/*
+		Calculate the costs of the inner walls and the walls along the sides of the path, given
+		the two wall indices of the next&previous rooms in the path
+		*/
+		static void calculateWallCosts(Room *current, int pathNumber, int wallIndex1, int wallIndex2, char inORout)
+		{
+			auto w1 = current->openings[wallIndex1], w2 = current->openings[wallIndex2];
+			switch (inORout)
+			{
+			case 'i': // inner
+				current->_inPathConfidence[pathNumber] = w1->known + w2->known;
+				break;
+			case 'o': // outer
+				for (int i = 0; i < 3; i++)
+					if (i != wallIndex1 && i != wallIndex2)
+						current->_alongPathConfidence[pathNumber] += current->openings[i]->known;
+				break;
+			default:
+				return;
+			}
+		}
+	};
+
+}
 
 #endif

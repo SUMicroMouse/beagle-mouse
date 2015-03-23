@@ -1,6 +1,9 @@
 #include "Sensor.h"
 
-Maze* Sensor::read()
+namespace Hardware
 {
-	return new Maze(5);
+	Data::Maze* Sensor::read()
+	{
+		return new Data::Maze();
+	}
 }

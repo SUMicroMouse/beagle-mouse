@@ -14,8 +14,8 @@ namespace Algorithm
 	class Mouse
 	{
 		Location *location;
-		std::unique_ptr<Maze> maze;
-		std::unique_ptr<Sensor> sensor;
+		std::unique_ptr<Data::Maze> maze;
+		std::unique_ptr<Hardware::Sensor> sensor;
 		
 	public:
 		Mouse();

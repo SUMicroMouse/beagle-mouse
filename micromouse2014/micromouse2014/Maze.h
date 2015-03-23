@@ -14,67 +14,71 @@
 
 #include "Room.h"
 
-class Maze
+namespace Data
 {
-public:
-	Maze(){ rooms = 0; dimensions = 16; initMaze(); makeMaze(); }
-	Maze(bool instantiate) { rooms = 0; dimensions = 16; if (instantiate) { initMaze(); makeMaze(); } }
-	Maze(int dim) { rooms = 0; dimensions = dim; initMaze(); makeMaze(); }
-	void printMaze(bool walls_hidden);
-
-	int Direction() { return direction; }
-	void Direction(int dir)
+	class Maze
 	{
-		direction = dir;
-		if (direction < 0)
-			direction = 3;
-		else if (direction > 3)
-			direction = 0;
-	}
-	Location* Start() { return start; }
-	void Current(Location* loc) { current = loc; }
-	std::array<Room*, 4> Goal() { return goal; }
+	public:
+		Maze(){ rooms = 0; dimensions = 16; initMaze(); makeMaze(); }
+		Maze(bool instantiate) { rooms = 0; dimensions = 16; if (instantiate) { initMaze(); makeMaze(); } }
+		Maze(int dim) { rooms = 0; dimensions = dim; initMaze(); makeMaze(); }
+		void printMaze(bool walls_hidden);
 
-private:
-	std::array<std::array<Room*, 16>, 16> maze;
-	// for (auto& i; maze..) to loop through
-	std::deque<Location*> opening_locations;
-	Location *start, *current; // Starting/Current location
-	std::array<Room*, 4> goal; // goal
-	int rooms, dimensions, direction;
+		int Direction() { return direction; }
+		void Direction(int dir)
+		{
+			direction = dir;
+			if (direction < 0)
+				direction = 3;
+			else if (direction > 3)
+				direction = 0;
+		}
+		Location* Start() { return start; }
+		void Current(Location* loc) { current = loc; }
+		std::array<Room*, 4> Goal() { return goal; }
 
-	void initMaze();
-	void makeMaze();
-	void clearMaze();
-public:
-	// Clear the boolean checked values for all of the rooms. reset to an empty map
-	void clearChecked();
-	// Reset the breadth heuristics to the max int
-	void resetBreadthHeuristics();
-private:
-	void cleanMaze();
-	void clearPillars();
-	void clearEmptyRooms();
-	void setWallParents();
-	int getChoice(int x, int y);
-	int getNumberOfAdjacentRooms(int x, int y);
-	std::vector<Room*> getAdjacentRooms(int x, int y);
-	int find(Location * loc);
+	private:
+		std::array<std::array<Room*, 16>, 16> maze;
+		// for (auto& i; maze..) to loop through
+		std::deque<Location*> opening_locations;
+		Location *start, *current; // Starting/Current location
+		std::array<Room*, 4> goal; // goal
+		int rooms, dimensions, direction;
 
-public:
-	// Bracket overload
-	// To use:
-	// Room r = m[std::pair<int, int>(1,1)];
-	Room* operator [] (std::pair<int, int> param) { return maze[param.first][param.second]; }
+		void initMaze();
+		void makeMaze();
+		void clearMaze();
+	public:
+		// Clear the boolean checked values for all of the rooms. reset to an empty map
+		void clearChecked();
+		// Reset the breadth heuristics to the max int
+		void resetBreadthHeuristics();
+	private:
+		void cleanMaze();
+		void clearPillars();
+		void clearEmptyRooms();
+		void setWallParents();
+		int getChoice(int x, int y);
+		int getNumberOfAdjacentRooms(int x, int y);
+		std::vector<Room*> getAdjacentRooms(int x, int y);
+		int find(Location * loc);
 
-	// Parentheses overload
-	// To use:
-	// Room r = m(1,1);
-	Room* operator () (int x, int y) { return maze[x][y]; }
+	public:
+		// Bracket overload
+		// To use:
+		// Room r = m[std::pair<int, int>(1,1)];
+		Room* operator [] (std::pair<int, int> param) { return maze[param.first][param.second]; }
 
-	/*
-	void operator = (Maze m);
-	*/
-};
+		// Parentheses overload
+		// To use:
+		// Room r = m(1,1);
+		Room* operator () (int x, int y) { return maze[x][y]; }
+
+		/*
+		void operator = (Maze m);
+		*/
+	};
+
+}
 
 #endif
