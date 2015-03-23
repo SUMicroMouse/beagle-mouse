@@ -8,6 +8,7 @@
 
 class Sensor
 {
+public:
 	Maze* read();
 };
 

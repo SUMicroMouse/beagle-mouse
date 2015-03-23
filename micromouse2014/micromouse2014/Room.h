@@ -146,24 +146,23 @@ private:
 		}
 
 		// Previous
-		if (nex->loc.y == previous->loc.y)
+		if (current->loc.y == previous->loc.y)
 		{
-			if (nex->loc.x == previous->loc.x - 1) // left
+			if (current->loc.x == previous->loc.x - 1) // left
 				wallIndex2 = 0;
-			else if (nex->loc.x == previous->loc.x + 1) // right
+			else if (current->loc.x == previous->loc.x + 1) // right
 				wallIndex2 = 2;
 		}
-		else if (nex->loc.x == previous->loc.x)
+		else if (current->loc.x == previous->loc.x)
 		{
-			if (nex->loc.y == previous->loc.y + 1) // top
+			if (current->loc.y == previous->loc.y + 1) // top
 				wallIndex2 = 1;
-			else if (nex->loc.y == previous->loc.y - 1) // bottom
+			else if (current->loc.y == previous->loc.y - 1) // bottom
 				wallIndex2 = 3;
 		}
 
 		calculateWallCosts(current, pathNumber, wallIndex1, wallIndex2, 'i');  // inner walls
 		calculateWallCosts(current, pathNumber, wallIndex1, wallIndex2, 'o');  // outer walls
-
 	}
 
 	/*

@@ -51,7 +51,7 @@ namespace Algorithm
 	bool Path_new::operator<(Path_new &p2)
 	{
 		
-		return false;
+		return true;
 	}
 
 	bool Path_new::operator>(Path_new &p2)
@@ -63,7 +63,7 @@ namespace Algorithm
 	bool Path_new::operator==(Path_new &p2)
 	{
 
-		return false;
+		return true;
 	}
 
 	bool Path_new::operator<=(Path_new &p2)
@@ -75,7 +75,7 @@ namespace Algorithm
 	bool Path_new::operator>=(Path_new &p2)
 	{
 
-		return false;
+		return true;
 	}
 
 	// Get the checked values in each cell corresponding to the old path

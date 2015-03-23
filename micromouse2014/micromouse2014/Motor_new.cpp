@@ -1,4 +1,4 @@
-#include "Motor.h"
+#include "Motor_new.h"
 
 void Motor::motion(MotorMotion motion)
 {

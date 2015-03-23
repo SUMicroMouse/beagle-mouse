@@ -42,9 +42,11 @@ namespace Algorithm
 			}
 			delete(children);
 
+			if (q->size() == 0)
+				break;
 			current_room = q->front();		// move to next child
 			q->pop();
-		} while (q->size() > 0);
+		} while (true);
 	}
 
 	/*
@@ -170,7 +172,10 @@ namespace Algorithm
 		
 		int success = 0;
 		while(success != 1)
-			depth_helper(pathStacks, *paths, goal);
+			success = depth_helper(pathStacks, *paths, goal);
+
+		//pathStacks.clear();
+		//delete pathStacks;
 
 		return paths;
 	}
@@ -226,6 +231,9 @@ namespace Algorithm
 				std::vector<Room*>::reverse_iterator nIt = children->rbegin();
 				n_child = *nIt;
 
+				// Calculate the inner & outer wall confidence of the paths while building
+				Room::MarkPathAndCalculateWallCosts(current_path->Number(), current_room, n_child);
+
 				Path_new *newpath = new Path_new(current_path, n_child);
 				paths.push_back(newpath);
 
@@ -242,6 +250,10 @@ namespace Algorithm
 			{
 				std::vector<Room*>::reverse_iterator nIt = children->rbegin();
 				n_child = *nIt;
+				
+				// Calculate the inner & outer wall confidence of the paths while building
+				Room::MarkPathAndCalculateWallCosts(current_path->Number(), current_room, n_child);
+
 				pathStacks[current_path->Number()].push(n_child);
 				children->pop_back();
 				current_path->Rooms()->push_back(n_child);	// expand current path
@@ -250,6 +262,12 @@ namespace Algorithm
 
 			//if (pathCreated)
 				//i = 0;      // restart at beginning to give every possible path a fair share
+
+			// end after 150,000
+			if (paths.size() > 499) //10000)
+			{
+				return 1;
+			}
 		}
 
 		if (finishedCount >= paths.size())
