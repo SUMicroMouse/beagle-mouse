@@ -98,6 +98,7 @@ void solveMaze(Maze maze)
 void main()
 {
 	Maze m;
-	solveMaze(m);
+	m.printMaze(false);
+	//solveMaze(m);
 	getchar();
 }
