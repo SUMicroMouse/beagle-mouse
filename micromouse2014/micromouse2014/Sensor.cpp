@@ -53,13 +53,13 @@ namespace Hardware
 			currentSesnorY = 1;
 
 			if (!walls[0]->getClosed()) // if left wall isn't there..
-				sensor_maze->operator()(currentX, currentY - 1)->operator=(*maze->operator()(currentX, currentY - 1));
+				sensor_maze->operator()(currentSensorX, currentSesnorY - 1)->operator=(*maze->operator()(currentX, currentY - 1));
 			if (!walls[1]->getClosed()) // if bottom wall isn't there..
-				sensor_maze->operator()(currentX + 1, currentY)->operator=(*maze->operator()(currentX + 1, currentY));
+				sensor_maze->operator()(currentSensorX + 1, currentSesnorY)->operator=(*maze->operator()(currentX + 1, currentY));
 			if (!walls[2]->getClosed()) // if right wall isn't there..
-				sensor_maze->operator()(currentX, currentY + 1)->operator=(*maze->operator()(currentX, currentY + 1));
+				sensor_maze->operator()(currentSensorX, currentSesnorY + 1)->operator=(*maze->operator()(currentX, currentY + 1));
 			if (!walls[3]->getClosed()) // if top wall isn't there..
-				sensor_maze->operator()(currentX - 1, currentY)->operator=(*maze->operator()(currentX - 1, currentY));
+				sensor_maze->operator()(currentSensorX - 1, currentSesnorY)->operator=(*maze->operator()(currentX - 1, currentY));
 		}
 		if (bottom)
 		{
@@ -71,13 +71,13 @@ namespace Hardware
 			currentSesnorY = 2;
 
 			if (!walls[0]->getClosed()) // if left wall isn't there..
-				sensor_maze->operator()(currentX, currentY - 1)->operator=(*maze->operator()(currentX, currentY - 1));
+				sensor_maze->operator()(currentSensorX, currentSesnorY - 1)->operator=(*maze->operator()(currentX, currentY - 1));
 			if (!walls[1]->getClosed()) // if bottom wall isn't there..
-				sensor_maze->operator()(currentX + 1, currentY)->operator=(*maze->operator()(currentX + 1, currentY));
+				sensor_maze->operator()(currentSensorX + 1, currentSesnorY)->operator=(*maze->operator()(currentX + 1, currentY));
 			if (!walls[2]->getClosed()) // if right wall isn't there..
-				sensor_maze->operator()(currentX, currentY + 1)->operator=(*maze->operator()(currentX, currentY + 1));
+				sensor_maze->operator()(currentSensorX, currentSesnorY + 1)->operator=(*maze->operator()(currentX, currentY + 1));
 			if (!walls[3]->getClosed()) // if top wall isn't there..
-				sensor_maze->operator()(currentX - 1, currentY)->operator=(*maze->operator()(currentX - 1, currentY));
+				sensor_maze->operator()(currentSensorX - 1, currentSesnorY)->operator=(*maze->operator()(currentX - 1, currentY));
 		}
 		if (right)
 		{
@@ -89,13 +89,13 @@ namespace Hardware
 			currentSesnorY = 3;
 
 			if (!walls[0]->getClosed()) // if left wall isn't there..
-				sensor_maze->operator()(currentX, currentY - 1)->operator=(*maze->operator()(currentX, currentY - 1));
+				sensor_maze->operator()(currentSensorX, currentSesnorY - 1)->operator=(*maze->operator()(currentX, currentY - 1));
 			if (!walls[1]->getClosed()) // if bottom wall isn't there..
-				sensor_maze->operator()(currentX + 1, currentY)->operator=(*maze->operator()(currentX + 1, currentY));
+				sensor_maze->operator()(currentSensorX + 1, currentSesnorY)->operator=(*maze->operator()(currentX + 1, currentY));
 			if (!walls[2]->getClosed()) // if right wall isn't there..
-				sensor_maze->operator()(currentX, currentY + 1)->operator=(*maze->operator()(currentX, currentY + 1));
+				sensor_maze->operator()(currentSensorX, currentSesnorY + 1)->operator=(*maze->operator()(currentX, currentY + 1));
 			if (!walls[3]->getClosed()) // if top wall isn't there..
-				sensor_maze->operator()(currentX - 1, currentY)->operator=(*maze->operator()(currentX - 1, currentY));
+				sensor_maze->operator()(currentSensorX - 1, currentSesnorY)->operator=(*maze->operator()(currentX - 1, currentY));
 		}
 		if (top)
 		{
@@ -107,13 +107,13 @@ namespace Hardware
 			currentSesnorY = 2;
 
 			if (!walls[0]->getClosed()) // if left wall isn't there..
-				sensor_maze->operator()(currentX, currentY - 1)->operator=(*maze->operator()(currentX, currentY - 1));
+				sensor_maze->operator()(currentSensorX, currentSesnorY - 1)->operator=(*maze->operator()(currentX, currentY - 1));
 			if (!walls[1]->getClosed()) // if bottom wall isn't there..
-				sensor_maze->operator()(currentX + 1, currentY)->operator=(*maze->operator()(currentX + 1, currentY));
+				sensor_maze->operator()(currentSensorX + 1, currentSesnorY)->operator=(*maze->operator()(currentX + 1, currentY));
 			if (!walls[2]->getClosed()) // if right wall isn't there..
-				sensor_maze->operator()(currentX, currentY + 1)->operator=(*maze->operator()(currentX, currentY + 1));
+				sensor_maze->operator()(currentSensorX, currentSesnorY + 1)->operator=(*maze->operator()(currentX, currentY + 1));
 			if (!walls[3]->getClosed()) // if top wall isn't there..
-				sensor_maze->operator()(currentX - 1, currentY)->operator=(*maze->operator()(currentX - 1, currentY));
+				sensor_maze->operator()(currentSensorX - 1, currentSesnorY)->operator=(*maze->operator()(currentX - 1, currentY));
 		}
 
 		return sensor_maze;
