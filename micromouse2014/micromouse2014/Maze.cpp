@@ -1,7 +1,7 @@
 #include "Maze.h"
 
 namespace Data
-{ 
+{
 	static int openings = 0;
 
 	/// <summary>
@@ -478,19 +478,19 @@ namespace Data
 		random = rand() % 4;
 		if (random == 0) // start in top left corner
 		{
-			start = new Location(0, 0); direction = 2;
+			start = new Location(0, 0); direction = Direction::RIGHT;
 		}
 		else if (random == 1) // start in top right corner
 		{
-			start = new Location(0, dimensions - 1); direction = 0;
+			start = new Location(0, dimensions - 1); direction = Direction::LEFT;
 		}
 		else if (random == 2) // start in bottom right corner
 		{
-			start = new Location(dimensions - 1, dimensions - 1); direction = 0;
+			start = new Location(dimensions - 1, dimensions - 1); direction = Direction::LEFT;
 		}
 		else // start in bottom left corner
 		{
-			start = new Location(dimensions - 1, 0); direction = 2;
+			start = new Location(dimensions - 1, 0); direction = Direction::RIGHT;
 		}
 
 		current = new Location(start->x, start->y);
@@ -543,6 +543,13 @@ namespace Data
 		return rooms;
 	}
 
+	void clearTerminal()
+	{
+		// I suppose this works for now..
+		for (int i = 0; i < 10; i++)
+			std::cout << "\n\n\n\n\n";
+	}
+
 	/// <summary>
 	/// Method printMaze
 	/// This method prints out the maze in a nice fashion.
@@ -573,7 +580,7 @@ namespace Data
 							if (start->x == i && start->y == j) // start
 								std::cout << "*";
 							else if (current->x == i && current->y == j) // current location
-								std::cout << (direction == 0) ? "<" : (direction == 1) ? "V" : (direction == 2) ? ">" : "^";
+								std::cout << (direction == Direction::LEFT) ? "<" : (direction == Direction::DOWN) ? "V" : (direction == Direction::RIGHT) ? ">" : "^";
 							else if (currentRoom->getPassages() != 0)
 								std::cout << " ";
 							else

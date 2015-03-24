@@ -16,6 +16,14 @@
 
 namespace Data
 {
+	enum Direction
+	{
+		LEFT,  // left
+		DOWN,     // Down/bottom
+		RIGHT,  // right
+		UP    // Up/top
+	};
+
 	class Maze
 	{
 	public:
@@ -24,13 +32,14 @@ namespace Data
 		Maze(int dim) { rooms = 0; dimensions = dim; initMaze(); makeMaze(); }
 		void printMaze(bool walls_hidden);
 
-		int Direction() { return direction; }
-		void Direction(int dir)
+		Direction getDirection() { return direction; }
+		void setDirection(Direction dir)
 		{
 			direction = dir;
-			if (direction < 0)
+			// Below is for safety, however this should be handled in turn() functions
+			if (direction < 0) // if trying to turn right and facing left (0)..
 				direction = 3;
-			else if (direction > 3)
+			else if (direction > 3) // if trying to turn left and facing up (3)..
 				direction = 0;
 		}
 		Location* Start() { return start; }
@@ -43,7 +52,8 @@ namespace Data
 		std::deque<Location*> opening_locations;
 		Location *start, *current; // Starting/Current location
 		std::array<Room*, 4> goal; // goal
-		int rooms, dimensions, direction;
+		int rooms, dimensions;
+		Direction direction;
 
 		void initMaze();
 		void makeMaze();
