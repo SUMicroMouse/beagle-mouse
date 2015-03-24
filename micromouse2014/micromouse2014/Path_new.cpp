@@ -14,6 +14,7 @@ namespace Algorithm
 		edgeCertainty = -1;
 		innerCertainty = -1;
 		success = false;
+		finished = false;
 	}
 
 	Path_new::Path_new(Data::Room *new_room)
@@ -24,6 +25,7 @@ namespace Algorithm
 		edgeCertainty = -1;
 		innerCertainty = -1;
 		success = false;
+		finished = false;
 	}
 
 	/**
@@ -38,6 +40,7 @@ namespace Algorithm
 		innerCertainty = -1;
 
 		success = old_path->success;
+		finished = old_path->finished;
 		//copyCheckedValues(old_path);
 	}
 

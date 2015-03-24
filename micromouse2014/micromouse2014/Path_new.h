@@ -26,6 +26,7 @@ namespace Algorithm
 
 		// mark if the path is finished
 		bool success;	
+		bool finished;
 
 		bool operator <(Path_new &p2);
 		bool operator >(Path_new &p2);
