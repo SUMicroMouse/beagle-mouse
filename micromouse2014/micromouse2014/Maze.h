@@ -13,22 +13,15 @@
 #include <map>
 
 #include "Room.h"
+#include "Direction.h"
 
 namespace Data
 {
-	enum Direction
-	{
-		LEFT,  // left
-		DOWN,     // Down/bottom
-		RIGHT,  // right
-		UP    // Up/top
-	};
-
 	class Maze
 	{
 	public:
 		Maze(){ rooms = 0; dimensions = 16; initMaze(); makeMaze(); }
-		Maze(bool instantiate) { rooms = 0; dimensions = 16; if (instantiate) { initMaze(); makeMaze(); } }
+		Maze(bool instantiate) { rooms = 0; dimensions = 16; if (instantiate) { initMaze(); makeMaze(); } else clearMaze(); }
 		Maze(int dim) { rooms = 0; dimensions = dim; initMaze(); makeMaze(); }
 		void printMaze(bool walls_hidden);
 
@@ -38,11 +31,12 @@ namespace Data
 			direction = dir;
 			// Below is for safety, however this should be handled in turn() functions
 			if (direction < 0) // if trying to turn right and facing left (0)..
-				direction = 3;
+				direction = Direction::Up;
 			else if (direction > 3) // if trying to turn left and facing up (3)..
-				direction = 0;
+				direction = Direction::Left;
 		}
 		Location* Start() { return start; }
+		Location* Current() { return current; }
 		void Current(Location* loc) { current = loc; }
 		std::array<Room*, 4> Goal() { return goal; }
 
