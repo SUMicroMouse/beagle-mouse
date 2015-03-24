@@ -185,6 +185,8 @@ namespace Algorithm
 		//std::map<int, std::stack<Room*>>::iterator sIt = pathStacks.begin();
 		//std::deque<Path_new*>::iterator pIt = paths.begin();
 
+		Path_new * bestPath;
+
 		int finishedCount = 0;
 		int successCount = 0;
 
@@ -194,14 +196,25 @@ namespace Algorithm
 			bool pathCreated = false;
 
 			Path_new *current_path = paths[i];
+			// Unsuccessful path
 			if (pathStacks[current_path->Number()].size() == 0)
 			{
 				finishedCount++;
+				current_path->finished = true;
+				// Delete the unsuccessful path
+				delete current_path;
+				paths[i] = nullptr;
+				
 				continue;
 			}
 
+			// Successful path
 			if (current_path->success)
 			{
+				if (current_path->finished == false)
+					successful_paths.push_back(current_path);
+
+				current_path->finished = true;
 				finishedCount++;
 				successCount++;
 				continue;
