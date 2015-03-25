@@ -20,6 +20,7 @@ namespace Algorithm
 		std::unique_ptr<Data::Maze> maze;
 		std::unique_ptr<Hardware::Sensor> sensor;
 		std::unique_ptr<Hardware::Motor> motor;
+		Room * currentRoom;
 		
 	public:
 		Mouse();
@@ -34,7 +35,7 @@ namespace Algorithm
 		void Turn(Data::Room * room);
 
 	private:
-		bool CheckForOptions();
+		int CheckForOptions();
 
 		/* Generate paths, return best path */
 		std::unique_ptr<Path_new> * GeneratePaths();

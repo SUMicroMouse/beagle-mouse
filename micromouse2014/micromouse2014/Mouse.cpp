@@ -29,7 +29,7 @@ namespace Algorithm
 			// Get information from sensors
 			auto senseGrid = this->sensor->read(maze.get());
 
-			// Check to see if there's more than one opening
+			// Check to see if there's more than one new path in the current physical room
 			switch (CheckForOptions())
 			{
 			case 0:	// dead end
@@ -41,6 +41,7 @@ namespace Algorithm
 				break;
 
 			case 2:	// 2 or 3 options in direction
+			case 3:
 				// Guess all the possible paths from the current "cross-roads"
 				path_chosen = Evaluate();
 				// Start down the new path
@@ -154,11 +155,10 @@ namespace Algorithm
 		return path_selected;
 	}
 
-	bool Mouse::CheckForOptions()
+	int Mouse::CheckForOptions()
 	{
-
-
-		return false;
+		std::vector<Room*>* children = currentRoom->get_children(previousRoom);
+		return children->size();
 	}
 
 	/**
