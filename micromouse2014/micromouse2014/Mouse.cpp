@@ -24,41 +24,32 @@ namespace Algorithm
 	{
 		std::unique_ptr<Path_new> * path_chosen;
 
-		// Get information from sensors
-		auto senseGrid = this->sensor->read();
-
-		// Check to see if there's more than one opening
-		switch (CheckForOptions())
+		while (true)
 		{
-		case 0:	// dead end
+			// Get information from sensors
+			auto senseGrid = this->sensor->read(maze.get());
 
-			break;
+			// Check to see if there's more than one opening
+			switch (CheckForOptions())
+			{
+			case 0:	// dead end
+				motor->motion(MotorMotion::TURN_AROUND);
+				break;
 
-		case 1:	// only option is straight ahead
+			case 1:	// only option is straight ahead
+				motor->motion(MotorMotion::MOVE_FORWARD);
+				break;
 
-			break;
-
-		case 2:	// 2 or 3 options in direction
-
-			break;
+			case 2:	// 2 or 3 options in direction
+				// Guess all the possible paths from the current "cross-roads"
+				path_chosen = Evaluate();
+				// Start down the new path
+				Turn(path_chosen->get());
+				motor->motion(MotorMotion::MOVE_FORWARD);
+				break;
+			}
 		}
 
-
-
-		if (CheckForOptions())
-		{
-			// Guess all the possible paths from the current "cross-roads"
-			path_chosen = Evaluate();
-
-			// Start down the new path
-			Turn(path_chosen->get());
-			//motor->motion()
-		}
-		else
-		{
-			// Move forward
-
-		}
 	}
 
 	void Mouse::Turn(Path_new * newPath)
@@ -94,7 +85,7 @@ namespace Algorithm
 				else
 					return;
 				// always move forward
-				motor->motion(MotorMotion::MOVE_FORWARD);
+				//motor->motion(MotorMotion::MOVE_FORWARD);
 				break;
 
 			case Direction::Up:
@@ -108,7 +99,7 @@ namespace Algorithm
 				else
 					return;
 				// always move forward
-				motor->motion(MotorMotion::MOVE_FORWARD);
+				//motor->motion(MotorMotion::MOVE_FORWARD);
 				break;
 
 			case Direction::Right:
@@ -122,7 +113,7 @@ namespace Algorithm
 				else
 					return;
 				// always move forward
-				motor->motion(MotorMotion::MOVE_FORWARD);
+				//motor->motion(MotorMotion::MOVE_FORWARD);
 				break;
 
 			case Direction::Down:
@@ -136,7 +127,7 @@ namespace Algorithm
 				else
 					return;
 				// always move forward
-				motor->motion(MotorMotion::MOVE_FORWARD);
+				//motor->motion(MotorMotion::MOVE_FORWARD);
 				break;
 
 			default:
