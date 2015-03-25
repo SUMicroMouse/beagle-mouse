@@ -406,6 +406,19 @@ namespace Data
 		return 0;
 	}
 
+	void Room::operator=(Room & room2)
+	{
+		this->breadth_heuristic = room2.breadth_heuristic;
+		this->checked = room2.checked;
+		this->loc = room2.loc;
+		this->neighbors = room2.neighbors;
+		this->openings = room2.openings;
+		this->opens = room2.opens;
+		this->type = room2.type;
+		this->_alongPathConfidence = room2._alongPathConfidence;
+		this->_inPathConfidence = room2._inPathConfidence;
+	}
+
 	bool Room::operator<(Room & room2)
 	{
 		if (this->weight() < room2.weight())

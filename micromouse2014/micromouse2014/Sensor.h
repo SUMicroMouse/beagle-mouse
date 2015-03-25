@@ -10,7 +10,7 @@ namespace Hardware
 	class Sensor
 	{
 	public:
-		Data::Maze* read();
+		Data::Maze* read(Data::Maze* maze);
 	};
 }
 #endif
