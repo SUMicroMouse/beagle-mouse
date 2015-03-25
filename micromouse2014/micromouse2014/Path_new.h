@@ -14,6 +14,7 @@ namespace Algorithm
 		Path_new();
 		Path_new(Data::Room * new_room);
 		Path_new(Path_new *old_path, Data::Room * new_room);
+		Path_new(Path_new *first_path, Path_new * second_path);
 		~Path_new();
 	private:
 		static int pathCount;	// identifier for each path
@@ -58,7 +59,7 @@ namespace Algorithm
 		// Number of turns involved in following the path
 		int turns();
 
-		// Getters
+		// Getters **************************************
 	public:
 		std::deque<Data::Room*> * Rooms();
 		std::vector<Data::Room*> * RoomsVector();

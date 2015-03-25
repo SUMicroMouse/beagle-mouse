@@ -44,6 +44,28 @@ namespace Algorithm
 		//copyCheckedValues(old_path);
 	}
 
+	/*
+	Create a path that's the addition of the two given paths. Gets the success & finished values
+	of the second path
+	*/
+	Path_new::Path_new(Path_new *first_path, Path_new * second_path)
+	{
+		_rooms = new std::deque<Room*>(*first_path->_rooms);
+		std::deque<Room*>::iterator rI = second_path->_rooms->begin();
+		while (rI != second_path->_rooms->end())
+		{
+			_rooms->push_back(*rI);
+			rI++;
+		}
+
+		path_number = pathCount++;
+		edgeCertainty = first_path->edgeCertainty + second_path->edgeCertainty;
+		innerCertainty = first_path->innerCertainty + second_path->innerCertainty;
+		
+		success = second_path->success;
+		finished = second_path->finished;
+	}
+
 	Path_new::~Path_new()
 	{
 	}

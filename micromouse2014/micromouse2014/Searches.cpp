@@ -211,8 +211,8 @@ namespace Algorithm
 			// Successful path
 			if (current_path->success)
 			{
-				if (current_path->finished == false)
-					successful_paths.push_back(current_path);
+				//if (current_path->finished == false)
+					//successful_paths.push_back(current_path);
 
 				current_path->finished = true;
 				finishedCount++;

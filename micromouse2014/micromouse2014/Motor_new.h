@@ -8,13 +8,14 @@ namespace Hardware
 	{
 		TURN_LEFT,
 		TURN_RIGHT,
-		TURN_ABOUT,
+		TURN_AROUND,
 		MOVE_FORWARD,
 		MOVE_BACKWARD
 	};
 
 	class Motor
 	{
+	public:
 		void motion(MotorMotion motion);
 	};
 }

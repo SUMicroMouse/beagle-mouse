@@ -12,17 +12,18 @@
 #include <array>
 #include <map>
 
+#include "Direction.h"
 #include "Room.h"
 
 namespace Data
 {
-	enum Direction
-	{
-		LEFT,  // left
-		DOWN,     // Down/bottom
-		RIGHT,  // right
-		UP    // Up/top
-	};
+	//enum Direction
+	//{
+	//	LEFT,  // left
+	//	DOWN,     // Down/bottom
+	//	RIGHT,  // right
+	//	UP    // Up/top
+	//};
 
 	class Maze
 	{
@@ -38,9 +39,9 @@ namespace Data
 			direction = dir;
 			// Below is for safety, however this should be handled in turn() functions
 			if (direction < 0) // if trying to turn right and facing left (0)..
-				direction = 3;
+				direction = (Direction)3;
 			else if (direction > 3) // if trying to turn left and facing up (3)..
-				direction = 0;
+				direction = (Direction)0;
 		}
 		Location* Start() { return start; }
 		void Current(Location* loc) { current = loc; }

@@ -478,19 +478,19 @@ namespace Data
 		random = rand() % 4;
 		if (random == 0) // start in top left corner
 		{
-			start = new Location(0, 0); direction = Direction::RIGHT;
+			start = new Location(0, 0); direction = Direction::Right;
 		}
 		else if (random == 1) // start in top right corner
 		{
-			start = new Location(0, dimensions - 1); direction = Direction::LEFT;
+			start = new Location(0, dimensions - 1); direction = Direction::Left;
 		}
 		else if (random == 2) // start in bottom right corner
 		{
-			start = new Location(dimensions - 1, dimensions - 1); direction = Direction::LEFT;
+			start = new Location(dimensions - 1, dimensions - 1); direction = Direction::Left;
 		}
 		else // start in bottom left corner
 		{
-			start = new Location(dimensions - 1, 0); direction = Direction::RIGHT;
+			start = new Location(dimensions - 1, 0); direction = Direction::Right;
 		}
 
 		current = new Location(start->x, start->y);
@@ -580,7 +580,7 @@ namespace Data
 							if (start->x == i && start->y == j) // start
 								std::cout << "*";
 							else if (current->x == i && current->y == j) // current location
-								std::cout << (direction == Direction::LEFT) ? "<" : (direction == Direction::DOWN) ? "V" : (direction == Direction::RIGHT) ? ">" : "^";
+								std::cout << (direction == Direction::Left) ? "<" : (direction == Direction::Down) ? "V" : (direction == Direction::Right) ? ">" : "^";
 							else if (currentRoom->getPassages() != 0)
 								std::cout << " ";
 							else

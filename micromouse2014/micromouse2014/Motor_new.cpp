@@ -6,15 +6,15 @@ namespace Hardware
 	{
 		switch (motion)
 		{
-		case 0: // TURN_LEFT
+		case MotorMotion::TURN_LEFT: 
 			break;
-		case 1: // TURN_RIGHT
+		case MotorMotion::TURN_RIGHT: 
 			break;
-		case 2: // TURN_ABOUT
+		case MotorMotion::TURN_AROUND:
 			break;
-		case 3: // MOVE_FORWARD
+		case MotorMotion::MOVE_FORWARD:
 			break;
-		case 4: // MOVE_BACKWARD
+		case MotorMotion::MOVE_BACKWARD: // MOVE_BACKWARD
 			break;
 		default:
 			return;
