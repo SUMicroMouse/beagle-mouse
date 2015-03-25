@@ -24,6 +24,7 @@ namespace Data
 		Maze(bool instantiate) { rooms = 0; dimensions = 16; if (instantiate) { initMaze(); makeMaze(); } else clearMaze(); }
 		Maze(int dim) { rooms = 0; dimensions = dim; initMaze(); makeMaze(); }
 		void printMaze(bool walls_hidden);
+		void printClean();
 
 		Direction getDirection() { return direction; }
 		void setDirection(Direction dir)
@@ -38,8 +39,8 @@ namespace Data
 		Location* Start() { return start; }
 		Location* Current() { return current; }
 		Room * CurrentRoom() { return maze[Current()->x][Current()->y]; }
-		Room * RoomGet(int x, int y) { return maze[Current()->x][Current()->y]; }
-		void Current(Location* loc) { current = loc; }
+		Room * RoomGet(int x, int y) { return maze[x][y]; }
+		void Current(Location* loc) { current->x = loc->x; current->y = loc->y; }
 		std::array<Room*, 4> Goal() { return goal; }
 
 	private:

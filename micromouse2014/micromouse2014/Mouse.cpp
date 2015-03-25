@@ -10,8 +10,12 @@ namespace Algorithm
 		maze(new Data::Maze()),
 		sensor(new Hardware::Sensor())
 	{
-		location = maze->Start();
 		currentRoom = maze->CurrentRoom();
+
+		// Set initial direction
+		InitialDirection();
+
+		// Print maze after setting direction
 		maze->printMaze(false);
 	}
 
@@ -21,15 +25,62 @@ namespace Algorithm
 		//delete sensor;
 	}
 
+	/* Set the initial direction using what's available as determined by the walls */
+	void Mouse::InitialDirection()
+	{
+		/*
+		// (0, 0)
+		if (location()->x == 0 && location()->y == 0)
+		{
+			direction = Direction::Up;
+		}
+		// (0, 15)
+		else if (location()->x == 0 && location()->y == 15)
+		{
+			direction = Direction::Right;
+		}
+		// (15, 0)
+		else if (location()->x == 15 && location()->y == 0)
+		{
+			direction = Direction::Up;
+		}
+		// (15, 15)
+		else if (location()->x == 15 && location()->y == 15)
+		{
+			direction = Direction::Left;
+		}
+		*/
+
+		// Face the wall that's open
+
+		std::vector<Wall*> & walls = currentRoom->getWalls();
+		if (walls[0]->getClosed() == false) // down
+			direction = Direction::Down;
+		else if (!walls[1]->getClosed()) // right
+			direction = Direction::Right;
+		else if (!walls[2]->getClosed()) // up
+			direction = Direction::Up;
+		else
+			direction = Direction::Left;	// left
+
+		// Update maze's direction
+		maze->setDirection(direction);
+	}
+
 	void Mouse::Explore()
 	{
 		std::unique_ptr<Path_new> * path_chosen;
 
-		auto senseGrid = this->sensor->read(maze.get());
+		//auto senseGrid = this->sensor->read(maze.get());
 
+		// Turn to face a direction where there's actually an opening
 		// Start off going forward once, set previous to start
 		MoveForward();
 
+		maze->printClean();
+		maze->printMaze(false);
+		maze->printClean();
+		
 		while (true)
 		{
 			// Get information from sensors
@@ -38,24 +89,33 @@ namespace Algorithm
 			// Check to see if there's more than one new path in the current physical room
 			switch (CheckForOptions())
 			{
-			case 0:	// dead end
-				motor->motion(MotorMotion::TURN_AROUND);
+			// dead end
+			case 0:	
+				TurnAround();
 				break;
 
-			case 1:	// only option is straight ahead
+			// only one option
+			case 1:	
+				// Get the next cell to turn to as there's only one option 
+				Turn(currentRoom->get_children(previousRoom)->front());
 				MoveForward();
 				break;
 
-			case 2:	// 2 or 3 options in direction
+			// 2 or 3 options in direction
+			case 2:	
 			case 3:
 				// Guess all the possible paths from the current "cross-roads"
 				path_chosen = Evaluate();
+
 				// Start down the new path
 				Turn(path_chosen->get());
 				MoveForward();
 				break;
 			}
-			int i = 0;
+
+			maze->printClean();
+			maze->printMaze(false);
+			maze->printClean();
 		}
 
 	}
@@ -65,9 +125,11 @@ namespace Algorithm
 		// make path the new complete guess Path
 		Path_new *newCompleteGuessPath = new Path_new();
 
-		//get room in front of mouse and move to room
+		//get room to continue to
 		Room * nextRoom = newPath->Rooms()->front();
-		//Move(nextRoom);
+
+		// Turn toward the room
+		Turn(nextRoom);
 	}
 
 	/* Turn to face the given room. Then move to it */
@@ -83,13 +145,25 @@ namespace Algorithm
 			{
 			case Direction::Left:
 
-				if (room->Location().x < location->x);
-				else if (room->Location().x > location->x)
+				if (room->Location().x < location()->x);
+				else if (room->Location().x > location()->x)
+				{
+					direction = Direction::Right;
+					maze->setDirection(direction);
 					motor->motion(MotorMotion::TURN_AROUND);
-				else if (room->Location().y < location->y)
+				}
+				else if (room->Location().y < location()->y)
+				{
+					direction = Direction::Down;
+					maze->setDirection(direction);
 					motor->motion(MotorMotion::TURN_LEFT);
-				else if (room->Location().y > location->y)
-					motor->motion(MotorMotion::TURN_RIGHT); 
+				}
+				else if (room->Location().y > location()->y)
+				{
+					direction = Direction::Up;
+					maze->setDirection(direction);
+					motor->motion(MotorMotion::TURN_RIGHT);
+				}
 				else
 					return;
 				// always move forward
@@ -97,13 +171,25 @@ namespace Algorithm
 				break;
 
 			case Direction::Up:
-				if (room->Location().x < location->x)
+				if (room->Location().x < location()->x)
+				{
+					direction = Direction::Left;
+					maze->setDirection(direction);
 					motor->motion(MotorMotion::TURN_LEFT);
-				else if (room->Location().x > location->x)
+				}
+				else if (room->Location().x > location()->x)
+				{
+					direction = Direction::Right;
+					maze->setDirection(direction);
 					motor->motion(MotorMotion::TURN_RIGHT);
-				else if (room->Location().y < location->y)
+				}
+				else if (room->Location().y < location()->y)
+				{
+					direction = Direction::Down;
+					maze->setDirection(direction);
 					motor->motion(MotorMotion::TURN_AROUND);
-				else if (room->Location().y > location->y);
+				}
+				else if (room->Location().y > location()->y);
 				else
 					return;
 				// always move forward
@@ -111,13 +197,25 @@ namespace Algorithm
 				break;
 
 			case Direction::Right:
-				if (room->Location().x < location->x)
+				if (room->Location().x < location()->x)
+				{
+					direction = Direction::Left;
+					maze->setDirection(direction);
 					motor->motion(MotorMotion::TURN_AROUND);
-				else if (room->Location().x > location->x);
-				else if (room->Location().y < location->y)
+				}
+				else if (room->Location().x > location()->x);
+				else if (room->Location().y < location()->y)
+				{
+					direction = Direction::Down;
+					maze->setDirection(direction);
 					motor->motion(MotorMotion::TURN_RIGHT);
-				else if (room->Location().y > location->y)
+				}
+				else if (room->Location().y > location()->y)
+				{
+					direction = Direction::Up;
+					maze->setDirection(direction);
 					motor->motion(MotorMotion::TURN_LEFT);
+				}
 				else
 					return;
 				// always move forward
@@ -125,13 +223,25 @@ namespace Algorithm
 				break;
 
 			case Direction::Down:
-				if (room->Location().x < location->x)
+				if (room->Location().x < location()->x)
+				{
+					direction = Direction::Left;
+					maze->setDirection(direction);
 					motor->motion(MotorMotion::TURN_RIGHT);
-				else if (room->Location().x > location->x)
+				}
+				else if (room->Location().x > location()->x)
+				{
+					direction = Direction::Right;
+					maze->setDirection(direction);
 					motor->motion(MotorMotion::TURN_LEFT);
-				else if (room->Location().y < location->y);
-				else if (room->Location().y > location->y)
+				}
+				else if (room->Location().y < location()->y);
+				else if (room->Location().y > location()->y)
+				{
+					direction = Direction::Up;
+					maze->setDirection(direction);
 					motor->motion(MotorMotion::TURN_AROUND);
+				}
 				else
 					return;
 				// always move forward
@@ -142,6 +252,31 @@ namespace Algorithm
 				break;
 			}
 		}
+	}
+
+	/* Switch to the opposite direction. Call the motor to do turn around */
+	void Mouse::TurnAround()
+	{
+		switch (direction)
+		{
+		case Data::Left:
+			direction = Direction::Right;
+			maze->setDirection(direction);
+			break;
+		case Data::Up:
+			direction = Direction::Down;
+			maze->setDirection(direction);
+			break;
+		case Data::Right:
+			direction = Direction::Left;
+			maze->setDirection(direction);
+			break;
+		case Data::Down:
+			direction = Direction::Up;
+			maze->setDirection(direction);
+			break;
+		}
+		motor->motion(MotorMotion::TURN_AROUND);
 	}
 
 	void Mouse::MoveForward()
@@ -166,6 +301,17 @@ namespace Algorithm
 			currentRoom = maze->RoomGet(x, y - 1);
 			break;
 		}
+
+		// Update the Maze's current pointer for printing & future reference
+		maze->Current(&currentRoom->Location());
+	}
+
+	Location * Mouse::location()
+	{
+		if (currentRoom == nullptr)
+			return nullptr;
+
+		return new Location(currentRoom->Location().x, currentRoom->Location().y);
 	}
 
 	std::unique_ptr<Path_new> * Mouse::Evaluate()
@@ -200,7 +346,7 @@ namespace Algorithm
 	{
 		// Generate paths
 		std::deque<Path_new*> *ps = Searches::depth_search(*maze, 
-															*location, 
+															*location(),
 															*new Location(8, 8));// 
 		// / / /// ///
 		//

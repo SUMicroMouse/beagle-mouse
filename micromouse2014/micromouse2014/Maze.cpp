@@ -577,10 +577,19 @@ namespace Data
 					{
 						if (m == 1 && k == 1) // center square
 						{
-							if (start->x == i && start->y == j) // start
-								std::cout << "*";
-							else if (current->x == i && current->y == j) // current location
-								std::cout << (direction == Direction::Left) ? "<" : (direction == Direction::Down) ? "V" : (direction == Direction::Right) ? ">" : "^";
+							//if (start->x == i && start->y == j) // start
+							//	std::cout << "*";
+							if (current->x == i && current->y == j) // current location
+							{
+								// Print the direction. Will not appear humanly natural due to the nature of x=row y=column
+								switch (direction)
+								{
+								case Data::Left: std::cout << "^"; break;
+								case Data::Up: std::cout << ">"; break;
+								case Data::Right: std::cout << "V"; break;
+								case Data::Down: std::cout << "<"; break;
+								}
+							}
 							else if (currentRoom->getPassages() != 0)
 								std::cout << " ";
 							else
@@ -630,6 +639,17 @@ namespace Data
 				std::cout << " " << i << " ";
 			else
 				std::cout << " " << i;
+		std::cout << std::endl;
+	}
+
+	/// <summary>
+	/// Method printClean
+	/// Print a new empty line for the number of rows in the maze
+	/// </summary>
+	void Maze::printClean()
+	{
+		for (int i = 0; i < dimensions; i++)
+			std::cout << std::endl;
 	}
 
 	/// <summary>

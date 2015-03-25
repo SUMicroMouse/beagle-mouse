@@ -16,15 +16,16 @@ namespace Algorithm
 	class Mouse
 	{
 		Data::Direction direction;
-		Location *location;
 		std::unique_ptr<Data::Maze> maze;
 		std::unique_ptr<Hardware::Sensor> sensor;
 		std::unique_ptr<Hardware::Motor> motor;
 		Data::Room * currentRoom;
-		
+
+		/* Set the initial direction based on the random starting position */
+		void InitialDirection();
 	public:
 		Mouse();
-		~Mouse();
+		~Mouse();		
 
 		void Explore();
 		std::unique_ptr<Path_new> * Evaluate();
@@ -34,9 +35,17 @@ namespace Algorithm
 
 		void Turn(Data::Room * room);
 
+		void TurnAround();
+
 		void MoveForward();
+		
+
+		// Getters
+
+		Location * location();
 
 	private:
+		// Check to see if there's more than one new path for the current physical room
 		int CheckForOptions();
 
 		/* Generate paths, return best path */

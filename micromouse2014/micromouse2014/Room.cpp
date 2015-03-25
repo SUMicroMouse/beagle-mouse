@@ -352,8 +352,7 @@ namespace Data
 			if (wall->getClosed() == false)	// if wall is open
 			{
 				Room * otherParent = wall->getOtherParent(this);
-				if (otherParent->Location().x != previous->Location().x && 
-							otherParent->Location().y != previous->Location().y)
+				if ((otherParent->Location().x != previous->Location().x) || (otherParent->Location().y != previous->Location().y))
 					children->push_back(otherParent); // add if this isn't the previous cell
 			}
 		}
