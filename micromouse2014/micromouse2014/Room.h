@@ -57,6 +57,8 @@ namespace Data
 
 		Location Location() { return loc; }
 		std::vector<Room*> * get_children();
+		// Get the cells that are reachable and aren't the previous room
+		std::vector<Room*> * get_children(Room *previous);
 		// Get children that aren't already in the given collection
 		std::vector<Room*> * get_children(std::vector<Room*> & existingCollection);
 

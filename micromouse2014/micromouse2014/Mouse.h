@@ -20,7 +20,7 @@ namespace Algorithm
 		std::unique_ptr<Data::Maze> maze;
 		std::unique_ptr<Hardware::Sensor> sensor;
 		std::unique_ptr<Hardware::Motor> motor;
-		Room * currentRoom;
+		Data::Room * currentRoom;
 		
 	public:
 		Mouse();

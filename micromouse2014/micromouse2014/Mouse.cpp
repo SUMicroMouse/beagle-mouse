@@ -157,7 +157,7 @@ namespace Algorithm
 
 	int Mouse::CheckForOptions()
 	{
-		std::vector<Room*>* children = currentRoom->get_children(previousRoom);
+		std::vector<Room*>* children = currentRoom->get_children(previousRoom.get());
 		return children->size();
 	}
 
