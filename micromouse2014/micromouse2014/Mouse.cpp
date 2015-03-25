@@ -11,6 +11,7 @@ namespace Algorithm
 		sensor(new Hardware::Sensor())
 	{
 		location = maze->Start();
+		currentRoom = maze->CurrentRoom();
 		maze->printMaze(false);
 	}
 
@@ -24,10 +25,15 @@ namespace Algorithm
 	{
 		std::unique_ptr<Path_new> * path_chosen;
 
+		auto senseGrid = this->sensor->read(maze.get());
+
+		// Start off going forward once, set previous to start
+		MoveForward();
+
 		while (true)
 		{
 			// Get information from sensors
-			auto senseGrid = this->sensor->read(maze.get());
+			//auto senseGrid = this->sensor->read(maze.get());
 
 			// Check to see if there's more than one new path in the current physical room
 			switch (CheckForOptions())
@@ -37,7 +43,7 @@ namespace Algorithm
 				break;
 
 			case 1:	// only option is straight ahead
-				motor->motion(MotorMotion::MOVE_FORWARD);
+				MoveForward();
 				break;
 
 			case 2:	// 2 or 3 options in direction
@@ -46,9 +52,10 @@ namespace Algorithm
 				path_chosen = Evaluate();
 				// Start down the new path
 				Turn(path_chosen->get());
-				motor->motion(MotorMotion::MOVE_FORWARD);
+				MoveForward();
 				break;
 			}
+			int i = 0;
 		}
 
 	}
@@ -137,6 +144,30 @@ namespace Algorithm
 		}
 	}
 
+	void Mouse::MoveForward()
+	{
+		motor->motion(MotorMotion::MOVE_FORWARD);
+		previousRoom = currentRoom;
+
+		int x = currentRoom->Location().x, y = currentRoom->Location().y;
+
+		switch (this->direction)
+		{
+		case Direction::Up:
+			currentRoom = maze->RoomGet(x, y + 1);
+			break;
+		case Direction::Right:
+			currentRoom = maze->RoomGet(x + 1, y);
+			break;
+		case Direction::Left:
+			currentRoom = maze->RoomGet(x - 1, y);
+			break;
+		case Direction::Down:
+			currentRoom = maze->RoomGet(x, y - 1);
+			break;
+		}
+	}
+
 	std::unique_ptr<Path_new> * Mouse::Evaluate()
 	{
 		
@@ -157,7 +188,7 @@ namespace Algorithm
 
 	int Mouse::CheckForOptions()
 	{
-		std::vector<Room*>* children = currentRoom->get_children(previousRoom.get());
+		std::vector<Room*>* children = currentRoom->get_children(previousRoom);
 		return children->size();
 	}
 

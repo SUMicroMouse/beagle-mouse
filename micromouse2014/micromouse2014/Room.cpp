@@ -344,6 +344,9 @@ namespace Data
 	{
 		std::vector<Room*> * children = new std::vector<Room*>();
 
+		if (previous == nullptr)
+			return children;
+
 		for (auto wall : openings)
 		{
 			if (wall->getClosed() == false)	// if wall is open

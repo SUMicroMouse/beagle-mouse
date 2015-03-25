@@ -34,6 +34,8 @@ namespace Algorithm
 
 		void Turn(Data::Room * room);
 
+		void MoveForward();
+
 	private:
 		int CheckForOptions();
 
@@ -46,7 +48,7 @@ namespace Algorithm
 		/* Path that the mouse has actually taken */
 		Path_new * actualPath;
 
-		std::unique_ptr<Data::Room> previousRoom;
+		Data::Room * previousRoom;
 
 		std::deque<Data::Room*> visitedRooms;
 	};	

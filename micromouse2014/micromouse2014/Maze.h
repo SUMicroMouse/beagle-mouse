@@ -37,6 +37,8 @@ namespace Data
 		}
 		Location* Start() { return start; }
 		Location* Current() { return current; }
+		Room * CurrentRoom() { return maze[Current()->x][Current()->y]; }
+		Room * RoomGet(int x, int y) { return maze[Current()->x][Current()->y]; }
 		void Current(Location* loc) { current = loc; }
 		std::array<Room*, 4> Goal() { return goal; }
 
