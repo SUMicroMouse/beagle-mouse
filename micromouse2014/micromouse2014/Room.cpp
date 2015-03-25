@@ -337,6 +337,27 @@ namespace Data
 		return children;
 	}
 
+	/*
+	Get children that are reachable and not the previous room
+	*/
+	std::vector<Room*> * Room::get_children(Room * previous)
+	{
+		std::vector<Room*> * children = new std::vector<Room*>();
+
+		for (auto wall : openings)
+		{
+			if (wall->getClosed() == false)	// if wall is open
+			{
+				Room * otherParent = wall->getOtherParent(this);
+				if (otherParent->Location().x != previous->Location().x && 
+							otherParent->Location().y != previous->Location().y)
+					children->push_back(otherParent); // add if this isn't the previous cell
+			}
+		}
+
+		return children;
+	}
+
 	/* Get children that aren't already in the given collection */
 	std::vector<Room*> * Room::get_children(std::vector<Room*> & existingCollection)
 	{
