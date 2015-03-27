@@ -23,6 +23,9 @@ namespace Algorithm
 
 		/* Set the initial direction based on the random starting position */
 		void InitialDirection();
+
+		// Add or Remove from the actual path depending on if mouse is backtracking
+		bool backtracking;
 	public:
 		Mouse();
 		~Mouse();		
@@ -42,7 +45,7 @@ namespace Algorithm
 
 		// Getters
 
-		Location * location();
+		Data::Location * location();
 
 	private:
 		// Check to see if there's more than one new path for the current physical room

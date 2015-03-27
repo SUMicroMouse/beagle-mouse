@@ -10,7 +10,12 @@ namespace Algorithm
 		maze(new Data::Maze()),
 		sensor(new Hardware::Sensor())
 	{
+		// Initialize current room
 		currentRoom = maze->CurrentRoom();
+
+		// Initialize paths
+		actualPath = new Path_new();
+		completePathGuess = new Path_new();
 
 		// Set initial direction
 		InitialDirection();
@@ -28,29 +33,6 @@ namespace Algorithm
 	/* Set the initial direction using what's available as determined by the walls */
 	void Mouse::InitialDirection()
 	{
-		/*
-		// (0, 0)
-		if (location()->x == 0 && location()->y == 0)
-		{
-			direction = Direction::Up;
-		}
-		// (0, 15)
-		else if (location()->x == 0 && location()->y == 15)
-		{
-			direction = Direction::Right;
-		}
-		// (15, 0)
-		else if (location()->x == 15 && location()->y == 0)
-		{
-			direction = Direction::Up;
-		}
-		// (15, 15)
-		else if (location()->x == 15 && location()->y == 15)
-		{
-			direction = Direction::Left;
-		}
-		*/
-
 		// Face the wall that's open
 
 		std::vector<Wall*> & walls = currentRoom->getWalls();
@@ -92,6 +74,9 @@ namespace Algorithm
 			// dead end
 			case 0:	
 				TurnAround();
+				// Reverse backtracking variable
+				backtracking ? backtracking = false : backtracking = true;
+				MoveForward();
 				break;
 
 			// only one option
@@ -284,6 +269,12 @@ namespace Algorithm
 		motor->motion(MotorMotion::MOVE_FORWARD);
 		previousRoom = currentRoom;
 
+		// Update actual path
+		if (backtracking == false)
+			actualPath->Rooms()->push_back(currentRoom); // not backtracking . Add to path
+		else
+			actualPath->Rooms()->pop_back();  // Backtracking. Remove from back
+
 		int x = currentRoom->Location().x, y = currentRoom->Location().y;
 
 		switch (this->direction)
@@ -304,6 +295,7 @@ namespace Algorithm
 
 		// Update the Maze's current pointer for printing & future reference
 		maze->Current(&currentRoom->Location());
+		
 	}
 
 	Location * Mouse::location()
@@ -326,16 +318,33 @@ namespace Algorithm
 
 		// Generate Paths
 		// Filter/Choose Path
-		auto path_selected = GeneratePaths();
+		//auto path_selected = GeneratePaths();
 
+		Path_new * dResult = Searches::depth_search(*maze, actualPath, *location(), *new Location(8, 8));
+		std::unique_ptr<Path_new> * returner = new std::unique_ptr<Path_new>(dResult);
 
-		return path_selected;
+		return returner;
 	}
 
+	/**
+	Get the number of open & untried options at this cell.
+	Only consider cells that aren't the previous cell and aren't in the actualPath
+	*/
 	int Mouse::CheckForOptions()
 	{
+		int count = 0;
 		std::vector<Room*>* children = currentRoom->get_children(previousRoom);
-		return children->size();
+
+		std::vector<Room*>::iterator cI = children->begin();
+		while (cI != children->end())
+		{
+			Room* cuRom = *cI;
+			if (!actualPath->Contains(cuRom->Location().x, cuRom->Location().y))
+				count++;
+			cI++;
+		}
+
+		return count;
 	}
 
 	/**
@@ -345,21 +354,28 @@ namespace Algorithm
 	std::unique_ptr<Path_new> * Mouse::GeneratePaths()
 	{
 		// Generate paths
+		/*
 		std::deque<Path_new*> *ps = Searches::depth_search(*maze, 
+															actualPath,
 															*location(),
 															*new Location(8, 8));// 
+															*/
 		// / / /// ///
 		//
 		///
 		//////////
 		///
 		//
+
+		/*
 		std::deque<std::unique_ptr<Path_new>> paths(ps->begin(), ps->end());
 
 		// Filter paths
 		Filter::mode = ExploreMode::Direct;
 		std::unique_ptr<Path_new> * path_selected = Filter::bestPath(&paths);
+		
 
-		return path_selected;
+		return path_selected;*/ 
+		return nullptr;
 	}
 }

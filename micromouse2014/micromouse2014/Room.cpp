@@ -360,6 +360,7 @@ namespace Data
 		return children;
 	}
 
+
 	/* Get children that aren't already in the given collection */
 	std::vector<Room*> * Room::get_children(std::vector<Room*> & existingCollection)
 	{

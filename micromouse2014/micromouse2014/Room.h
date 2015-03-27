@@ -55,7 +55,7 @@ namespace Data
 		int get_breadth_heuristic();
 		void set_breadth_heuristic(int new_value);
 
-		Location Location() { return loc; }
+		Data::Location Location() { return loc; }
 		std::vector<Room*> * get_children();
 		// Get the cells that are reachable and aren't the previous room
 		std::vector<Room*> * get_children(Room *previous);
@@ -116,7 +116,12 @@ namespace Data
 			determineInnerAndOuterWallCosts(pathNumber, previous);
 		}
 
-
+		float DistanceToGoal(Data::Location &goal)
+		{
+			float xxS = std::abs(goal.x - loc.x * std::abs(goal.x - loc.x));
+			float yyS = std::abs(goal.y - loc.y * std::abs(goal.y - loc.y));
+			return std::sqrt(xxS + yyS);
+		}
 
 	private:
 
