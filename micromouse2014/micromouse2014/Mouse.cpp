@@ -128,7 +128,7 @@ namespace Algorithm
 		//get room to continue to
 		Room * nextRoom = newPath->Rooms()->front();
 
-		// Turn toward the room
+		// Turn toward the roomTurn
 		Turn(nextRoom);
 	}
 
@@ -145,7 +145,7 @@ namespace Algorithm
 			{
 			case Direction::Left:
 
-				if (room->Location().x < location()->x);
+				if (room->Location().x < location()->x); //mouse is already in this direction
 				else if (room->Location().x > location()->x)
 				{
 					direction = Direction::Right;
@@ -189,7 +189,7 @@ namespace Algorithm
 					maze->setDirection(direction);
 					motor->motion(MotorMotion::TURN_AROUND);
 				}
-				else if (room->Location().y > location()->y);
+				else if (room->Location().y > location()->y); //mouse is already in this direction
 				else
 					return;
 				// always move forward
@@ -203,7 +203,7 @@ namespace Algorithm
 					maze->setDirection(direction);
 					motor->motion(MotorMotion::TURN_AROUND);
 				}
-				else if (room->Location().x > location()->x);
+				else if (room->Location().x > location()->x); //mouse is already in this direction
 				else if (room->Location().y < location()->y)
 				{
 					direction = Direction::Down;
@@ -235,7 +235,7 @@ namespace Algorithm
 					maze->setDirection(direction);
 					motor->motion(MotorMotion::TURN_LEFT);
 				}
-				else if (room->Location().y < location()->y);
+				else if (room->Location().y < location()->y); //mouse is already in this direction
 				else if (room->Location().y > location()->y)
 				{
 					direction = Direction::Up;
@@ -327,7 +327,6 @@ namespace Algorithm
 		// Generate Paths
 		// Filter/Choose Path
 		auto path_selected = GeneratePaths();
-
 
 		return path_selected;
 	}
