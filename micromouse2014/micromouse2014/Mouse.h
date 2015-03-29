@@ -1,6 +1,10 @@
 #ifndef __MOUSE_H__
 #define __MOUSE_H__
 
+// Delay
+#include <chrono>
+#include <thread>
+
 #include <deque>
 #include <memory>
 

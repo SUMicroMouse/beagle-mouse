@@ -65,6 +65,11 @@ namespace Algorithm
 		
 		while (true)
 		{
+			// Delay *******************************************************
+			std::this_thread::sleep_until(
+				std::chrono::system_clock::now() + std::chrono::seconds(1));
+			// *************************************************************
+
 			// Get information from sensors
 			//auto senseGrid = this->sensor->read(maze.get());
 
