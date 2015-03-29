@@ -50,6 +50,7 @@ namespace Data
 		for (int i = 0; i < 4; i++)
 			openings[i]->setParent(0, this);
 
+		visits = 0;
 	}
 
 	char* Room::getRoom()

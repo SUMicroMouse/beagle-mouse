@@ -89,12 +89,37 @@ namespace Algorithm
 			// 2 or 3 options in direction
 			case 2:	
 			case 3:
-				// Guess all the possible paths from the current "cross-roads"
-				path_chosen = Evaluate();
+				if (!backtracking)
+				{
+					// Guess all the possible paths from the current "cross-roads"
+					path_chosen = Evaluate();
 
-				// Start down the new path
-				Turn(path_chosen->get());
-				MoveForward();
+					// Get the next room from the new completePathGuess, aka path_chosen
+					delete(completePathGuess);
+					completePathGuess = path_chosen->get();
+					Room * nextr = completePathGuess->Rooms()->at(actualPath->Rooms()->size());
+
+					// Start down the new path
+					Turn(nextr);
+					MoveForward();
+				}
+				else
+				{
+					// backtracking
+
+					// Choose the room with the least visits, avoiding going back down the previous path
+					Room * nextr = Filter::LeastVisited(currentRoom->get_children(previousRoom));
+					
+					if (!actualPath->Contains(nextr->Location().x, nextr->Location().y))
+					{
+						// change back to regular advancements
+						backtracking = false;
+					}
+					
+					// Start down path
+					Turn(nextr);
+					MoveForward();
+				}
 				break;
 			}
 
@@ -108,7 +133,7 @@ namespace Algorithm
 	void Mouse::Turn(Path_new * newPath)
 	{
 		// make path the new complete guess Path
-		Path_new *newCompleteGuessPath = new Path_new();
+		//Path_new *newCompleteGuessPath = new Path_new();
 
 		//get room to continue to
 		Room * nextRoom = newPath->Rooms()->front();
@@ -267,13 +292,20 @@ namespace Algorithm
 	void Mouse::MoveForward()
 	{
 		motor->motion(MotorMotion::MOVE_FORWARD);
+		// Increment number of visits before leaving
+		currentRoom->visits++;
 		previousRoom = currentRoom;
 
 		// Update actual path
 		if (backtracking == false)
 			actualPath->Rooms()->push_back(currentRoom); // not backtracking . Add to path
 		else
+		{
 			actualPath->Rooms()->pop_back();  // Backtracking. Remove from back
+			// go back to regular mode if back at starting point
+			if (actualPath->Rooms()->size() == 0)
+				backtracking = false;
+		}
 
 		int x = currentRoom->Location().x, y = currentRoom->Location().y;
 
@@ -339,7 +371,12 @@ namespace Algorithm
 		while (cI != children->end())
 		{
 			Room* cuRom = *cI;
-			if (!actualPath->Contains(cuRom->Location().x, cuRom->Location().y))
+			if (backtracking == false)
+			{
+				if (!actualPath->Contains(cuRom->Location().x, cuRom->Location().y))
+					count++;
+			}
+			else
 				count++;
 			cI++;
 		}

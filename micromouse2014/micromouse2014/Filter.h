@@ -3,8 +3,9 @@
 
 #include <deque>
 #include <memory>
-#include "Path_new.h"
 #include "ExploreMode.h"
+#include "Path_new.h"
+#include "Room.h"
 #include "Sorts.h"
 
 namespace Algorithm
@@ -35,6 +36,30 @@ namespace Algorithm
 			std::unique_ptr<Path_new> & returnedPath = paths->front();
 
 			return &returnedPath;
+		}
+
+		/*
+		Return pointer to the room with the least visits in a given collection
+		*/
+		template <typename SequenceContainer>
+		static Data::Room * LeastVisited(SequenceContainer collection)
+		{
+			if (collection->size() == 0)
+				return nullptr;
+
+			int equalCount = 1;
+
+			Data::Room * lowest = collection->front();
+			for (int i = 1; i < collection->size(); i++)
+			{
+				Data::Room * cu = collection->at(i);
+				if (cu->visits < lowest->visits)
+					lowest = cu;
+				else if (cu->visits == lowest->visits)
+					equalCount++;
+			}
+
+			return lowest;
 		}
 	};	
 }

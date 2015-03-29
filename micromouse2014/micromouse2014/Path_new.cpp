@@ -127,9 +127,10 @@ namespace Algorithm
 		Path_new * chosenPath;
 		int p1_wins = 0, p2_wins = 0;
 
-		if ((p1->averageDistanceToGoal(goal) + p1->_rooms->back()->DistanceToGoal(goal)) < (p2->averageDistanceToGoal(goal) + p2->_rooms->back()->DistanceToGoal(goal)))
+		if (p1->_rooms->back()->DistanceToGoal(goal) < p2->_rooms->back()->DistanceToGoal(goal))	//((p1->averageDistanceToGoal(goal) + p1->_rooms->back()->DistanceToGoal(goal)) < (p2->averageDistanceToGoal(goal) + p2->_rooms->back()->DistanceToGoal(goal)))
 		{
-			p1_wins++;
+			if (p1->Rooms()->size() < p2->Rooms()->size())
+				p1_wins++;
 		}
 
 		if (p1_wins > p2_wins)
