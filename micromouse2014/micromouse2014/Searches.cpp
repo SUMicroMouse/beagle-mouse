@@ -226,7 +226,7 @@ namespace Algorithm
 			}
 
 			// Update the best path
-			*bestPath = Path_new::BetterPath(current_path, *bestPath, goal);
+			*bestPath = Filter::BetterPath(current_path, *bestPath, goal);
 
 			std::stack<Room*> & stackCurrent = pathStacks[current_path->Number()];
 			Room * current_room = stackCurrent.top();

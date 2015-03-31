@@ -11,6 +11,7 @@
 #include <stack>
 #include <map>
 //#include "Cell_new.h"
+#include "Filter.h"
 #include "Maze.h"
 #include "Path_new.h"
 

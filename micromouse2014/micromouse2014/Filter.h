@@ -38,6 +38,30 @@ namespace Algorithm
 			return &returnedPath;
 		}
 
+		// Returns the better path
+		static Path_new * BetterPath(Path_new * p1, Path_new * p2, Data::Location &goal)
+		{
+			if (p1 == nullptr || p2 == nullptr)
+				return nullptr;
+
+			Path_new * chosenPath;
+			int p1_wins = 0, p2_wins = 0;
+
+			// Distance to goal
+			if (p1->Rooms()->back()->DistanceToGoal(goal) < p2->Rooms()->back()->DistanceToGoal(goal))	//((p1->averageDistanceToGoal(goal) + p1->_rooms->back()->DistanceToGoal(goal)) < (p2->averageDistanceToGoal(goal) + p2->_rooms->back()->DistanceToGoal(goal)))
+			{
+				if (p1->Rooms()->size() < p2->Rooms()->size())
+					p1_wins++;
+			}
+
+			if (p1_wins > p2_wins)
+				return p1;
+			else
+				return p2;
+
+			return nullptr;
+		}
+
 		/*
 		Return pointer to the room with the least visits in a given collection
 		*/

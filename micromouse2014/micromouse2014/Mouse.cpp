@@ -358,6 +358,7 @@ namespace Algorithm
 		//auto path_selected = GeneratePaths();
 
 		Path_new * dResult = Searches::depth_search(*maze, actualPath, *location(), *new Location(8, 8));
+
 		std::unique_ptr<Path_new> * returner = new std::unique_ptr<Path_new>(dResult);
 
 		return returner;

@@ -61,9 +61,6 @@ namespace Algorithm
 		int turns();
 
 	public:
-		// Returns the better path
-		static Path_new * BetterPath(Path_new * p1, Path_new * p2, Data::Location &goal);
-
 		// Average distance to goal
 		float averageDistanceToGoal(Data::Location &goal);
 
