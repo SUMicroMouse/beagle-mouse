@@ -50,6 +50,7 @@ namespace Data
 		for (int i = 0; i < 4; i++)
 			openings[i]->setParent(0, this);
 
+		visits = 0;
 	}
 
 	char* Room::getRoom()
@@ -359,6 +360,7 @@ namespace Data
 
 		return children;
 	}
+
 
 	/* Get children that aren't already in the given collection */
 	std::vector<Room*> * Room::get_children(std::vector<Room*> & existingCollection)

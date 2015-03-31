@@ -150,7 +150,7 @@ namespace Algorithm
 	*/
 
 
-	std::deque<Path_new*> * Searches::depth_search(Maze &maze, Location &start, Location &goal)
+	Path_new * Searches::depth_search(Maze &maze, Path_new *actualPath, Location &start, Location &goal)
 	{
 		// Reset the path count and the rooms' checked values
 		Path_new::resetPathCount();
@@ -160,32 +160,33 @@ namespace Algorithm
 
 		// Starting room & path
 		Room * current_room = maze(start.x, start.y);
-		Path_new * current_path = new Path_new(current_room);
+		Path_new * current_path = new Path_new(actualPath); //(current_room);
 
 		// set of stacks corresponding to the paths
 		std::map<int, std::stack<Room*>> pathStacks;
 
-		// Set up first stack & add first path
+		// Set up first stack & add create/add path from the actual path
 		paths->push_back(current_path);
 		std::stack<Room*> & st = pathStacks[current_path->Number()];
 		st.push(current_room);		
 		
+		// Best path
+		Path_new * bestPath = current_path;
+
 		int success = 0;
 		while(success != 1)
-			success = depth_helper(pathStacks, *paths, goal);
+			success = depth_helper(pathStacks, *paths, &bestPath, goal);
 
 		//pathStacks.clear();
 		//delete pathStacks;
 
-		return paths;
+		return bestPath; // return best path
 	}
 
-	int Searches::depth_helper(std::map<int, std::stack<Room*>> & pathStacks, std::deque<Path_new*> & paths, Location & goal)
+	int Searches::depth_helper(std::map<int, std::stack<Data::Room*>> & pathStacks, std::deque<Path_new*> & paths, Path_new **bestPath, Data::Location & goal)
 	{
 		//std::map<int, std::stack<Room*>>::iterator sIt = pathStacks.begin();
 		//std::deque<Path_new*>::iterator pIt = paths.begin();
-
-		Path_new * bestPath;
 
 		int finishedCount = 0;
 		int successCount = 0;
@@ -195,6 +196,9 @@ namespace Algorithm
 		{
 			bool pathCreated = false;
 
+			if (paths[i] == nullptr)
+				continue;
+
 			Path_new *current_path = paths[i];
 			// Unsuccessful path
 			if (pathStacks[current_path->Number()].size() == 0)
@@ -202,8 +206,8 @@ namespace Algorithm
 				finishedCount++;
 				current_path->finished = true;
 				// Delete the unsuccessful path
-				delete current_path;
-				paths[i] = nullptr;
+				//delete current_path;
+				//paths[i] = nullptr;
 				
 				continue;
 			}
@@ -213,12 +217,16 @@ namespace Algorithm
 			{
 				//if (current_path->finished == false)
 					//successful_paths.push_back(current_path);
-
+				if (current_path->finished)
+					continue;
 				current_path->finished = true;
 				finishedCount++;
 				successCount++;
 				continue;
 			}
+
+			// Update the best path
+			*bestPath = Path_new::BetterPath(current_path, *bestPath, goal);
 
 			std::stack<Room*> & stackCurrent = pathStacks[current_path->Number()];
 			Room * current_room = stackCurrent.top();

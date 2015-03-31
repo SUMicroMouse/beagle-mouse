@@ -5,6 +5,7 @@
 #undef min
 #undef max
 
+#include <limits>
 #include <vector>
 #include <map>
 #include "wall.h"
@@ -42,6 +43,7 @@ namespace Data
 				openings.push_back(new Wall());
 			breadth_heuristic = std::numeric_limits<int>::max();
 			type = RoomType::ALL;
+			visits = 0;
 		}
 
 		Room(int v, int x, int y);
@@ -55,7 +57,7 @@ namespace Data
 		int get_breadth_heuristic();
 		void set_breadth_heuristic(int new_value);
 
-		Location Location() { return loc; }
+		Data::Location Location() { return loc; }
 		std::vector<Room*> * get_children();
 		// Get the cells that are reachable and aren't the previous room
 		std::vector<Room*> * get_children(Room *previous);
@@ -88,12 +90,15 @@ namespace Data
 		// Return 1 if there's a turn or 0 if there isn't
 		int turn(int pathNumber);
 
+		// Number of actual visits
+		int visits;
+
 
 		int getPassages(){ return opens; }
 		char* getRoom();
 		void setWall(int side, bool value);
 
-
+		
 
 		void operator =(Room & room2);
 		bool operator <(Room & room2);
@@ -116,7 +121,12 @@ namespace Data
 			determineInnerAndOuterWallCosts(pathNumber, previous);
 		}
 
-
+		float DistanceToGoal(Data::Location &goal)
+		{
+			float xxS = std::abs(goal.x - loc.x * std::abs(goal.x - loc.x));
+			float yyS = std::abs(goal.y - loc.y * std::abs(goal.y - loc.y));
+			return std::sqrt(xxS + yyS);
+		}
 
 	private:
 

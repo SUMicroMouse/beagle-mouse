@@ -29,6 +29,19 @@ namespace Algorithm
 	}
 
 	/**
+	Create a path that is a copy of the original, but with different path number
+	*/
+	Path_new::Path_new(Path_new * original_path)
+	{
+		_rooms = new std::deque<Room*>(*original_path->_rooms);
+		path_number = pathCount++;
+		edgeCertainty = original_path->edgeCertainty;
+		innerCertainty = original_path->innerCertainty;
+		success = original_path->success;
+		finished = original_path->finished;
+	}
+
+	/**
 	Create a new path that is a copy of the given one with the addition of the new room
 	*/
 	Path_new::Path_new(Path_new *old_path, Data::Room *new_room)
@@ -103,6 +116,42 @@ namespace Algorithm
 	{
 
 		return true;
+	}
+
+	// Returns the better path
+	Path_new * Path_new::BetterPath(Path_new * p1, Path_new * p2, Location &goal)
+	{
+		if (p1 == nullptr || p2 == nullptr)
+			return nullptr;
+
+		Path_new * chosenPath;
+		int p1_wins = 0, p2_wins = 0;
+
+		if (p1->_rooms->back()->DistanceToGoal(goal) < p2->_rooms->back()->DistanceToGoal(goal))	//((p1->averageDistanceToGoal(goal) + p1->_rooms->back()->DistanceToGoal(goal)) < (p2->averageDistanceToGoal(goal) + p2->_rooms->back()->DistanceToGoal(goal)))
+		{
+			if (p1->Rooms()->size() < p2->Rooms()->size())
+				p1_wins++;
+		}
+
+		if (p1_wins > p2_wins)
+			return p1;
+		else
+			return p2;
+
+		return nullptr;
+	}
+
+	//
+	float Path_new::averageDistanceToGoal(Location &goal)
+	{
+		float total = 0;
+		std::deque<Room*>::iterator rI = _rooms->begin();
+		while (rI != _rooms->end())
+		{
+			total += (*rI)->DistanceToGoal(goal);
+			rI++;
+		}
+		return total / _rooms->size();
 	}
 
 	// Get the checked values in each cell corresponding to the old path

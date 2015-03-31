@@ -13,6 +13,7 @@ namespace Algorithm
 	public:
 		Path_new();
 		Path_new(Data::Room * new_room);
+		Path_new(Path_new *original_path);
 		Path_new(Path_new *old_path, Data::Room * new_room);
 		Path_new(Path_new *first_path, Path_new * second_path);
 		~Path_new();
@@ -58,6 +59,13 @@ namespace Algorithm
 
 		// Number of turns involved in following the path
 		int turns();
+
+	public:
+		// Returns the better path
+		static Path_new * BetterPath(Path_new * p1, Path_new * p2, Data::Location &goal);
+
+		// Average distance to goal
+		float averageDistanceToGoal(Data::Location &goal);
 
 		// Getters **************************************
 	public:

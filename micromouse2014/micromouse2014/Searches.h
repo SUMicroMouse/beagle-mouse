@@ -33,14 +33,14 @@ namespace Algorithm
 		/**
 		* Obtain all the possible paths from a selected room
 		*/
-		static std::deque<Path_new*> * depth_search(Data::Maze &maze, Location &start, Location &goal);
+		static Path_new * depth_search(Data::Maze &maze, Path_new *actualPath, Data::Location &start, Data::Location &goal);
 
 	private:
 		// Probably will need a variable to represent when a search is in progress vs. finished
 		// so that multithreading works properly.. "condition variable"
 
 
-		static int depth_helper(std::map<int, std::stack<Data::Room*>> & pathStacks, std::deque<Path_new*> & paths, Location & goal);
+		static int depth_helper(std::map<int, std::stack<Data::Room*>> & pathStacks, std::deque<Path_new*> & paths, Path_new **bestPath, Data::Location & goal);
 		static void replacePathInCollection(std::deque<Path_new*> &paths, Path_new * newPath);
 	};		
 }
