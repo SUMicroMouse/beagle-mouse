@@ -21,8 +21,8 @@ namespace Data
 	{
 	public:
 		Maze(){ rooms = 0; dimensions = 16; initMaze(); makeMaze(); }
-		Maze(bool instantiate) { rooms = 0; dimensions = 16; if (instantiate) { initMaze(); makeMaze(); } else clearMaze(); }
-		Maze(int dim) { rooms = 0; dimensions = dim; initMaze(); makeMaze(); }
+		Maze(bool instantiate) { rooms = 0; dimensions = 16; if (instantiate) { initMaze(); makeMaze(); } else { current = new Location(-1, -1); clearMaze(); } }
+		Maze(int dim) { rooms = 0; dimensions = dim; initMaze(); }
 		void printMaze(bool walls_hidden);
 		void printClean();
 

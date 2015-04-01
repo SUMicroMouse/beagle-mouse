@@ -26,8 +26,8 @@ namespace Data
 	/// </summary>
 	void Maze::clearMaze()
 	{
-		for (int i = 0; i < dimensions; i++)
-			for (int j = 0; j < dimensions; j++)
+		for (int i = 0; i < 16; i++)
+			for (int j = 0; j < 16; j++)
 				maze[i][j] = new Room(-1, i, j);
 	}
 
@@ -317,7 +317,7 @@ namespace Data
 	void Maze::initMaze()
 	{
 		srand(time(NULL));
-
+		current = new Location(-1, -1);
 		// clears/initializes maze
 		clearMaze();
 		if (dimensions != 16)
