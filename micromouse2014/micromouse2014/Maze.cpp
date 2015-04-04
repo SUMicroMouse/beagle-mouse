@@ -195,11 +195,11 @@ namespace Data
 				if (Left != NULL) // Room to the left
 					Left->getWalls()[2]->setParent(1, Current);
 				if (Right != NULL) // Room to the right
-					Right->getWalls()[0]->setParent(1, Current);
+				{ Right->getWalls()[0]->setParent(1, Current); Right->getWalls()[0] = Current->getWalls()[2]; }
 				if (Top != NULL)
 					Top->getWalls()[1]->setParent(1, Current);
 				if (Bottom != NULL)
-					Bottom->getWalls()[3]->setParent(1, Current);
+				{ Bottom->getWalls()[3]->setParent(1, Current); Bottom->getWalls()[3] = Current->getWalls()[1]; }
 			}
 		}
 	}
