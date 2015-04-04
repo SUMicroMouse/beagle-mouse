@@ -195,11 +195,45 @@ namespace Data
 				if (Left != NULL) // Room to the left
 					Left->getWalls()[2]->setParent(1, Current);
 				if (Right != NULL) // Room to the right
-				{ Right->getWalls()[0]->setParent(1, Current); Right->getWalls()[0] = Current->getWalls()[2]; }
+					Right->getWalls()[0]->setParent(1, Current);
 				if (Top != NULL)
 					Top->getWalls()[1]->setParent(1, Current);
 				if (Bottom != NULL)
-				{ Bottom->getWalls()[3]->setParent(1, Current); Bottom->getWalls()[3] = Current->getWalls()[1]; }
+					Bottom->getWalls()[3]->setParent(1, Current);
+			}
+		}
+
+		// clean up..
+		for (int i = 0; i < dimensions; i++) // rows
+		{
+			for (int j = 0; j < dimensions; j++) // columns
+			{
+				Current = maze[i][j];
+				Right = Bottom = NULL;
+				if (j == 0) // left side
+				{
+					Right = maze[i][j + 1];
+					if (i != dimensions - 1) // not top right corner
+						Bottom = maze[i + 1][j];
+				}
+				else if (j == dimensions - 1) // right side
+				{
+					if (i != dimensions - 1) // not top right corner
+						Bottom = maze[i + 1][j];
+				}
+				else // top,bottom,middle
+				{
+					Right = maze[i][j + 1];
+					if (i == 0) // top, but not corners
+						Bottom = maze[i + 1][j];
+					else // middle of maze
+						Bottom = maze[i + 1][j];
+				}
+
+				if (Right != NULL) // Room to the right
+					Right->getWalls()[0] = Current->getWalls()[2];
+				if (Bottom != NULL)
+					Bottom->getWalls()[3] = Current->getWalls()[1];
 			}
 		}
 	}
