@@ -11,6 +11,7 @@ namespace Hardware
 	{
 	public:
 		Data::Maze* read(Data::Maze* maze);
+		void sense(Data::Maze * maze);
 	};
 }
 #endif

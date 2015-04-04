@@ -118,4 +118,43 @@ namespace Hardware
 
 		return sensor_maze;
 	}
+
+	void Sensor::sense(Data::Maze * maze)
+	{
+		int x_center = maze->Current()->x, y_center = maze->Current()->y;
+
+		for (int x = x_center - 2; x <= x_center + 2; x++)
+		{
+			if (x >= 0 && x < 16)
+			{
+				// Make all the room's walls known, increasing its known value
+				Data::Room * Ro = maze->RoomGet(x, y_center);
+				std::vector<Data::Wall*> & walls = Ro->getWalls();
+				std::vector<Data::Wall*>::iterator wI = walls.begin();
+				while (wI != walls.end())
+				{
+					Data::Wall *cwall = *wI;
+					cwall->known++;
+					wI++;
+				}
+			}
+		}
+
+		for (int y = y_center - 2; y <= y_center + 2; y++)
+		{
+			if (y >= 0 && y < 16)
+			{
+				// Make all the room's walls known, increasing its known value
+				Data::Room * Ro = maze->RoomGet(x_center, y);
+				std::vector<Data::Wall*> & walls = Ro->getWalls();
+				std::vector<Data::Wall*>::iterator wI = walls.begin();
+				while (wI != walls.end())
+				{
+					Data::Wall *cwall = *wI;
+					cwall->known++;
+					wI++;
+				}
+			}
+		}
+	}
 }

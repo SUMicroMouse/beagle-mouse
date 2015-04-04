@@ -21,7 +21,7 @@ namespace Algorithm
 		InitialDirection();
 
 		// Print maze after setting direction
-		maze->printMaze(false);
+		maze->printMaze(true);
 	}
 
 	Mouse::~Mouse()
@@ -33,6 +33,9 @@ namespace Algorithm
 	/* Set the initial direction using what's available as determined by the walls */
 	void Mouse::InitialDirection()
 	{
+		// Get sensor data
+		this->sensor->sense(maze.get());
+
 		// Face the wall that's open
 
 		std::vector<Wall*> & walls = currentRoom->getWalls();
@@ -53,14 +56,12 @@ namespace Algorithm
 	{
 		std::unique_ptr<Path_new> * path_chosen;
 
-		//auto senseGrid = this->sensor->read(maze.get());
-
 		// Turn to face a direction where there's actually an opening
 		// Start off going forward once, set previous to start
 		MoveForward();
 
 		maze->printClean();
-		maze->printMaze(false);
+		maze->printMaze(true);
 		maze->printClean();
 		
 		while (true)
@@ -70,8 +71,8 @@ namespace Algorithm
 				std::chrono::system_clock::now() + std::chrono::seconds(1));
 			// *************************************************************
 
-			// Get information from sensors
-			//auto senseGrid = this->sensor->read(maze.get());
+			// Get sensor data
+			this->sensor->sense(maze.get());
 
 			// Check to see if there's more than one new path in the current physical room
 			switch (CheckForOptions())
@@ -330,9 +331,8 @@ namespace Algorithm
 			break;
 		}
 
-		// Update the Maze's current pointer for printing & future reference
+		// Update the Maze's current location pointer for printing & future reference
 		maze->Current(&currentRoom->Location());
-		
 	}
 
 	Location * Mouse::location()
