@@ -48,12 +48,7 @@ namespace Data
 		}
 
 		for (int i = 0; i < 4; i++)
-		{
-			if (i == 0 || i == 3) // left and top
-				openings[i]->setParent(1, this);
-			else
-				openings[i]->setParent(0, this);
-		}
+			openings[i]->setParent(0, this);
 
 		visits = 0;
 	}
