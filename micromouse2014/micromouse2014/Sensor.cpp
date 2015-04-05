@@ -119,10 +119,40 @@ namespace Hardware
 		return sensor_maze;
 	}
 
+	/*
+	Get details on the visible walls within the distance of two rooms from the current position
+	*/
 	void Sensor::sense(Data::Maze * maze)
 	{
 		int x_center = maze->Current()->x, y_center = maze->Current()->y;
 
+		
+		// Update current rooms' walls
+		std::vector<Data::Wall*> & cwalls = maze->RoomGet(x_center, y_center)->getWalls();
+		for (auto *w : cwalls)
+			w->known++;
+
+		// Going left
+		for (int x = x_center - 1; x >= x_center - 2; x--)
+		{
+			if (x < 0)
+				continue;
+
+			// Visible if right wall is confirmed to be open visibly
+			Data::Room * Ro = maze->RoomGet(x, y_center);
+			std::vector<Data::Wall*> & walls = Ro->getWalls();
+			if (walls[2]->known >= 0 && walls[2]->getClosed() == false) // known & open
+			{
+				for (auto *w : walls)	// fill in the rest of the walls
+					w->known++;
+			}
+		}
+
+		// Going right
+
+		
+
+		/*
 		for (int x = x_center - 2; x <= x_center + 2; x++)
 		{
 			if (x >= 0 && x < 16)
@@ -156,5 +186,6 @@ namespace Hardware
 				}
 			}
 		}
+		*/
 	}
 }
