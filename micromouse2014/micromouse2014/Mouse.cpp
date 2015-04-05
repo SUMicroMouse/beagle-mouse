@@ -10,6 +10,8 @@ namespace Algorithm
 		maze(new Data::Maze()),
 		sensor(new Hardware::Sensor())
 	{
+		// Set goal
+
 		// Initialize current room
 		currentRoom = maze->CurrentRoom();
 
@@ -130,7 +132,7 @@ namespace Algorithm
 			}
 
 			maze->printClean();
-			maze->printMaze(false);
+			maze->printMaze(true);
 			maze->printClean();
 		}
 
