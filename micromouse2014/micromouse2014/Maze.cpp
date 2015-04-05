@@ -193,13 +193,13 @@ namespace Data
 				}
 
 				if (Left != NULL) // Room to the left
-					(*Left->getWalls())[2]->setParent(1, Current);
+					Left->getWalls()[2]->setParent(1, Current);
 				if (Right != NULL) // Room to the right
-					(*Right->getWalls())[0]->setParent(1, Current);
+					Right->getWalls()[0]->setParent(1, Current);
 				if (Top != NULL)
-					(*Top->getWalls())[1]->setParent(1, Current);
+					Top->getWalls()[1]->setParent(1, Current);
 				if (Bottom != NULL)
-					(*Bottom->getWalls())[3]->setParent(1, Current);
+					Bottom->getWalls()[3]->setParent(1, Current);
 			}
 		}
 
@@ -586,7 +586,7 @@ namespace Data
 				for (int j = 0; j < dimensions; j++) // columns
 				{
 					currentRoom = maze[i][j];
-					walls = *currentRoom->getWalls();
+					walls = currentRoom->getWalls();
 
 					memcpy(room, currentRoom->getRoom(), 9);
 					for (int m = 0; m < 3; m++) // "columns"
