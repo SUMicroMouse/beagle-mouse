@@ -288,7 +288,7 @@ namespace Data
 
 	float Room::weight()
 	{
-		return get_breadth_heuristic();
+		return get_breadth_heuristic();// +DistanceToGoal(Location::goal);
 	}
 
 	std::vector<bool> Room::getOpenings()
@@ -375,7 +375,11 @@ namespace Data
 		for (auto wall : openings)
 		{
 			bool existsInOtherCollection = false;
-			if (wall->getClosed() == false)	// if wall is open
+
+			//if (wall->getClosed() == false)	// if wall is open
+
+			// If wall is known to be open, or is simply unknown
+			if ((wall->known >= 0 && wall->getClosed() == false) || wall->known < 0)
 			{
 				for (int i = 0; i < existingCollection.size(); i++)
 					if (wall->getOtherParent(this) == existingCollection[i])
