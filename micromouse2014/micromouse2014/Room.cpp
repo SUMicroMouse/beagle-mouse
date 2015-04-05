@@ -371,8 +371,6 @@ namespace Data
 		{
 			bool existsInOtherCollection = false;
 
-			//if (wall->getClosed() == false)	// if wall is open
-
 			// If wall is known to be open, or is simply unknown
 			if ((wall->known >= 0 && wall->getClosed() == false) || wall->known < 0)
 			{
@@ -381,7 +379,8 @@ namespace Data
 						existsInOtherCollection = true;
 
 				if (!existsInOtherCollection)	// add child if it's not already in the given collection
-					children->push_back(wall->getOtherParent(this));
+					if (wall->getOtherParent(this) != nullptr)
+						children->push_back(wall->getOtherParent(this));
 			}
 		}
 

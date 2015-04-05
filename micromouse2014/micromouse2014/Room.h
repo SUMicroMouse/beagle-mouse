@@ -147,32 +147,32 @@ namespace Data
 			if (nex->loc.y == current->loc.y)
 			{
 				if (nex->loc.x == current->loc.x - 1) // left
-					wallIndex1 = 0;
+					wallIndex1 = 3;
 				else if (nex->loc.x == current->loc.x + 1) // right
-					wallIndex1 = 2;
+					wallIndex1 = 1;
 			}
 			else if (nex->loc.x == current->loc.x)
 			{
 				if (nex->loc.y == current->loc.y + 1) // top
-					wallIndex1 = 1;
+					wallIndex1 = 2;
 				else if (nex->loc.y == current->loc.y - 1) // bottom
-					wallIndex1 = 3;
+					wallIndex1 = 0;
 			}
 
 			// Previous
 			if (current->loc.y == previous->loc.y)
 			{
 				if (current->loc.x == previous->loc.x - 1) // left
-					wallIndex2 = 0;
+					wallIndex2 = 3;
 				else if (current->loc.x == previous->loc.x + 1) // right
-					wallIndex2 = 2;
+					wallIndex2 = 1;
 			}
 			else if (current->loc.x == previous->loc.x)
 			{
 				if (current->loc.y == previous->loc.y + 1) // top
-					wallIndex2 = 1;
+					wallIndex2 = 2;
 				else if (current->loc.y == previous->loc.y - 1) // bottom
-					wallIndex2 = 3;
+					wallIndex2 = 0;
 			}
 
 			calculateWallCosts(current, pathNumber, wallIndex1, wallIndex2, 'i');  // inner walls

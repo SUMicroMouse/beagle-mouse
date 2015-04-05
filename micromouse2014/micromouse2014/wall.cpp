@@ -6,6 +6,10 @@ namespace Data
 	{
 		closed = false;
 		known = -1;
+
+		// start both parents at nullptr
+		for (int i = 0; i < parents.size(); i++)
+			parents[i] = nullptr;
 	}
 
 	Wall::Wall(bool closed_value)
@@ -13,6 +17,10 @@ namespace Data
 		closed = closed_value;
 
 		known = 0;	// known
+
+		// start both parents at nullptr
+		for (int i = 0; i < parents.size(); i++)
+			parents[i] = nullptr;
 	}
 
 
@@ -41,7 +49,7 @@ namespace Data
 			if (p != parent)
 				return p;
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	// sets the designated parent (mother = 0, father = 1)

@@ -160,7 +160,7 @@ namespace Data
 			for (int j = 0; j < dimensions; j++) // columns
 			{
 				Current = maze[i][j];
-				Left = Right = Top = Bottom = NULL;
+				Left = Right = Top = Bottom = nullptr;
 				if (j == 0) // left side
 				{
 					if (i != 0) // not top left corner
@@ -192,13 +192,13 @@ namespace Data
 					}
 				}
 
-				if (Left != NULL) // Room to the left
+				if (Left != nullptr) // Room to the left
 					Left->getWalls()[2]->setParent(1, Current);
-				if (Right != NULL) // Room to the right
+				if (Right != nullptr) // Room to the right
 					Right->getWalls()[0]->setParent(1, Current);
-				if (Top != NULL)
+				if (Top != nullptr)
 					Top->getWalls()[1]->setParent(1, Current);
-				if (Bottom != NULL)
+				if (Bottom != nullptr)
 					Bottom->getWalls()[3]->setParent(1, Current);
 			}
 		}
@@ -209,12 +209,12 @@ namespace Data
 			for (int j = 0; j < dimensions; j++) // columns
 			{
 				Current = maze[i][j];
-				Right = (j != dimensions - 1) ? maze[i][j + 1] : NULL;
-				Bottom = (i != dimensions - 1) ? maze[i + 1][j] : NULL;
+				Right = (j != dimensions - 1) ? maze[i][j + 1] : nullptr;
+				Bottom = (i != dimensions - 1) ? maze[i + 1][j] : nullptr;
 
-				if (Right != NULL) // Room to the right
+				if (Right != nullptr) // Room to the right
 					Right->getWalls()[0] = Current->getWalls()[2];
-				if (Bottom != NULL)
+				if (Bottom != nullptr)
 					Bottom->getWalls()[3] = Current->getWalls()[1];
 			}
 		}

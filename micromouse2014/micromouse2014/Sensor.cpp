@@ -141,7 +141,7 @@ namespace Hardware
 			// Visible if right wall is confirmed to be open visibly
 			Data::Room * Ro = maze->RoomGet(x, y_center);
 			std::vector<Data::Wall*> & walls = Ro->getWalls();
-			if (walls[2]->known >= 0 && walls[2]->getClosed() == false) // known & open
+			if (walls[1]->known >= 0 && walls[1]->getClosed() == false) // right wall is known & open
 			{
 				for (auto *w : walls)	// fill in the rest of the walls
 					w->known++;
@@ -149,43 +149,52 @@ namespace Hardware
 		}
 
 		// Going right
+		for (int x = x_center + 1; x <= x_center + 2; x++)
+		{
+			if (x >= 16)
+				continue;
 
+			// Visible if left wall is confirmed to be open visibly
+			Data::Room * Ro = maze->RoomGet(x, y_center);
+			std::vector<Data::Wall*> & walls = Ro->getWalls();
+			if (walls[3]->known >= 0 && walls[3]->getClosed() == false) // left wall is known & open
+			{
+				for (auto *w : walls)	// fill in the rest of the walls
+					w->known++;
+			}
+		}
 		
-
-		/*
-		for (int x = x_center - 2; x <= x_center + 2; x++)
+		// Going down
+		for (int y = y_center - 1; y >= y_center - 2; y--)
 		{
-			if (x >= 0 && x < 16)
+			if (y < 0)
+				continue;
+
+			// Visible if top wall is confirmed to be open visibly
+			Data::Room * Ro = maze->RoomGet(x_center, y);
+			std::vector<Data::Wall*> & walls = Ro->getWalls();
+			if (walls[2]->known >= 0 && walls[2]->getClosed() == false) // top wall is known & open
 			{
-				// Make all the room's walls known, increasing its known value
-				Data::Room * Ro = maze->RoomGet(x, y_center);
-				std::vector<Data::Wall*> & walls = Ro->getWalls();
-				std::vector<Data::Wall*>::iterator wI = walls.begin();
-				while (wI != walls.end())
-				{
-					Data::Wall *cwall = *wI;
-					cwall->known++;
-					wI++;
-				}
+				for (auto *w : walls)	// fill in the rest of the walls
+					w->known++;
 			}
 		}
 
-		for (int y = y_center - 2; y <= y_center + 2; y++)
+		// Going up
+		for (int y = y_center + 1; y <= y_center + 2; y++)
 		{
-			if (y >= 0 && y < 16)
+			if (y >= 16)
+				continue;
+
+			// Visible if top wall is confirmed to be open visibly
+			Data::Room * Ro = maze->RoomGet(x_center, y);
+			std::vector<Data::Wall*> & walls = Ro->getWalls();
+			if (walls[0]->known >= 0 && walls[0]->getClosed() == false) // bottom wall is known & open
 			{
-				// Make all the room's walls known, increasing its known value
-				Data::Room * Ro = maze->RoomGet(x_center, y);
-				std::vector<Data::Wall*> & walls = Ro->getWalls();
-				std::vector<Data::Wall*>::iterator wI = walls.begin();
-				while (wI != walls.end())
-				{
-					Data::Wall *cwall = *wI;
-					cwall->known++;
-					wI++;
-				}
+				for (auto *w : walls)	// fill in the rest of the walls
+					w->known++;
 			}
 		}
-		*/
+
 	}
 }
