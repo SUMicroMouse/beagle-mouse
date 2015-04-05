@@ -11,6 +11,9 @@ namespace Data
 		int x, y;
 
 		bool operator == (Location loc) { return (x == loc.x && y == loc.y); }
+
+		// publicly accessible goal
+		//static Location goal
 	};
 }
 #endif
