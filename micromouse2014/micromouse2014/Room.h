@@ -10,6 +10,7 @@
 #include <map>
 #include "wall.h"
 #include "Location.h"
+//#include "Mouse.h"
 
 namespace Data
 {
@@ -49,7 +50,7 @@ namespace Data
 		Room(int v, int x, int y);
 
 		std::vector<bool> getOpenings();
-		std::vector<Wall*> getWalls() { return openings; }
+		std::vector<Wall*> & getWalls() { return openings; }
 
 		// Heuristics
 		float weight();	// lower = better?
